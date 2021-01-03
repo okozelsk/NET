@@ -5,40 +5,40 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Data.Generators
 {
     /// <summary>
-    /// Configuration of the PulseGenerator
+    /// Configuration of the PulseGenerator.
     /// </summary>
     [Serializable]
     public class PulseGeneratorSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "PulseGeneratorType";
 
         //Attribute properties
         /// <summary>
-        /// Pulse signal
+        /// The pulse signal value.
         /// </summary>
         public double Signal { get; }
 
         /// <summary>
-        /// Average period of the pulse
+        /// The pulse average leak.
         /// </summary>
         public double AvgPeriod { get; }
 
         /// <summary>
-        /// Pulse timing mode
+        /// The pulse timing mode.
         /// </summary>
         public PulseGenerator.TimingMode Mode { get; }
 
         //Constructors
         /// <summary>
-        /// Constructs an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="signal">Pulse signal</param>
-        /// <param name="avgPeriod">Pulse average period</param>
-        /// <param name="mode">Pulse timing mode</param>
+        /// <param name="signal">The pulse signal value.</param>
+        /// <param name="avgPeriod">The pulse average leak.</param>
+        /// <param name="mode">The pulse timing mode.</param>
         public PulseGeneratorSettings(double signal,
                                       double avgPeriod,
                                       PulseGenerator.TimingMode mode
@@ -52,11 +52,11 @@ namespace RCNet.Neural.Data.Generators
         }
 
         /// <summary>
-        /// Deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public PulseGeneratorSettings(PulseGeneratorSettings source)
-            :this(source.Signal, source.AvgPeriod, source.Mode)
+            : this(source.Signal, source.AvgPeriod, source.Mode)
         {
             return;
         }
@@ -64,7 +64,7 @@ namespace RCNet.Neural.Data.Generators
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public PulseGeneratorSettings(XElement elem)
         {
             //Validation

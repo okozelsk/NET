@@ -5,54 +5,54 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
 {
     /// <summary>
-    /// Configuration of spiking neuron's homogenous excitability
+    /// Configuration of the spiking neuron homogenous excitability.
     /// </summary>
     [Serializable]
     public class HomogenousExcitabilitySettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "HomogenousExcitabilityType";
         //Default values
         /// <summary>
-        /// Default excitatory strength
+        /// The default value of the total excitatory strength.
         /// </summary>
         public const double DefaultExcitatoryStrength = 0.75d;
         /// <summary>
-        /// Default input strength ratio
+        /// The default value of the input strength ratio.
         /// </summary>
-        public const double DefaultInputRatio = 0.67d;
+        public const double DefaultInputRatio = 0.75d;
         /// <summary>
-        /// Default inhibitory ratio
+        /// The default value of the inhibitory ratio.
         /// </summary>
         public const double DefaultInhibitoryRatio = 0.25d;
 
         //Attribute properties
         /// <summary>
-        /// Total excitatory strength (sum of inner excitatory synapses + sum of input synapses)
+        /// The total excitatory strength.
         /// </summary>
         public double ExcitatoryStrength { get; }
 
         /// <summary>
-        /// Determines input strength. (input strength = InputRatio * ExcitatoryStrength)
+        /// The input strength ratio.
         /// </summary>
         public double InputRatio { get; }
 
         /// <summary>
-        /// Determines inhibitory strength (inhibitory strength = InhibitoryRatio * ExcitatoryStrength)
+        /// The inhibitory strength ratio.
         /// </summary>
         public double InhibitoryRatio { get; }
 
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="excitatoryStrength">Total excitatory strength (sum of inner excitatory synapses + sum of input synapses)</param>
-        /// <param name="inputRatio">Determines input strength. (input strength = InputRatio * ExcitatoryStrength)</param>
-        /// <param name="inhibitoryRatio">Determines inhibitory strength (inhibitory strength = InhibitoryRatio * ExcitatoryStrength)</param>
+        /// <param name="excitatoryStrength">The total excitatory strength.</param>
+        /// <param name="inputRatio">The input strength ratio.</param>
+        /// <param name="inhibitoryRatio">The inhibitory strength ratio.</param>
         public HomogenousExcitabilitySettings(double excitatoryStrength = DefaultExcitatoryStrength,
                                               double inputRatio = DefaultInputRatio,
                                               double inhibitoryRatio = DefaultInhibitoryRatio
@@ -66,9 +66,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         }
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public HomogenousExcitabilitySettings(HomogenousExcitabilitySettings source)
             : this(source.ExcitatoryStrength, source.InputRatio, source.InhibitoryRatio)
         {
@@ -78,7 +78,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings.</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public HomogenousExcitabilitySettings(XElement elem)
         {
             //Validation
@@ -93,15 +93,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultExcitatoryStrength { get { return (ExcitatoryStrength == DefaultExcitatoryStrength); } }
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultInputRatio { get { return (InputRatio == DefaultInputRatio); } }
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultInhibitoryRatio { get { return (InhibitoryRatio == DefaultInhibitoryRatio); } }
 

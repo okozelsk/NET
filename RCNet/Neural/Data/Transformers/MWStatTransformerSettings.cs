@@ -1,61 +1,61 @@
-﻿using System;
+﻿using RCNet.MathTools;
+using System;
 using System.Globalization;
 using System.Xml.Linq;
-using RCNet.MathTools;
 
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Configuration of the MWStatTransformer
+    /// Configuration of the MWStatTransformer.
     /// </summary>
     [Serializable]
     public class MWStatTransformerSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "MWStatTransformerType";
 
         //Attribute properties
         /// <summary>
-        /// Name of the input field to be transformed
+        /// The name of the input field to be transformed.
         /// </summary>
         public string InputFieldName { get; }
 
         /// <summary>
-        /// Window size
+        /// The recent history window size.
         /// </summary>
-        public int Window { get; }
+        public int WindowSize { get; }
 
         /// <summary>
-        /// Requiered output
+        /// The output statistical figure.
         /// </summary>
-        public BasicStat.OutputFeature Output { get; }
+        public BasicStat.StatisticalFigure OutputFigure { get; }
 
 
         //Constructors
         /// <summary>
-        /// Constructs an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="inputFieldName">Name of the input field to be transformed</param>
-        /// <param name="window">Difference interval</param>
-        /// <param name="output">Requiered output</param>
-        public MWStatTransformerSettings(string inputFieldName, int window, BasicStat.OutputFeature output)
+        /// <param name="inputFieldName">The name of the input field to be transformed.</param>
+        /// <param name="windowSize">The recent history window size.</param>
+        /// <param name="outputFigure">The output statistical figure.</param>
+        public MWStatTransformerSettings(string inputFieldName, int windowSize, BasicStat.StatisticalFigure outputFigure)
         {
             InputFieldName = inputFieldName;
-            Window = window;
-            Output = output;
+            WindowSize = windowSize;
+            OutputFigure = outputFigure;
             Check();
             return;
         }
 
         /// <summary>
-        /// Deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public MWStatTransformerSettings(MWStatTransformerSettings source)
-            : this(source.InputFieldName, source.Window, source.Output)
+            : this(source.InputFieldName, source.WindowSize, source.OutputFigure)
         {
             return;
         }
@@ -63,15 +63,15 @@ namespace RCNet.Neural.Data.Transformers
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public MWStatTransformerSettings(XElement elem)
         {
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             InputFieldName = settingsElem.Attribute("fieldName").Value;
-            Window = int.Parse(settingsElem.Attribute("window").Value, CultureInfo.InvariantCulture);
-            Output = (BasicStat.OutputFeature)Enum.Parse(typeof(BasicStat.OutputFeature), settingsElem.Attribute("output").Value, true);
+            WindowSize = int.Parse(settingsElem.Attribute("window").Value, CultureInfo.InvariantCulture);
+            OutputFigure = (BasicStat.StatisticalFigure)Enum.Parse(typeof(BasicStat.StatisticalFigure), settingsElem.Attribute("output").Value, true);
             Check();
             return;
         }
@@ -89,9 +89,9 @@ namespace RCNet.Neural.Data.Transformers
             {
                 throw new ArgumentException($"Name of the input field must be specified.", "InputFieldName");
             }
-            if (Window < 1)
+            if (WindowSize < 1)
             {
-                throw new ArgumentException($"Invalid window size {Window.ToString(CultureInfo.InvariantCulture)}. Window size must be GE to 2.", "Window");
+                throw new ArgumentException($"Invalid window size {WindowSize.ToString(CultureInfo.InvariantCulture)}. Window size must be GE to 2.", "Window");
             }
             return;
         }
@@ -107,8 +107,8 @@ namespace RCNet.Neural.Data.Transformers
         {
             XElement rootElem = new XElement(rootElemName,
                                              new XAttribute("fieldName", InputFieldName),
-                                             new XAttribute("window", Window.ToString(CultureInfo.InvariantCulture)),
-                                             new XAttribute("output", Output.ToString())
+                                             new XAttribute("window", WindowSize.ToString(CultureInfo.InvariantCulture)),
+                                             new XAttribute("output", OutputFigure.ToString())
                                              );
             Validate(rootElem, XsdTypeName);
             return rootElem;

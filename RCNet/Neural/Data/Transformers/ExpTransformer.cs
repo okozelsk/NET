@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Implements the "Base^value" transformation of the input field
+    /// Implements the exponential transformation of the input field ("Base^Input field value").
     /// </summary>
     [Serializable]
     public class ExpTransformer : ITransformer
@@ -13,18 +13,18 @@ namespace RCNet.Neural.Data.Transformers
 
         //Attributes
         private readonly int _fieldIdx;
-        private readonly ExpTransformerSettings _settings;
+        private readonly ExpTransformerSettings _cfg;
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="availableFieldNames">Collection of names of all available input fields</param>
-        /// <param name="settings">Configuration</param>
-        public ExpTransformer(List<string> availableFieldNames, ExpTransformerSettings settings)
+        /// <param name="availableFieldNames">The collection of names of all available input fields.</param>
+        /// <param name="cfg">The configuration.</param>
+        public ExpTransformer(List<string> availableFieldNames, ExpTransformerSettings cfg)
         {
-            _settings = (ExpTransformerSettings)settings.DeepClone();
-            _fieldIdx = availableFieldNames.IndexOf(_settings.InputFieldName);
+            _cfg = (ExpTransformerSettings)cfg.DeepClone();
+            _fieldIdx = availableFieldNames.IndexOf(_cfg.InputFieldName);
             return;
         }
 
@@ -43,7 +43,7 @@ namespace RCNet.Neural.Data.Transformers
                 throw new InvalidOperationException($"Invalid data value at input field index {_fieldIdx} (NaN).");
             }
             double arg = data[_fieldIdx].Bound();
-            return Math.Pow(_settings.Base, arg).Bound();
+            return Math.Pow(_cfg.Base, arg).Bound();
         }
 
     }//ExpTransformer

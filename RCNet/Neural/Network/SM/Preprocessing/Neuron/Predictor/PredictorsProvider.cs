@@ -1,5 +1,4 @@
-﻿using RCNet.Extensions;
-using RCNet.MathTools;
+﻿using RCNet.MathTools;
 using RCNet.Queue;
 using System;
 using System.Collections.Generic;
@@ -7,50 +6,50 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 {
     /// <summary>
-    /// Class provides computed predictors of the hidden neuron
+    /// Implements the provider of the unified set of computed predictors.
     /// </summary>
     [Serializable]
     public class PredictorsProvider
     {
         /// <summary>
-        /// Identifier of the predictor
+        /// An identifier of the predictor.
         /// </summary>
         public enum PredictorID
         {
             /// <summary>
-            /// Result of the activation function.
+            /// The result of the activation function.
             /// </summary>
             Activation,
             /// <summary>
-            /// Powered absolute value of the result of the activation function.
+            /// The powered absolute value of the result of the activation function.
             /// </summary>
             ActivationPower,
             /// <summary>
-            /// Statistical feature computed from the activation function results.
+            /// The statistical figure computed from the activation function results.
             /// </summary>
-            ActivationStatFeature,
+            ActivationStatFigure,
             /// <summary>
-            /// Rescalled range computed from the activation function results.
+            /// The rescaled range computed from the activation function results.
             /// </summary>
-            ActivationRescalledRange,
+            ActivationRescaledRange,
             /// <summary>
-            /// Linearly weighted average computed from the activation function results.
+            /// The linearly weighted average computed from the activation function results.
             /// </summary>
             ActivationLinWAvg,
             /// <summary>
-            /// Statistical feature computed from the differences of the activation function results (A[T] - A[T-1]).
+            /// The statistical figure computed from the differences of the activation function results (A[T] - A[T-1]).
             /// </summary>
-            ActivationDiffStatFeature,
+            ActivationDiffStatFigure,
             /// <summary>
-            /// Rescalled range computed from the differences of the activation function results (A[T] - A[T-1]).
+            /// The rescaled range computed from the differences of the activation function results (A[T] - A[T-1]).
             /// </summary>
-            ActivationDiffRescalledRange,
+            ActivationDiffRescaledRange,
             /// <summary>
-            /// Linearly weighted average computed from the differences of the activation function results (A[T] - A[T-1]).
+            /// The linearly weighted average computed from the differences of the activation function results (A[T] - A[T-1]).
             /// </summary>
             ActivationDiffLinWAvg,
             /// <summary>
-            /// Traced neuron's firing.
+            /// The traced neuron's firing.
             /// </summary>
             FiringTrace
 
@@ -59,7 +58,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 
         //Attribute properties
         /// <summary>
-        /// Number of provided predictors
+        /// The number of provided predictors.
         /// </summary>
         public int NumOfProvidedPredictors { get { return _predictorCollection.Count; } }
 
@@ -77,7 +76,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// <summary>
         /// Creates new initialized instance.
         /// </summary>
-        /// <param name="cfg">Configuration to be used. Note that ParamsCfg member inside the cfg must not be null.</param>
+        /// <param name="cfg">The configuration.</param>
         public PredictorsProvider(PredictorsProviderSettings cfg)
         {
             int reqAMDWCapacity = 0;
@@ -93,22 +92,22 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
                 IPredictor predictor = PredictorFactory.CreatePredictor(predictorCfg);
                 reqAMDWCapacity = Math.Max(reqAMDWCapacity, predictor.Cfg.RequiredWndSizeOfActivations);
                 reqFMDWCapacity = Math.Max(reqFMDWCapacity, predictor.Cfg.RequiredWndSizeOfFirings);
-                if(predictor.Cfg.NeedsContinuousActivationStat && _activationStat == null)
+                if (predictor.Cfg.NeedsContinuousActivationStat && _activationStat == null)
                 {
                     _activationStat = new BasicStat();
                 }
-                if(predictor.Cfg.NeedsContinuousActivationDiffStat && _activationDiffStat == null)
+                if (predictor.Cfg.NeedsContinuousActivationDiffStat && _activationDiffStat == null)
                 {
                     _activationDiffStat = new BasicStat();
                 }
                 _predictorCollection.Add(predictor);
             }
 
-            if(reqAMDWCapacity > 0)
+            if (reqAMDWCapacity > 0)
             {
                 _activationMDW = new MovingDataWindow(reqAMDWCapacity);
             }
-            if(reqFMDWCapacity > 0)
+            if (reqFMDWCapacity > 0)
             {
                 _firingMDW = new SimpleQueue<byte>(reqFMDWCapacity);
             }
@@ -118,13 +117,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 
         //Properties
         /// <summary>
-        /// Necessary number of updates to make the predictors ready
+        /// The necessary length of recent history.
         /// </summary>
         public int RequiredHistLength { get { return Math.Max(_activationMDW == null ? 1 : _activationMDW.Capacity, _firingMDW == null ? 1 : _firingMDW.Capacity); } }
 
         //Methods
         /// <summary>
-        /// Resets internal state to initial state
+        /// Resets the predictors provider to its initial state.
         /// </summary>
         public void Reset()
         {
@@ -144,12 +143,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         }
 
         /// <summary>
-        /// Returns identifiers of provided predictors in the same order as is used in the methods CopyPredictorsTo and GetPredictors
+        /// Gets the identifiers of provided predictors in the same order as in the methods CopyPredictorsTo and GetPredictors.
         /// </summary>
         public List<PredictorID> GetIDs()
         {
             List<PredictorID> ids = new List<PredictorID>(_predictorCollection.Count);
-            foreach(IPredictor predictor in _predictorCollection)
+            foreach (IPredictor predictor in _predictorCollection)
             {
                 ids.Add(predictor.Cfg.ID);
             }
@@ -157,19 +156,19 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         }
 
         /// <summary>
-        /// Updates internal state
+        /// Updates the predictors provider.
         /// </summary>
-        /// <param name="activation">Current value of the activation</param>
-        /// <param name="normalizedActivation">Current value of the activation normalized between 0 and 1</param>
-        /// <param name="spike">Indicates whether the neuron is firing</param>
+        /// <param name="activation">The current value of the activation.</param>
+        /// <param name="normalizedActivation">The current value of the activation normalized between 0 and 1.</param>
+        /// <param name="spike">Indicates whether the neuron is currently firing.</param>
         public void Update(double activation, double normalizedActivation, bool spike)
         {
             //Continuous statistics
             double activationDiff = activation - _lastActivation;
-            _activationStat?.AddSampleValue(activation);
-            _activationDiffStat?.AddSampleValue(activationDiff);
+            _activationStat?.AddSample(activation);
+            _activationDiffStat?.AddSample(activationDiff);
             //Data windows
-            _activationMDW?.AddSampleValue(activation);
+            _activationMDW?.AddSample(activation);
             _firingMDW?.Enqueue(spike ? (byte)1 : (byte)0);
             //Predictors
             foreach (IPredictor predictor in _predictorCollection)
@@ -184,17 +183,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         }
 
         /// <summary>
-        /// Copies values of enabled predictors to a given buffer starting from specified position (idx)
+        /// Copies the computed predictors into a buffer starting from the specified position.
         /// </summary>
-        /// <param name="predictors">Buffer where to be copied enabled predictors</param>
-        /// <param name="idx">Starting position index</param>
-        /// <returns></returns>
-        public int CopyPredictorsTo(double[] predictors, int idx)
+        /// <param name="buffer">The buffer.</param>
+        /// <param name="idx">The zero-based starting position.</param>
+        /// <returns>The number of copied values.</returns>
+        public int CopyPredictorsTo(double[] buffer, int idx)
         {
             int count = 0;
             foreach (IPredictor predictor in _predictorCollection)
             {
-                predictors[idx++] = predictor.Compute(_activationStat,
+                buffer[idx++] = predictor.Compute(_activationStat,
                                                       _activationDiffStat,
                                                       _activationMDW,
                                                       _firingMDW,
@@ -208,7 +207,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         }
 
         /// <summary>
-        /// Returns array containing values of enabled predictors
+        /// Gets the array of computed predictors.
         /// </summary>
         public double[] GetPredictors()
         {

@@ -5,22 +5,22 @@ using System;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Implements the Leaky Rectified Linear Unit activation function
+    /// Implements the LeakyReLU (Leaky Rectified Linear Unit) activation function.
     /// </summary>
     [Serializable]
     public class AFAnalogLeakyReLU : AFAnalogBase
     {
         //Attribute properties
         /// <summary>
-        /// A slope of the negative part of the curve
+        /// A slope of the negative part of the curve.
         /// </summary>
         public double NegSlope { get; }
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="negSlope">A slope of the negative part of the curve</param>
+        /// <param name="negSlope">A slope of the negative part of the curve.</param>
         public AFAnalogLeakyReLU(double negSlope)
             : base(null)
         {

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Implements the transformation of an input field value as a difference of field current value and a past value
+    /// Implements the transformation of the input field value as the difference between the current field value and the past value.
     /// </summary>
     [Serializable]
     public class DiffTransformer : ITransformer
@@ -18,10 +18,10 @@ namespace RCNet.Neural.Data.Transformers
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="availableFieldNames">Collection of names of all available input fields</param>
-        /// <param name="settings">Configuration</param>
+        /// <param name="availableFieldNames">The collection of names of all available input fields.</param>
+        /// <param name="settings">The configuration.</param>
         public DiffTransformer(List<string> availableFieldNames, DiffTransformerSettings settings)
         {
             _settings = (DiffTransformerSettings)settings.DeepClone();
@@ -30,7 +30,7 @@ namespace RCNet.Neural.Data.Transformers
             {
                 throw new InvalidOperationException($"Input field name {_settings.InputFieldName} not found among given available fields.");
             }
-            _lastValues = new SimpleQueue<double>(_settings.Interval);
+            _lastValues = new SimpleQueue<double>(_settings.PastInterval);
             return;
         }
 
@@ -53,11 +53,12 @@ namespace RCNet.Neural.Data.Transformers
             if (_lastValues.Full)
             {
                 //Moving data window is ready
-                transVal = data[_fieldIdx] - _lastValues.GetElementAt(_settings.Interval - 1, true);
+                transVal = data[_fieldIdx] - _lastValues.GetElementAt(_settings.PastInterval - 1, true);
             }
             _lastValues.Enqueue(data[_fieldIdx], true);
             return transVal;
         }
 
     }//DiffTransformer
+
 }//Namespace

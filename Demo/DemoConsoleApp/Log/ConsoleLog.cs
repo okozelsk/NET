@@ -4,8 +4,7 @@ using System.Text;
 namespace Demo.DemoConsoleApp.Log
 {
     /// <summary>
-    /// Implements a simple output journal (IOutputLog interface).
-    /// Messages are written to the system console.
+    /// Implements the simple output log using system console.
     /// </summary>
     public class ConsoleLog : IOutputLog
     {
@@ -31,7 +30,6 @@ namespace Demo.DemoConsoleApp.Log
             Console.WindowTop = 0;
             Console.WindowWidth = Console.LargestWindowWidth;
 #endif
-
             //Clear the console
             Console.Clear();
             //Store current cursor position
@@ -43,7 +41,7 @@ namespace Demo.DemoConsoleApp.Log
 
         //Methods
         /// <summary>
-        /// Restores the cursor position
+        /// Restores the cursor position.
         /// </summary>
         private void RestoreCursor()
         {
@@ -53,7 +51,7 @@ namespace Demo.DemoConsoleApp.Log
         }
 
         /// <summary>
-        /// Stores the current cursor position
+        /// Stores the current cursor position.
         /// </summary>
         private void StoreCursor()
         {
@@ -63,9 +61,9 @@ namespace Demo.DemoConsoleApp.Log
         }
 
         /// <summary>
-        /// Writes a message to the system console
+        /// Writes a message to the system console.
         /// </summary>
-        /// <param name="message">Message to be written to console</param>
+        /// <param name="message">The message to be written to system console.</param>
         /// <param name="replaceLastMessage">Specifies whether to replace text of the previous message.</param>
         public void Write(string message, bool replaceLastMessage = false)
         {

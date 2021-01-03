@@ -3,57 +3,57 @@
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 {
     /// <summary>
-    /// Information about a neuron location within the neural preprocessor
+    /// Implements the holder of an information about a neuron location within the neural preprocessor.
     /// </summary>
     [Serializable]
     public class NeuronLocation
     {
         /// <summary>
-        /// Neuron's home reservoir ID
+        /// An identifier of the neuron's origin reservoir.
         /// </summary>
         public int ReservoirID { get; }
         /// <summary>
-        /// Neuron's index in a reservoir flat stucture
+        /// The zero-based index of the neuron in the flat array of the reservoir's neurons.
         /// </summary>
         public int ReservoirFlatIdx { get; }
         /// <summary>
-        /// Neuron's home pool ID
+        /// An identifier of the neuron's origin pool.
         /// </summary>
         public int PoolID { get; }
         /// <summary>
-        /// Neuron index in a pool flat stucture
+        /// The zero-based index of the neuron in the flat array of the pool's neurons.
         /// </summary>
         public int PoolFlatIdx { get; }
         /// <summary>
-        /// Neuron's group index within the pool
+        /// An identifier of the neuron's origin group.
         /// </summary>
         public int PoolGroupID { get; }
         /// <summary>
-        /// Coordinates (x,y,z) within the reservoir
+        /// The neuron's coordinates (x,y,z) within the reservoir.
         /// </summary>
         public int[] ReservoirCoordinates { get; }
 
         //Constructor
         /// <summary>
-        /// Instantiates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="reservoirID">Home reservoir index.</param>
-        /// <param name="reservoirFlatIdx">Index of the neuron in a reservoir flat structure.</param>
-        /// <param name="poolID">Home pool index.</param>
-        /// <param name="poolFlatIdx">Index of the neuron in a pool flat structure.</param>
-        /// <param name="poolGroupID">Index of the neuron's group in a pool.</param>
-        /// <param name="x">X coordinate in the reservoir</param>
-        /// <param name="y">Y coordinate in the reservoir</param>
-        /// <param name="z">Z coordinate in the reservoir</param>
+        /// <param name="reservoirID">An identifier of the neuron's origin reservoir.</param>
+        /// <param name="reservoirFlatIdx">The zero-based index of the neuron in the flat array of the reservoir's neurons.</param>
+        /// <param name="poolID">An identifier of the neuron's origin pool.</param>
+        /// <param name="poolFlatIdx">The zero-based index of the neuron in the flat array of the pool's neurons.</param>
+        /// <param name="poolGroupID">An identifier of the neuron's origin group.</param>
+        /// <param name="x">The neuron's X coordinate within the reservoir.</param>
+        /// <param name="y">The neuron's Y coordinate within the reservoir.</param>
+        /// <param name="z">The neuron's Z coordinate within the reservoir.</param>
         public NeuronLocation(int reservoirID,
-                               int reservoirFlatIdx,
-                               int poolID,
-                               int poolFlatIdx,
-                               int poolGroupID,
-                               int x,
-                               int y,
-                               int z
-                               )
+                              int reservoirFlatIdx,
+                              int poolID,
+                              int poolFlatIdx,
+                              int poolGroupID,
+                              int x,
+                              int y,
+                              int z
+                              )
         {
             ReservoirID = reservoirID;
             ReservoirFlatIdx = reservoirFlatIdx;
@@ -68,9 +68,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         }
 
         /// <summary>
-        /// Copy constructor
+        /// The copy constructor.
         /// </summary>
-        /// <param name="source">Source instance.</param>
+        /// <param name="source">The source instance.</param>
         public NeuronLocation(NeuronLocation source)
             : this(source.ReservoirID,
                   source.ReservoirFlatIdx,
@@ -92,6 +92,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
             return new NeuronLocation(this);
         }
 
-    }//NeuronPlacement
+    }//NeuronLocation
 
 }//Namespace

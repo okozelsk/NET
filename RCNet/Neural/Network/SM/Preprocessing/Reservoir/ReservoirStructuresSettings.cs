@@ -6,26 +6,26 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 {
     /// <summary>
-    /// The collection of the reservoir structures configurations
+    /// Configuration of the reservoir structures.
     /// </summary>
     [Serializable]
     public class ReservoirStructuresSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "NPResStructsType";
 
         //Attribute properties
         /// <summary>
-        /// Collection of reservoir structure settings
+        /// The collection of the reservoir structure configurations.
         /// </summary>
         public List<ReservoirStructureSettings> ReservoirStructureCfgCollection { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an uninitialized instance
+        /// Creates an uninitialized instance.
         /// </summary>
         private ReservoirStructuresSettings()
         {
@@ -34,9 +34,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="reservoirStructureCfgCollection">Reservoir structure settings collection</param>
+        /// <param name="reservoirStructureCfgCollection">The collection of the reservoir structure configurations.</param>
         public ReservoirStructuresSettings(IEnumerable<ReservoirStructureSettings> reservoirStructureCfgCollection)
             : this()
         {
@@ -46,9 +46,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="reservoirStructureCfgCollection">Resrvoir structure settings collection</param>
+        /// <param name="reservoirStructureCfgCollection">The reservoir structure configurations.</param>
         public ReservoirStructuresSettings(params ReservoirStructureSettings[] reservoirStructureCfgCollection)
             : this()
         {
@@ -58,9 +58,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public ReservoirStructuresSettings(ReservoirStructuresSettings source)
             : this()
         {
@@ -71,7 +71,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings.</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public ReservoirStructuresSettings(XElement elem)
         {
             //Validation
@@ -113,9 +113,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// Adds cloned reservoir structure configurations from given collection into the internal collection
+        /// Adds the reservoir structure configurations from the specified collection into the internal collection.
         /// </summary>
-        /// <param name="reservoirStructureCfgCollection">Collection of reservoir structure configurations</param>
+        /// <param name="reservoirStructureCfgCollection">The collection of the reservoir structure configurations.</param>
         private void AddReservoirStructures(IEnumerable<ReservoirStructureSettings> reservoirStructureCfgCollection)
         {
             foreach (ReservoirStructureSettings reservoirStructureCfg in reservoirStructureCfgCollection)
@@ -126,9 +126,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// Returns ID (index) of the given reservoir structure
+        /// Gets an identifier (index) of the specified reservoir structure.
         /// </summary>
-        /// <param name="reservoirStructureName">Reservoir structure name</param>
+        /// <param name="reservoirStructureName">The name of the reservoir structure configuration.</param>
         public int GetReservoirStructureID(string reservoirStructureName)
         {
             for (int i = 0; i < ReservoirStructureCfgCollection.Count; i++)
@@ -142,9 +142,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// Returns configuration of the given resrvoir structure
+        /// Gets the configuration of the specified resrvoir structure.
         /// </summary>
-        /// <param name="reservoirStructureName">Reservoir structure name</param>
+        /// <param name="reservoirStructureName">The name of the reservoir structure configuration.</param>
         public ReservoirStructureSettings GetReservoirStructureCfg(string reservoirStructureName)
         {
             return ReservoirStructureCfgCollection[GetReservoirStructureID(reservoirStructureName)];

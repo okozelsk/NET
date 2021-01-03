@@ -5,39 +5,39 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D
 {
     /// <summary>
-    /// Configuration of the 3D proportions
+    /// Configuration of the 3D proportions.
     /// </summary>
     [Serializable]
     public class ProportionsSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "ProportionsType";
 
         /// <summary>
-        /// X dimension
+        /// The X dimension.
         /// </summary>
         public int DimX { get; }
 
         /// <summary>
-        /// Y dimension
+        /// The Y dimension.
         /// </summary>
         public int DimY { get; }
 
         /// <summary>
-        /// Z dimension
+        /// The Z dimension.
         /// </summary>
         public int DimZ { get; }
 
         //Constructor
         /// <summary>
-        /// Instantiates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="dimX">X-Dimension</param>
-        /// <param name="dimY">Y-Dimension</param>
-        /// <param name="dimZ">Z-Dimension</param>
+        /// <param name="dimX">The X dimension.</param>
+        /// <param name="dimY">The Y dimension.</param>
+        /// <param name="dimZ">The Z dimension.</param>
         public ProportionsSettings(int dimX,
                                    int dimY,
                                    int dimZ
@@ -53,7 +53,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D
         /// <summary>
         /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public ProportionsSettings(ProportionsSettings source)
             : this(source.DimX, source.DimY, source.DimZ)
         {
@@ -61,9 +61,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D
         }
 
         /// <summary>
-        /// Creates an initialized instance from the given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public ProportionsSettings(XElement elem)
         {
             //Validation
@@ -78,7 +78,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D
 
         //Properties
         /// <summary>
-        /// Total size
+        /// The total size.
         /// </summary>
         public int Size { get { return DimX * DimY * DimZ; } }
 

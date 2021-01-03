@@ -5,26 +5,26 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 {
     /// <summary>
-    /// The collection of the input connections configurations
+    /// Configuration of the input fields connections.
     /// </summary>
     [Serializable]
     public class InputConnsSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "NPResInstanceInputConnectionsType";
 
         //Attribute properties
         /// <summary>
-        /// Collection of connection settings
+        /// The collection of an input field connection configurations.
         /// </summary>
         public List<InputConnSettings> ConnCfgCollection { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         private InputConnsSettings()
         {
@@ -33,9 +33,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="connCfgCollection">Connection settings collection</param>
+        /// <param name="connCfgCollection">The collection of an input field connection configurations.</param>
         public InputConnsSettings(IEnumerable<InputConnSettings> connCfgCollection)
             : this()
         {
@@ -45,9 +45,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="connCfgCollection">Connection settings collection</param>
+        /// <param name="connCfgCollection">The input field connection configurations.</param>
         public InputConnsSettings(params InputConnSettings[] connCfgCollection)
             : this()
         {
@@ -57,9 +57,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public InputConnsSettings(InputConnsSettings source)
             : this()
         {
@@ -70,7 +70,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings.</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public InputConnsSettings(XElement elem)
         {
             //Validation
@@ -101,9 +101,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// Adds cloned connection settings from given collection into the internal collection
+        /// Adds the input field connection configurations from the specified collection into the internal collection.
         /// </summary>
-        /// <param name="connCfgCollection">Connection settings collection</param>
+        /// <param name="connCfgCollection">The collection of an input field connection configurations.</param>
         private void AddConnections(IEnumerable<InputConnSettings> connCfgCollection)
         {
             foreach (InputConnSettings connCfg in connCfgCollection)

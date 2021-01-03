@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace RCNet.Neural.Network.NonRecurrent.FF
 {
     /// <summary>
-    /// Implements the Resilient Backpropagation iRPROP+ method trainer
+    /// Implements the Resilient Backpropagation iRPROP+ trainer of the feed forward network.
     /// </summary>
     [Serializable]
     public class RPropTrainer : INonRecurrentNetworkTrainer
@@ -27,7 +27,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         public string InfoMessage { get; private set; }
 
         //Attributes
-        private readonly RPropTrainerSettings _settings;
+        private readonly RPropTrainerSettings _cfg;
         private readonly FeedForwardNetwork _net;
         private readonly List<double[]> _inputVectorCollection;
         private readonly List<double[]> _outputVectorCollection;
@@ -43,15 +43,15 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// <summary>
         /// Instantiates the RPropTrainer
         /// </summary>
-        /// <param name="net"> The feed forward network to be trained </param>
-        /// <param name="inputVectorCollection"> Collection of the training input vectors </param>
-        /// <param name="outputVectorCollection"> Collection of the desired outputs </param>
-        /// <param name="settings"> Trainer parameters </param>
-        /// <param name="rand">Random object to be used</param>
+        /// <param name="net">The FF network to be trained.</param>
+        /// <param name="inputVectorCollection">The input vectors (input).</param>
+        /// <param name="outputVectorCollection">The output vectors (ideal).</param>
+        /// <param name="cfg">The configuration of the trainer.</param>
+        /// <param name="rand">The random object to be used.</param>
         public RPropTrainer(FeedForwardNetwork net,
                             List<double[]> inputVectorCollection,
                             List<double[]> outputVectorCollection,
-                            RPropTrainerSettings settings,
+                            RPropTrainerSettings cfg,
                             Random rand
                             )
         {
@@ -59,9 +59,9 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             {
                 throw new InvalidOperationException($"Can´t create trainer. Network structure was not finalized.");
             }
-            _settings = settings;
-            MaxAttempt = _settings.NumOfAttempts;
-            MaxAttemptEpoch = _settings.NumOfAttemptEpochs;
+            _cfg = cfg;
+            MaxAttempt = _cfg.NumOfAttempts;
+            MaxAttemptEpoch = _cfg.NumOfAttemptEpochs;
             _net = net;
             _rand = rand;
             _inputVectorCollection = inputVectorCollection;
@@ -97,20 +97,23 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
 
         //Methods
         /// <summary>
-        /// Decreases the zero recognition precision.
+        /// Determines the value sign. A value less than the zero tolerance is considered as zero.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private double Sign(double value)
         {
-            if (Math.Abs(value) <= _settings.ZeroTolerance)
+            if (Math.Abs(value) <= _cfg.ZeroTolerance)
             {
                 return 0;
             }
-            if (value > 0)
+            else if (value > 0)
             {
                 return 1;
             }
-            return -1;
+            else
+            {
+                return -1;
+            }
         }
 
         /// <summary>
@@ -123,13 +126,13 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             if (gradMulSign > 0)
             {
                 //No sign change, increase delta
-                _weigthsPrevDeltas[weightFlatIndex] = Math.Min(_weigthsPrevDeltas[weightFlatIndex] * _settings.PositiveEta, _settings.MaxDelta);
+                _weigthsPrevDeltas[weightFlatIndex] = Math.Min(_weigthsPrevDeltas[weightFlatIndex] * _cfg.PositiveEta, _cfg.MaxDelta);
                 weightChange = Sign(_weigthsGradsAcc[weightFlatIndex]) * _weigthsPrevDeltas[weightFlatIndex];
             }
             else if (gradMulSign < 0)
             {
                 //Changed sign, decrease delta
-                _weigthsPrevDeltas[weightFlatIndex] = Math.Max(_weigthsPrevDeltas[weightFlatIndex] * _settings.NegativeEta, _settings.MinDelta);
+                _weigthsPrevDeltas[weightFlatIndex] = Math.Max(_weigthsPrevDeltas[weightFlatIndex] * _cfg.NegativeEta, _cfg.MinDelta);
                 //Ensure no change to delta in the next iteration
                 _weigthsGradsAcc[weightFlatIndex] = 0;
                 weightChange = (MSE > _prevMSE) ? -_weigthsPrevChanges[weightFlatIndex] : 0;
@@ -172,7 +175,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
                 _net.RandomizeWeights(_rand);
                 _weigthsGradsAcc.Populate(0);
                 _weigthsPrevGradsAcc.Populate(0);
-                _weigthsPrevDeltas.Populate(_settings.IniDelta);
+                _weigthsPrevDeltas.Populate(_cfg.IniDelta);
                 _weigthsPrevChanges.Populate(0);
                 _prevMSE = 0;
                 MSE = 0;
@@ -321,7 +324,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
 
             //Methods
             /// <summary>
-            /// Resets the gradient worker data to initial state
+            /// Resets the gradient worker data to initial state.
             /// </summary>
             internal void Reset()
             {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace RCNet.Neural.Network.NonRecurrent.PP
 {
     /// <summary>
-    /// Implements the p-delta rule trainer of the parallel perceptron network
+    /// Implements the p-delta rule trainer of the parallel perceptron network.
     /// </summary>
     [Serializable]
     public class PDeltaRuleTrainer : INonRecurrentNetworkTrainer
@@ -26,7 +26,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         public string InfoMessage { get; private set; }
 
         //Attributes
-        private readonly PDeltaRuleTrainerSettings _settings;
+        private readonly PDeltaRuleTrainerSettings _cfg;
         private readonly ParallelPerceptron _net;
         private readonly List<double[]> _inputVectorCollection;
         private readonly List<double[]> _outputVectorCollection;
@@ -44,24 +44,24 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
 
         //Constructor
         /// <summary>
-        /// Constructs a parallel perceptron P-Delta rule trainer
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="net">PP to be trained</param>
-        /// <param name="inputVectorCollection">Predictors (input)</param>
-        /// <param name="outputVectorCollection">Ideal outputs (the same number of rows as predictors rows)</param>
-        /// <param name="settings">Configuration of the trainer</param>
-        /// <param name="rand">Random object to be used</param>
+        /// <param name="net">The PP to be trained.</param>
+        /// <param name="inputVectorCollection">The input vectors (input).</param>
+        /// <param name="outputVectorCollection">The output vectors (ideal).</param>
+        /// <param name="cfg">The configuration of the trainer.</param>
+        /// <param name="rand">The random object to be used.</param>
         public PDeltaRuleTrainer(ParallelPerceptron net,
                                  List<double[]> inputVectorCollection,
                                  List<double[]> outputVectorCollection,
-                                 PDeltaRuleTrainerSettings settings,
+                                 PDeltaRuleTrainerSettings cfg,
                                  Random rand
                                  )
         {
             //Parameters
-            _settings = (PDeltaRuleTrainerSettings)settings.DeepClone();
-            MaxAttempt = _settings.NumOfAttempts;
-            MaxAttemptEpoch = _settings.NumOfAttemptEpochs;
+            _cfg = (PDeltaRuleTrainerSettings)cfg.DeepClone();
+            MaxAttempt = _cfg.NumOfAttempts;
+            MaxAttemptEpoch = _cfg.NumOfAttemptEpochs;
             _net = net;
             _rand = rand;
             _inputVectorCollection = inputVectorCollection;
@@ -112,18 +112,18 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
                 if (_prevMSE > MSE)
                 {
                     //Increase learning rate
-                    _learningRate *= _settings.IncLR;
-                    _learningRate = Math.Min(_settings.MaxLR, _learningRate);
+                    _learningRate *= _cfg.IncLR;
+                    _learningRate = Math.Min(_cfg.MaxLR, _learningRate);
                 }
                 else if (_prevMSE < MSE)
                 {
-                    if (_learningRate > _settings.MinLR)
+                    if (_learningRate > _cfg.MinLR)
                     {
                         applyWeights = false;
                     }
                     //Decrease learning rate
-                    _learningRate *= _settings.DecLR;
-                    _learningRate = Math.Max(_settings.MinLR, _learningRate);
+                    _learningRate *= _cfg.DecLR;
+                    _learningRate = Math.Max(_cfg.MinLR, _learningRate);
                 }
             }
             if (applyWeights)
@@ -155,7 +155,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
                 //Reset
                 _net.RandomizeWeights(_rand);
                 _clearMargin = 0.05;
-                _learningRate = _settings.IniLR;
+                _learningRate = _cfg.IniLR;
                 _prevWeights = _net.GetWeights();
                 _prevMSE = 0;
                 MSE = 0;

@@ -5,14 +5,14 @@ using System;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Implements the Sigmoid activation function
+    /// Implements the Sigmoid activation function.
     /// </summary>
     [Serializable]
     public class AFAnalogSigmoid : AFAnalogBase
     {
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         public AFAnalogSigmoid()
             : base(Interval.IntZP1)

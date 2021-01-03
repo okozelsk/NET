@@ -1,68 +1,67 @@
 ﻿using RCNet.Neural.Data.Filter;
 using RCNet.Neural.Network.NonRecurrent;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
 namespace RCNet.Neural.Network.SM.Readout
 {
     /// <summary>
-    /// Configuration of the classification task
+    /// Configuration of the readout unit's classification task.
     /// </summary>
     [Serializable]
     public class ClassificationTaskSettings : RCNetBaseSettings, ITaskSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
-        public const string XsdTypeName = "ROutLayerUnitClassificationTaskType";
+        public const string XsdTypeName = "ROutUnitClassificationTaskType";
         //Default values
         /// <summary>
-        /// Means no membership to one winner group
+        /// The default value of the "One Takes All" group (NA means no membership in "One Takes All" group).
         /// </summary>
-        public const string DefaultOneWinnerGroupName = "NA";
+        public const string DefaultOneTakesAllGroupName = "NA";
 
         //Static members
         /// <summary>
-        /// Shared instance of BinFeatureFilterSettings
+        /// The shared instance of BinFeatureFilterSettings.
         /// </summary>
         private static readonly IFeatureFilterSettings _sharedBinFeatureFilterCfg = new BinFeatureFilterSettings();
 
         //Attribute properties
         /// <summary>
-        /// Specifies membership to "one winner" group of given name or no membership if default "NA" name is used
+        /// Specifies the membership in "One Takes All" group of the specified name or no membership if NA keyword is used.
         /// </summary>
-        public string OneWinnerGroupName { get; }
+        public string OneTakesAllGroupName { get; }
 
         /// <summary>
-        /// Classification networks settings
+        /// The cluster chain configuration.
         /// </summary>
-        public ClassificationNetworksSettings NetworksCfg { get; }
+        public TNRNetClusterChainSingleBoolSettings ClusterChainCfg { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="oneWinnerGroupName">Specifies membership to "one winner" group of given name or no membership if default "NA" name is used</param>
-        /// <param name="networksCfg">Classifying networks settings</param>
-        public ClassificationTaskSettings(string oneWinnerGroupName = DefaultOneWinnerGroupName,
-                                          ClassificationNetworksSettings networksCfg = null
+        /// <param name="oneTakesAllGroupName">Specifies the membership in "One Takes All" group of the specified name or no membership if NA keyword is used.</param>
+        /// <param name="clusterChainCfg">The cluster chain configuration.</param>
+        public ClassificationTaskSettings(string oneTakesAllGroupName = DefaultOneTakesAllGroupName,
+                                          TNRNetClusterChainSingleBoolSettings clusterChainCfg = null
                                           )
         {
-            OneWinnerGroupName = oneWinnerGroupName;
-            NetworksCfg = networksCfg == null ? new ClassificationNetworksSettings() : (ClassificationNetworksSettings)networksCfg.DeepClone();
+            OneTakesAllGroupName = oneTakesAllGroupName;
+            ClusterChainCfg = clusterChainCfg == null ? null : (TNRNetClusterChainSingleBoolSettings)clusterChainCfg.DeepClone();
             Check();
             return;
         }
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public ClassificationTaskSettings(ClassificationTaskSettings source)
-            : this(source.OneWinnerGroupName, source.NetworksCfg)
+            : this(source.OneTakesAllGroupName, source.ClusterChainCfg)
         {
             return;
         }
@@ -70,16 +69,16 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public ClassificationTaskSettings(XElement elem)
         {
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            OneWinnerGroupName = settingsElem.Attribute("oneWinnerGroupName").Value;
-            //Networks
-            XElement classificationNetworksSettingsElem = settingsElem.Elements("networks").FirstOrDefault();
-            NetworksCfg = classificationNetworksSettingsElem == null ? new ClassificationNetworksSettings() : new ClassificationNetworksSettings(classificationNetworksSettingsElem);
+            OneTakesAllGroupName = settingsElem.Attribute("oneTakesAllGroupName").Value;
+            //Result
+            XElement clusterChainElem = settingsElem.Elements("clusterChain").FirstOrDefault();
+            ClusterChainCfg = clusterChainElem == null ? null : new TNRNetClusterChainSingleBoolSettings(clusterChainElem);
             Check();
             return;
         }
@@ -91,20 +90,17 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <inheritdoc />
         public IFeatureFilterSettings FeatureFilterCfg { get { return _sharedBinFeatureFilterCfg; } }
 
-        /// <inheritdoc />
-        public List<INonRecurrentNetworkSettings> NetworkCfgCollection { get { return NetworksCfg.NetworkCfgCollection; } }
-
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
-        public bool IsDefaultOneWinnerGroupName { get { return (OneWinnerGroupName == DefaultOneWinnerGroupName); } }
+        public bool IsDefaultOneTakesAllGroupName { get { return (OneTakesAllGroupName == DefaultOneTakesAllGroupName); } }
 
         /// <inheritdoc />
         public override bool ContainsOnlyDefaults
         {
             get
             {
-                return IsDefaultOneWinnerGroupName && NetworksCfg.ContainsOnlyDefaults;
+                return IsDefaultOneTakesAllGroupName && ClusterChainCfg == null;
             }
         }
 
@@ -112,9 +108,9 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <inheritdoc />
         protected override void Check()
         {
-            if (OneWinnerGroupName.Length == 0)
+            if (OneTakesAllGroupName.Length == 0)
             {
-                throw new ArgumentException($"Name of the one winner group can not be empty.", "OneWinnerGroupName");
+                throw new ArgumentException($"The name of the One Takes All group can not be empty.", "OneTakesAllGroupName");
             }
             return;
         }
@@ -129,13 +125,13 @@ namespace RCNet.Neural.Network.SM.Readout
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
-            if (!suppressDefaults || !IsDefaultOneWinnerGroupName)
+            if (!suppressDefaults || !IsDefaultOneTakesAllGroupName)
             {
-                rootElem.Add(new XAttribute("oneWinnerGroupName", OneWinnerGroupName));
+                rootElem.Add(new XAttribute("oneTakesAllGroupName", OneTakesAllGroupName));
             }
-            if (!NetworksCfg.ContainsOnlyDefaults)
+            if (ClusterChainCfg != null && !ClusterChainCfg.ContainsOnlyDefaults)
             {
-                rootElem.Add(NetworksCfg.GetXml("networks", suppressDefaults));
+                rootElem.Add(ClusterChainCfg.GetXml(suppressDefaults));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;

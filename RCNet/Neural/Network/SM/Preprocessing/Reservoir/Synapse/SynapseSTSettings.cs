@@ -5,40 +5,40 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {
     /// <summary>
-    /// Configuration of a synapse providing signal to hidden spiking neuron
+    /// Configuration of a synapse connecting postsynaptic hidden spiking neuron.
     /// </summary>
     [Serializable]
     public class SynapseSTSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "SynapseSTType";
 
         //Attribute properties
         /// <summary>
-        /// Input synapse settings
+        /// The configuration of an input synapse.
         /// </summary>
         public SynapseSTInputSettings InputSynCfg { get; }
 
         /// <summary>
-        /// Excitatory synapse settings
+        /// The configuration of an excitatory synapse.
         /// </summary>
         public SynapseSTExcitatorySettings ExcitatorySynCfg { get; }
 
         /// <summary>
-        /// Inhibitory synapse settings
+        /// The configuration of an inhibitory synapse.
         /// </summary>
         public SynapseSTInhibitorySettings InhibitorySynCfg { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="inputSynCfg">Input synapse settings</param>
-        /// <param name="excitatorySynCfg">Excitatory synapse settings</param>
-        /// <param name="inhibitorySynCfg">Inhibitory synapse settings</param>
+        /// <param name="inputSynCfg">The configuration of an input synapse.</param>
+        /// <param name="excitatorySynCfg">The configuration of an excitatory synapse.</param>
+        /// <param name="inhibitorySynCfg">The configuration of an inhibitory synapse.</param>
         public SynapseSTSettings(SynapseSTInputSettings inputSynCfg = null,
                                  SynapseSTExcitatorySettings excitatorySynCfg = null,
                                  SynapseSTInhibitorySettings inhibitorySynCfg = null
@@ -53,9 +53,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public SynapseSTSettings(SynapseSTSettings source)
             : this(source.InputSynCfg, source.ExcitatorySynCfg, source.InhibitorySynCfg)
         {
@@ -66,7 +66,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public SynapseSTSettings(XElement elem)
         {
             //Validation
@@ -84,17 +84,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultInputSynCfg { get { return InputSynCfg.ContainsOnlyDefaults; } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultExcitatorySynCfg { get { return ExcitatorySynCfg.ContainsOnlyDefaults; } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultInhibitorySynCfg { get { return InhibitorySynCfg.ContainsOnlyDefaults; } }
 

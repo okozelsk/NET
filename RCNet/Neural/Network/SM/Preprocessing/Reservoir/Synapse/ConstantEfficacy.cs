@@ -1,7 +1,7 @@
 ﻿namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {
     /// <summary>
-    /// Implements the constant efficacy computer
+    /// Implements the efficacy computer having the constant dynamics.
     /// </summary>
     public class ConstantEfficacy : IEfficacy
     {
@@ -10,9 +10,9 @@
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="dynamicsCfg">Dynamics configuration</param>
+        /// <param name="dynamicsCfg">The configuration of the dynamics.</param>
         public ConstantEfficacy(ConstantDynamicsSettings dynamicsCfg)
         {
             _dynamicsCfg = dynamicsCfg;

@@ -4,31 +4,31 @@ using System;
 namespace RCNet.Neural.Data.Generators
 {
     /// <summary>
-    /// Implements the constant signal pulses generator
+    /// Implements the constant pulse generator.
     /// </summary>
     [Serializable]
     public class PulseGenerator : IGenerator
     {
         //Enums
         /// <summary>
-        /// Method of the pulse timing
+        /// The pulse timing mode.
         /// </summary>
         public enum TimingMode
         {
             /// <summary>
-            /// Period of the pulses is constant
+            /// The period of the pulses is constant.
             /// </summary>
             Constant,
             /// <summary>
-            /// Period of the pulses follows the Uniform distribution
+            /// The period of the pulses follows the Uniform distribution.
             /// </summary>
             Uniform,
             /// <summary>
-            /// Period of the pulses follows the Gaussian distribution
+            /// The period of the pulses follows the Gaussian distribution.
             /// </summary>
             Gaussian,
             /// <summary>
-            /// Period of the pulses follows the Poisson (Exponential) distribution
+            /// The period of the pulses follows the Poisson (Exponential) distribution.
             /// </summary>
             Poisson
         }
@@ -43,11 +43,11 @@ namespace RCNet.Neural.Data.Generators
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="signal">Pulse signal value</param>
-        /// <param name="avgPeriod">Pulse average leak</param>
-        /// <param name="mode">Pulse timing mode</param>
+        /// <param name="signal">The pulse signal value.</param>
+        /// <param name="avgPeriod">The pulse average leak.</param>
+        /// <param name="mode">The pulse timing mode.</param>
         public PulseGenerator(double signal, double avgPeriod, TimingMode mode)
         {
             _signal = signal;
@@ -58,21 +58,21 @@ namespace RCNet.Neural.Data.Generators
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="settings">Configuration</param>
-        public PulseGenerator(PulseGeneratorSettings settings)
+        /// <param name="cfg">The configuration</param>
+        public PulseGenerator(PulseGeneratorSettings cfg)
         {
-            _signal = settings.Signal;
-            _avgPeriod = settings.AvgPeriod;
-            _mode = settings.Mode;
+            _signal = cfg.Signal;
+            _avgPeriod = cfg.AvgPeriod;
+            _mode = cfg.Mode;
             Reset();
             return;
         }
 
         //Methods
         /// <summary>
-        /// Schedules next pulse time
+        /// Schedules the next pulse.
         /// </summary>
         private void ScheduleNextPulse()
         {
@@ -89,7 +89,7 @@ namespace RCNet.Neural.Data.Generators
                     timeIncrement = (int)Math.Round(_rand.NextRangedUniformDouble(minPeriod, maxPeriod));
                     break;
                 case TimingMode.Gaussian:
-                    timeIncrement = (int)Math.Round(_rand.NextFilterredGaussianDouble(_avgPeriod, spanPeriod / 6d, minPeriod, maxPeriod));
+                    timeIncrement = (int)Math.Round(_rand.NextRangedGaussianDouble(_avgPeriod, spanPeriod / 6d, minPeriod, maxPeriod));
                     break;
                 case TimingMode.Poisson:
                     timeIncrement = (int)Math.Round(_rand.NextExponentialDouble(_avgPeriod));
@@ -131,4 +131,5 @@ namespace RCNet.Neural.Data.Generators
         }
 
     }//PulseGenerator
+
 }//Namespace

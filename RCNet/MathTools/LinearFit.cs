@@ -5,13 +5,13 @@ using System.Collections.Generic;
 namespace RCNet.MathTools
 {
     /// <summary>
-    /// Class computes coefficients of the straight line best fitting specified sample points.
+    /// Implements the calculation of the coefficients of the line that best corresponds to the sample points.
     /// </summary>
     [Serializable]
     public class LinearFit
     {
         //Attributes
-        private readonly List<Point2D> _pointCollection;
+        private readonly List<FnPoint> _pointCollection;
         private double _sumOfX;
         private double _sumOfSquaredX;
         private double _sumOfY;
@@ -22,22 +22,23 @@ namespace RCNet.MathTools
 
         //Constructor
         /// <summary>
-        /// Constructs an uninitialized instance
+        /// Creates an uninitialized instance.
         /// </summary>
         public LinearFit()
         {
-            _pointCollection = new List<Point2D>();
+            _pointCollection = new List<FnPoint>();
             Reset();
             return;
         }
 
         //Properties
         /// <summary>
-        /// Number of sample points
+        /// Gets the number of sample points.
         /// </summary>
         public int NumOfPoints { get { return _pointCollection.Count; } }
+
         /// <summary>
-        /// The A coeficient of the linear equation y = A*x + B
+        /// Gets the A coefficient of the linear equation y = A*x + B.
         /// </summary>
         public double A
         {
@@ -47,8 +48,9 @@ namespace RCNet.MathTools
                 return _a;
             }
         }
+
         /// <summary>
-        /// The B coeficient of the linear equation y = A*x + B
+        /// Gets the B coefficient of the linear equation y = A*x + B.
         /// </summary>
         public double B
         {
@@ -61,7 +63,7 @@ namespace RCNet.MathTools
 
         //Methods
         /// <summary>
-        /// Resets instance to its initial state
+        /// Resets the instance to its initial state.
         /// </summary>
         public void Reset()
         {
@@ -77,28 +79,28 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Adds sample point
+        /// Adds a sample point.
         /// </summary>
-        /// <param name="point">Sample point</param>
-        public void AddSamplePoint(Point2D point)
+        /// <param name="point">The sample point.</param>
+        public void AddSamplePoint(FnPoint point)
         {
             _pointCollection.Add(point);
-            _sumOfX += point._x;
-            _sumOfSquaredX += point._x.Power(2);
-            _sumOfY += point._y;
-            _sumOfXYDotProduct += point._x * point._y;
+            _sumOfX += point.X;
+            _sumOfSquaredX += point.X.Power(2);
+            _sumOfY += point.Y;
+            _sumOfXYDotProduct += point.X * point.Y;
             _invalidated = true;
             return;
         }
 
         /// <summary>
-        /// Adds a sample point
+        /// Adds a sample point.
         /// </summary>
-        /// <param name="x">X coordinate of a sample point</param>
-        /// <param name="y">Y coordinate of a sample point</param>
+        /// <param name="x">The X coordinate of a sample point.</param>
+        /// <param name="y">The Y coordinate of a sample point.</param>
         public void AddSamplePoint(double x, double y)
         {
-            AddSamplePoint(new Point2D(x, y));
+            AddSamplePoint(new FnPoint(x, y));
             return;
         }
 
@@ -124,7 +126,7 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Computes error statistics of Y values (computedY - sampleY)
+        /// Computes the error statistics of Y values (computedY - sampleY).
         /// </summary>
         public BasicStat ComputeRegressionErrStat()
         {
@@ -132,19 +134,19 @@ namespace RCNet.MathTools
             BasicStat errStat = new BasicStat();
             if (_pointCollection.Count > 0)
             {
-                foreach (Point2D point in _pointCollection)
+                foreach (FnPoint point in _pointCollection)
                 {
-                    double regrY = _a * point._x + _b;
-                    errStat.AddSampleValue(Math.Abs(regrY - point._y));
+                    double regrY = _a * point.X + _b;
+                    errStat.AddSample(Math.Abs(regrY - point.Y));
                 }
             }
             return errStat;
         }
 
         /// <summary>
-        /// Computes the Y value for given X value
+        /// Computes the Y value for the specified X value.
         /// </summary>
-        /// <param name="x">X value</param>
+        /// <param name="x">The X value.</param>
         public double ComputeY(double x)
         {
             ComputeRegression();
@@ -152,4 +154,5 @@ namespace RCNet.MathTools
         }
 
     }//LinearFit
+
 }//Namespace

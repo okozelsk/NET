@@ -14,46 +14,46 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "NPInpFeedingPatternedType";
         //Default values
         /// <summary>
-        /// Default value of parameter specifying how many times to collect predictors during pattern data preprocessing
+        /// The default value of the parameter specifying how many times to collect predictors during the pattern preprocessing.
         /// </summary>
         public const int DefaultSlices = 1;
         /// <summary>
-        /// Default value of parameter specifying whether and how to preprocess time series pattern in both time directions
+        /// The default value of the parameter specifying whether and how to preprocess pattern in both time directions.
         /// </summary>
         public const NeuralPreprocessor.BidirProcessing DefaultBidir = NeuralPreprocessor.BidirProcessing.Forbidden;
         /// <summary>
-        /// Default value of parameter specifying variables organization in the pattern
+        /// The default value of the parameter specifying the variables organization schema in the pattern.
         /// </summary>
         public const InputPattern.VariablesSchema DefaultVarSchema = InputPattern.VariablesSchema.Groupped;
 
         //Attribute properties
         /// <summary>
-        /// Specifies how many times to collect predictors during pattern data preprocessing
+        /// Specifies how many times to collect predictors during the pattern preprocessing.
         /// </summary>
         public int Slices { get; }
 
         /// <summary>
-        /// Specifies whether and how to preprocess time series pattern in both time directions
+        /// Specifies whether and how to preprocess pattern in both time directions.
         /// </summary>
         public NeuralPreprocessor.BidirProcessing Bidir { get; }
 
         /// <summary>
-        /// Specifies variables organization in the pattern
+        /// Specifies the variables organization schema in the pattern.
         /// </summary>
         public InputPattern.VariablesSchema VarSchema { get; }
 
         /// <summary>
-        /// Configuration of an input pattern unification
+        /// The configuration of the pattern unification.
         /// </summary>
         public UnificationSettings UnificationCfg { get; }
 
         /// <summary>
-        /// Steady external input fields settings
+        /// The configuration of the steady external input fields.
         /// </summary>
         public SteadyFieldsSettings SteadyFieldsCfg { get; }
 
@@ -61,11 +61,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Creates an itialized instance.
         /// </summary>
-        /// <param name="slices">Specifies how many times to collect predictors during pattern data preprocessing</param>
-        /// <param name="bidir">Specifies whether and how to preprocess time series pattern in both time directions</param>
-        /// <param name="varSchema">Specifies variables organization in the pattern</param>
-        /// <param name="unificationCfg">Configuration of an input pattern unification</param>
-        /// <param name="steadyFieldsCfg">Steady external input fields settings</param>
+        /// <param name="slices">Specifies how many times to collect predictors during the pattern preprocessing.</param>
+        /// <param name="bidir">Specifies whether and how to preprocess pattern in both time directions.</param>
+        /// <param name="varSchema">Specifies the variables organization schema in the pattern.</param>
+        /// <param name="unificationCfg">The configuration of the pattern unification.</param>
+        /// <param name="steadyFieldsCfg">The configuration of the steady external input fields.</param>
         public FeedingPatternedSettings(int slices = DefaultSlices,
                                         NeuralPreprocessor.BidirProcessing bidir = DefaultBidir,
                                         InputPattern.VariablesSchema varSchema = DefaultVarSchema,
@@ -85,7 +85,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public FeedingPatternedSettings(FeedingPatternedSettings source)
             : this(source.Slices, source.Bidir, source.VarSchema, source.UnificationCfg, source.SteadyFieldsCfg)
         {
@@ -93,9 +93,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Creates an initialized instance from the given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public FeedingPatternedSettings(XElement elem)
         {
             //Validation
@@ -114,7 +114,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                 UnificationCfg = new UnificationSettings();
             }
             XElement steadyFieldsElem = settingsElem.Elements("steadyFields").FirstOrDefault();
-            if(steadyFieldsElem != null)
+            if (steadyFieldsElem != null)
             {
                 SteadyFieldsCfg = new SteadyFieldsSettings(steadyFieldsElem);
             }
@@ -131,22 +131,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public InputEncoder.InputFeedingType FeedingType { get { return InputEncoder.InputFeedingType.Patterned; } }
 
         /// <summary>
-        /// Number of steady external input fields
-        /// </summary>
-        public int NumOfSteadyFields { get { return SteadyFieldsCfg == null ? 0 : SteadyFieldsCfg.FieldCfgCollection.Count; } }
-
-        /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultSlices { get { return (Slices == DefaultSlices); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultBidir { get { return (Bidir == DefaultBidir); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultVarSchema { get { return (VarSchema == DefaultVarSchema); } }
 
@@ -171,7 +166,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             {
                 throw new ArgumentException($"Invalid Slices {Slices.ToString(CultureInfo.InvariantCulture)}. Slices must be GT 0.", "Slices");
             }
-            if(UnificationCfg.ResamplingCfg.TargetTimePoints != ResamplingSettings.AutoTargetTimePointsNum && Slices > UnificationCfg.ResamplingCfg.TargetTimePoints)
+            if (UnificationCfg.ResamplingCfg.TargetTimePoints != ResamplingSettings.AutoTargetTimePointsNum && Slices > UnificationCfg.ResamplingCfg.TargetTimePoints)
             {
                 throw new ArgumentException($"Invalid Slices {Slices.ToString(CultureInfo.InvariantCulture)}. Slices must be LE to pattern timepoints ({UnificationCfg.ResamplingCfg.TargetTimePoints}).", "Slices");
             }
@@ -204,7 +199,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             {
                 rootElem.Add(UnificationCfg.GetXml(suppressDefaults));
             }
-            if(SteadyFieldsCfg != null)
+            if (SteadyFieldsCfg != null)
             {
                 rootElem.Add(SteadyFieldsCfg.GetXml(suppressDefaults));
             }

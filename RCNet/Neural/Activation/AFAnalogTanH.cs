@@ -5,14 +5,14 @@ using System;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Implements the Hyperbolic Tangent activation function
+    /// Implements the Hyperbolic Tangent activation function.
     /// </summary>
     [Serializable]
     public class AFAnalogTanH : AFAnalogBase
     {
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         public AFAnalogTanH()
             : base(Interval.IntN1P1)

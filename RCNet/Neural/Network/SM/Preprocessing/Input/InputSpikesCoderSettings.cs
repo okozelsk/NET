@@ -1,9 +1,7 @@
-﻿using System;
+﻿using RCNet.Neural.Data.Coders.AnalogToSpiking;
+using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
 using System.Xml.Linq;
-using RCNet.Neural.Data.Coders.AnalogToSpiking;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
@@ -15,27 +13,25 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "NPInpSpikesCoderType";
         //Default values
         /// <summary>
-        /// Default value of the parameter specifying spiking input encoding regime
+        /// The default value of the parameter specifying the way of input spikes coding.
         /// </summary>
-        public const InputEncoder.SpikingInputEncodingRegime DefaultRegime = InputEncoder.SpikingInputEncodingRegime.Forbidden;
+        public const InputEncoder.InputSpikesCoding DefaultRegime = InputEncoder.InputSpikesCoding.Forbidden;
         /// <summary>
-        /// Default value of the parameter specifying collection of configurations of spikes coders
+        /// The default value of the parameter specifying the collection of the A2S coder configurations.
         /// </summary>
         public const List<RCNetBaseSettings> DefaultCoderCfgCollection = null;
 
         //Attribute properties
+        /// <inheritdoc cref="InputEncoder.InputSpikesCoding"/>
+        public InputEncoder.InputSpikesCoding Regime { get; }
+
         /// <summary>
-        /// Spiking input encoding regime
-        /// </summary>
-        public InputEncoder.SpikingInputEncodingRegime Regime { get; }
-        
-        /// <summary>
-        /// Collection of configurations of spikes coders
+        /// The collection of the A2S coder configurations.
         /// </summary>
         public List<RCNetBaseSettings> CoderCfgCollection { get; }
 
@@ -43,15 +39,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="regime">Spiking input encoding regime</param>
-        /// <param name="coderCfgCollection">Collection of configurations of spikes coders</param>
-        public InputSpikesCoderSettings(InputEncoder.SpikingInputEncodingRegime regime = DefaultRegime,
-                                      List<RCNetBaseSettings> coderCfgCollection = DefaultCoderCfgCollection
-                                      )
+        /// <param name="regime">The way of input spikes coding.</param>
+        /// <param name="coderCfgCollection">The collection of the A2S coder configurations.</param>
+        public InputSpikesCoderSettings(InputEncoder.InputSpikesCoding regime = DefaultRegime,
+                                        List<RCNetBaseSettings> coderCfgCollection = DefaultCoderCfgCollection
+                                        )
         {
             Regime = regime;
             CoderCfgCollection = new List<RCNetBaseSettings>();
-            if (Regime != InputEncoder.SpikingInputEncodingRegime.Forbidden)
+            if (Regime != InputEncoder.InputSpikesCoding.Forbidden)
             {
                 if (coderCfgCollection != null && coderCfgCollection.Count > 0)
                 {
@@ -68,12 +64,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="regime">Spiking input encoding regime</param>
-        /// <param name="coderCfgCollection">Collection of configurations of spikes coders</param>
-        public InputSpikesCoderSettings(InputEncoder.SpikingInputEncodingRegime regime,
-                                      params RCNetBaseSettings[] coderCfgCollection
-                                      )
-            :this(regime, new List<RCNetBaseSettings>(coderCfgCollection))
+        /// <param name="regime">The way of input spikes coding.</param>
+        /// <param name="coderCfgCollection">The A2S coder configurations.</param>
+        public InputSpikesCoderSettings(InputEncoder.InputSpikesCoding regime,
+                                        params RCNetBaseSettings[] coderCfgCollection
+                                        )
+            : this(regime, new List<RCNetBaseSettings>(coderCfgCollection))
         {
             return;
         }
@@ -81,7 +77,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public InputSpikesCoderSettings(InputSpikesCoderSettings source)
             : this(source.Regime, source.CoderCfgCollection)
         {
@@ -89,19 +85,19 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Creates an initialized instance from the given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public InputSpikesCoderSettings(XElement elem)
         {
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             //Regime
-            Regime = (InputEncoder.SpikingInputEncodingRegime)Enum.Parse(typeof(InputEncoder.SpikingInputEncodingRegime), settingsElem.Attribute("regime").Value, true);
+            Regime = (InputEncoder.InputSpikesCoding)Enum.Parse(typeof(InputEncoder.InputSpikesCoding), settingsElem.Attribute("regime").Value, true);
             //Coders configurations
             CoderCfgCollection = null;
-            if (Regime != InputEncoder.SpikingInputEncodingRegime.Forbidden)
+            if (Regime != InputEncoder.InputSpikesCoding.Forbidden)
             {
                 CoderCfgCollection = new List<RCNetBaseSettings>();
                 foreach (XElement coderCfgElem in settingsElem.Elements())
@@ -118,12 +114,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultRegime { get { return (Regime == DefaultRegime); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultCoderCfgCollection { get { return (CoderCfgCollection == DefaultCoderCfgCollection); } }
 
@@ -134,15 +130,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <inheritdoc/>
         protected override void Check()
         {
-            if (Regime != InputEncoder.SpikingInputEncodingRegime.Forbidden)
+            if (Regime != InputEncoder.InputSpikesCoding.Forbidden)
             {
                 if (CoderCfgCollection.Count == 0)
                 {
                     throw new ArgumentException($"It must be specified at least one coder configuration.", "CoderCfgCollection");
                 }
-                foreach(RCNetBaseSettings coderCfg in CoderCfgCollection)
+                foreach (RCNetBaseSettings coderCfg in CoderCfgCollection)
                 {
-                    if(!A2SCoderFactory.CheckSettings(coderCfg))
+                    if (!A2SCoderFactory.CheckSettings(coderCfg))
                     {
                         throw new ArgumentException($"Unknown coder configuration {coderCfg.GetType().Name}.", "CoderCfgCollection");
                     }
@@ -165,7 +161,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             {
                 rootElem.Add(new XAttribute("regime", Regime.ToString()));
             }
-            foreach(RCNetBaseSettings coderCfg in CoderCfgCollection)
+            foreach (RCNetBaseSettings coderCfg in CoderCfgCollection)
             {
                 rootElem.Add(coderCfg.GetXml(suppressDefaults));
             }

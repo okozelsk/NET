@@ -5,7 +5,7 @@ using System;
 namespace RCNet.Neural.Data.Generators
 {
     /// <summary>
-    /// Implements the random signal generator
+    /// Implements the random signal generator.
     /// </summary>
     [Serializable]
     public class RandomGenerator : IGenerator
@@ -13,20 +13,17 @@ namespace RCNet.Neural.Data.Generators
         //Attributes
         private Random _rand;
         private readonly int _seek;
-        private readonly RandomValueSettings _settings;
+        private readonly RandomValueSettings _cfg;
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="settings">Configuration</param>
-        /// <param name="seek">
-        /// Initial seek of the random generator.
-        /// Specify seek less than 0 to obtain different initialization each time Reset is invoked.
-        /// </param>
-        public RandomGenerator(RandomValueSettings settings, int seek = 0)
+        /// <param name="cfg">The RandomValue configuration.</param>
+        /// <param name="seek">The initial seek of the random generator. Specify the seek less than 0 to obtain different initialization each time the Reset is invoked.</param>
+        public RandomGenerator(RandomValueSettings cfg, int seek = 0)
         {
-            _settings = (RandomValueSettings)settings.DeepClone();
+            _cfg = (RandomValueSettings)cfg.DeepClone();
             _seek = seek;
             Reset();
             return;
@@ -43,8 +40,9 @@ namespace RCNet.Neural.Data.Generators
         /// <inheritdoc />
         public double Next()
         {
-            return _rand.NextDouble(_settings);
+            return _rand.NextDouble(_cfg);
         }
 
     }//RandomGenerator
+
 }//Namespace

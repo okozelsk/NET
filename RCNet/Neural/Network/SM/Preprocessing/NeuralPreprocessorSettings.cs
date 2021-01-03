@@ -8,61 +8,61 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing
 {
     /// <summary>
-    /// Configuration of the NeuralPreprocessor
+    /// Configuration of the neural preprocessor.
     /// </summary>
     [Serializable]
     public class NeuralPreprocessorSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "NPType";
         //Default values
         /// <summary>
-        /// Default value of parameter determining how many predictors having smallest value-span to be disabled
+        /// The default value of the parameter determining how many predictors having smallest value-span to be disabled.
         /// </summary>
         public const double DefaultPredictorsReductionRatio = 0d;
         /// <summary>
-        /// Default value of parameter specifying minimum acceptable predictor's value-span
+        /// The default value of the parameter specifying the minimum acceptable predictor's value-span.
         /// </summary>
         public const double DefaultPredictorValueMinSpan = 1e-6d;
 
         //Attribute properties
         /// <summary>
-        /// Configuration of the preprocessor's input encoder
+        /// The configuration of the input encoder.
         /// </summary>
         public InputEncoderSettings InputEncoderCfg { get; }
 
         /// <summary>
-        /// Configuration of reservoir structures
+        /// The configuration of the reservoir structures.
         /// </summary>
         public ReservoirStructuresSettings ReservoirStructuresCfg { get; }
 
         /// <summary>
-        /// Configuration of reservoir instances
+        /// The configuration of the reservoir instances.
         /// </summary>
         public ReservoirInstancesSettings ReservoirInstancesCfg { get; }
 
         /// <summary>
-        /// Determines how many predictors having smallest value-span to be disabled
+        /// Determines how many predictors having smallest value-span to be disabled.
         /// </summary>
         public double PredictorsReductionRatio { get; }
 
         /// <summary>
-        /// Specifies minimum acceptable predictor's value-span
+        /// Specifies the minimum acceptable predictor's value-span.
         /// </summary>
         public double PredictorValueMinSpan { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="inputEncoderCfg">Configuration of the preprocessor's input encoder</param>
-        /// <param name="reservoirStructuresCfg">Configuration of reservoir structures</param>
-        /// <param name="reservoirInstancesCfg">Configuration of reservoir instances</param>
-        /// <param name="predictorsReductionRatio">Determines how many predictors having smallest value-span to be disabled</param>
-        /// <param name="predictorValueMinSpan">Specifies minimum acceptable predictor's value-span</param>
+        /// <param name="inputEncoderCfg">The configuration of the input encoder.</param>
+        /// <param name="reservoirStructuresCfg">The configuration of the reservoir structures.</param>
+        /// <param name="reservoirInstancesCfg">The configuration of the reservoir instances.</param>
+        /// <param name="predictorsReductionRatio">Determines how many predictors having smallest value-span to be disabled.</param>
+        /// <param name="predictorValueMinSpan">Specifies the minimum acceptable predictor's value-span.</param>
         public NeuralPreprocessorSettings(InputEncoderSettings inputEncoderCfg,
                                           ReservoirStructuresSettings reservoirStructuresCfg,
                                           ReservoirInstancesSettings reservoirInstancesCfg,
@@ -82,7 +82,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <summary>
         /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public NeuralPreprocessorSettings(NeuralPreprocessorSettings source)
             : this(source.InputEncoderCfg, source.ReservoirStructuresCfg, source.ReservoirInstancesCfg,
                    source.PredictorsReductionRatio, source.PredictorValueMinSpan)
@@ -91,9 +91,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         }
 
         /// <summary>
-        /// Creates an initialized instance from the given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public NeuralPreprocessorSettings(XElement elem)
         {
             //Validation
@@ -110,12 +110,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultPredictorsReductionRatio { get { return (PredictorsReductionRatio == DefaultPredictorsReductionRatio); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultPredictorValueMinSpan { get { return (PredictorValueMinSpan == DefaultPredictorValueMinSpan); } }
 

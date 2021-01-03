@@ -4,13 +4,14 @@ using RCNet.Neural.Data;
 using RCNet.Neural.Network.NonRecurrent;
 using RCNet.Neural.Network.SM;
 using RCNet.Neural.Network.SM.Preprocessing;
+using RCNet.Neural.Network.SM.Readout;
 using System;
 using System.Diagnostics;
 
 namespace Demo.DemoConsoleApp.SM
 {
     /// <summary>
-    /// Demonstrates the State Machine usage, performing demo cases defined in xml file.
+    /// Performs the demo cases defined in xml file, demonstrates the State Machine usage.
     /// </summary>
     public class SMDemo
     {
@@ -26,10 +27,10 @@ namespace Demo.DemoConsoleApp.SM
 
         //Event handlers
         /// <summary>
-        /// Displays information about the verification progress.
+        /// Displays an information about the verification progress.
         /// </summary>
-        /// <param name="totalNumOfInputs">Total number of inputs to be processed</param>
-        /// <param name="numOfProcessedInputs">Number of processed inputs</param>
+        /// <param name="totalNumOfInputs">The total number of inputs to be processed.</param>
+        /// <param name="numOfProcessedInputs">The number of already processed inputs.</param>
         private void OnVerificationProgressChanged(int totalNumOfInputs, int numOfProcessedInputs)
         {
             //Display progress
@@ -41,11 +42,11 @@ namespace Demo.DemoConsoleApp.SM
         }
 
         /// <summary>
-        /// Displays information about the preprocessing progress and at the end displays important NeuralPreprocessor's statistics.
+        /// Displays an information about the preprocessing progress and at the end displays important NeuralPreprocessor's statistics.
         /// </summary>
-        /// <param name="totalNumOfInputs">Total number of inputs to be processed</param>
-        /// <param name="numOfProcessedInputs">Number of processed inputs</param>
-        /// <param name="finalPreprocessingOverview">Final overview of the preprocessing phase</param>
+        /// <param name="totalNumOfInputs">The total number of inputs to be processed.</param>
+        /// <param name="numOfProcessedInputs">The number of already processed inputs.</param>
+        /// <param name="finalPreprocessingOverview">The final overview of the preprocessing.</param>
         private void OnPreprocessingProgressChanged(int totalNumOfInputs,
                                                     int numOfProcessedInputs,
                                                     NeuralPreprocessor.PreprocessingOverview finalPreprocessingOverview
@@ -70,49 +71,49 @@ namespace Demo.DemoConsoleApp.SM
         }
 
         /// <summary>
-        /// Displays information about the readout unit regression progress.
+        /// Displays information about the build process progress.
         /// </summary>
-        /// <param name="buildingState">Current state of the regression process</param>
-        /// <param name="foundBetter">Indicates that the best readout unit was changed as a result of the performed epoch</param>
-        private void OnRegressionEpochDone(TrainedNetworkBuilder.BuildingState buildingState, bool foundBetter)
+        /// <param name="buildProgress">The current state of the build process.</param>
+        /// <param name="foundBetter">Indicates that the best network so far was found during the last performed epoch.</param>
+        private void OnEpochDone(TNRNetBuilder.BuildProgress buildProgress, bool foundBetter)
         {
             int reportEpochsInterval = 5;
             //Progress info
             if (foundBetter ||
-                (buildingState.Epoch % reportEpochsInterval) == 0 ||
-                buildingState.Epoch == buildingState.MaxEpochs ||
-                (buildingState.Epoch == 1 && buildingState.RegrAttemptNumber == 1)
+                (buildProgress.Epoch % reportEpochsInterval) == 0 ||
+                 buildProgress.Epoch == buildProgress.MaxEpochs ||
+                (buildProgress.Epoch == 1 && buildProgress.AttemptNumber == 1)
                 )
             {
                 //Build progress report message
-                string progressText = buildingState.GetProgressInfo(4);
+                string progressText = buildProgress.GetInfo(4);
                 //Report the progress
-                _log.Write(progressText, !(buildingState.Epoch == 1 && buildingState.RegrAttemptNumber == 1));
+                _log.Write(progressText, !(buildProgress.Epoch == 1 && buildProgress.AttemptNumber == 1));
             }
             return;
         }
 
         //Methods
         /// <summary>
-        /// Performs specified demo case.
+        /// Performs the demo case.
         /// </summary>
-        /// <param name="demoCaseParams">An instance of DemoSettings.CaseSettings to be performed</param>
-        public void PerformDemoCase(SMDemoSettings.CaseSettings demoCaseParams)
+        /// <param name="demoCaseCfg">The configuration of the demo case to be performed.</param>
+        public void PerformDemoCase(SMDemoSettings.CaseSettings demoCaseCfg)
         {
             bool continuousFeedingDataFormat = false;
             //Prediction input vector (relevant only for input continuous feeding)
             double[] predictionInputVector = null;
             //Log start
-            _log.Write("  Performing demo case " + demoCaseParams.Name, false);
+            _log.Write("  Performing demo case " + demoCaseCfg.Name, false);
             _log.Write(" ", false);
             //Instantiate the StateMachine
-            StateMachine stateMachine = new StateMachine(demoCaseParams.StateMachineCfg);
+            StateMachine stateMachine = new StateMachine(demoCaseCfg.StateMachineCfg);
             //////////////////////////////////////////////////////////////////////////////////////
             //Train StateMachine
-            //Register to RegressionEpochDone event
-            stateMachine.RL.RegressionEpochDone += OnRegressionEpochDone;
+            //Register to EpochDone event
+            stateMachine.RL.EpochDone += OnEpochDone;
             StateMachine.TrainingResults trainingResults;
-            CsvDataHolder trainingCsvData = new CsvDataHolder(demoCaseParams.TrainingDataFileName);
+            CsvDataHolder trainingCsvData = new CsvDataHolder(demoCaseCfg.TrainingDataFileName);
             VectorBundle trainingData;
             if (trainingCsvData.ColNameCollection.NumOfStringValues > 0)
             {
@@ -124,15 +125,15 @@ namespace Demo.DemoConsoleApp.SM
                     throw new InvalidOperationException($"Incorrect file format. When NeuralPreprocessor is bypassed, only patterned data are allowed.");
                 }
                 trainingData = VectorBundle.Load(trainingCsvData,
-                                                 demoCaseParams.StateMachineCfg.NeuralPreprocessorCfg.InputEncoderCfg.VaryingFieldsCfg.ExternalFieldsCfg.GetFieldNames(),
-                                                 demoCaseParams.StateMachineCfg.ReadoutLayerCfg.OutputFieldNameCollection,
+                                                 demoCaseCfg.StateMachineCfg.NeuralPreprocessorCfg.InputEncoderCfg.VaryingFieldsCfg.ExternalFieldsCfg.GetFieldNames(),
+                                                 demoCaseCfg.StateMachineCfg.ReadoutLayerCfg.OutputFieldNameCollection,
                                                  out predictionInputVector
                                                  );
             }
             else
             {
                 //Patterned feeding data format
-                trainingData = VectorBundle.Load(trainingCsvData, demoCaseParams.StateMachineCfg.ReadoutLayerCfg.OutputFieldNameCollection.Count);
+                trainingData = VectorBundle.Load(trainingCsvData, demoCaseCfg.StateMachineCfg.ReadoutLayerCfg.OutputFieldNameCollection.Count);
             }
             if (stateMachine.NP != null)
             {
@@ -150,29 +151,29 @@ namespace Demo.DemoConsoleApp.SM
 
             //////////////////////////////////////////////////////////////////////////////////////
             //Verification of training quality on verification data
-            if (demoCaseParams.VerificationDataFileName.Length > 0)
+            if (demoCaseCfg.VerificationDataFileName.Length > 0)
             {
                 stateMachine.VerificationProgressChanged += OnVerificationProgressChanged;
                 StateMachine.VerificationResults verificationResults;
-                CsvDataHolder verificationCsvData = new CsvDataHolder(demoCaseParams.VerificationDataFileName);
+                CsvDataHolder verificationCsvData = new CsvDataHolder(demoCaseCfg.VerificationDataFileName);
                 VectorBundle verificationData;
                 if (continuousFeedingDataFormat)
                 {
                     //Continuous input feeding
                     //Last known input values from training (predictionInputVector) must be pushed into the reservoirs to keep time series continuity
                     //(first input data in verification.csv is output of the last data in training.csv)
-                    double[] tmp = stateMachine.Compute(predictionInputVector);
+                    double[] tmp = stateMachine.Compute(predictionInputVector, out ReadoutLayer.ReadoutData readoutData);
                     //Load verification data and get new predictionInputVector for final prediction
                     verificationData = VectorBundle.Load(verificationCsvData,
-                                                         demoCaseParams.StateMachineCfg.NeuralPreprocessorCfg.InputEncoderCfg.VaryingFieldsCfg.ExternalFieldsCfg.GetFieldNames(),
-                                                         demoCaseParams.StateMachineCfg.ReadoutLayerCfg.OutputFieldNameCollection,
+                                                         demoCaseCfg.StateMachineCfg.NeuralPreprocessorCfg.InputEncoderCfg.VaryingFieldsCfg.ExternalFieldsCfg.GetFieldNames(),
+                                                         demoCaseCfg.StateMachineCfg.ReadoutLayerCfg.OutputFieldNameCollection,
                                                          out predictionInputVector
                                                          );
                 }
                 else
                 {
                     //Patterned feeding data format
-                    verificationData = VectorBundle.Load(verificationCsvData, demoCaseParams.StateMachineCfg.ReadoutLayerCfg.OutputFieldNameCollection.Count);
+                    verificationData = VectorBundle.Load(verificationCsvData, demoCaseCfg.StateMachineCfg.ReadoutLayerCfg.OutputFieldNameCollection.Count);
                 }
                 verificationResults = stateMachine.Verify(verificationData);
                 _log.Write(string.Empty);
@@ -182,10 +183,10 @@ namespace Demo.DemoConsoleApp.SM
                 _log.Write(string.Empty);
             }
 
-            //Perform prediction in case the input feeding is continuous (we know the input but we don't know the ideal output)
+            //Perform prediction in case of input feeding is continuous (we know the input but we don't know the ideal output)
             if (continuousFeedingDataFormat)
             {
-                double[] predictionOutputVector = stateMachine.Compute(predictionInputVector);
+                double[] predictionOutputVector = stateMachine.Compute(predictionInputVector, out ReadoutLayer.ReadoutData readoutData);
                 string predictionReport = stateMachine.RL.GetForecastReport(predictionOutputVector, 6);
                 _log.Write("    Forecasts", false);
                 _log.Write(predictionReport);
@@ -196,23 +197,23 @@ namespace Demo.DemoConsoleApp.SM
         }
 
         /// <summary>
-        /// Runs State Machine demo. This is the main function.
-        /// Executes demo cases defined in xml file.
+        /// Runs the State Machine demo.
+        /// Executes the demo cases defined in xml file one by one.
         /// </summary>
-        /// <param name="demoSettingsXmlFile">Xml file containing definitions of demo cases to be performed</param>
-        public void RunDemo(string demoSettingsXmlFile)
+        /// <param name="demoCasesXmlFile">The name of the xml file containing the definitions of demo cases to be performed.</param>
+        public void RunDemo(string demoCasesXmlFile)
         {
             _log.Write("State Machine demo started");
-            //Instantiate demo settings from the xml file
-            SMDemoSettings demoSettings = new SMDemoSettings(demoSettingsXmlFile);
-            //Loop through all demo cases
+            //Instantiate the demo configuration from the xml file
+            SMDemoSettings demoCfg = new SMDemoSettings(demoCasesXmlFile);
+            //Loop through the demo cases
             Stopwatch sw = new Stopwatch();
-            foreach (SMDemoSettings.CaseSettings demoCaseParams in demoSettings.CaseCfgCollection)
+            foreach (SMDemoSettings.CaseSettings caseCfg in demoCfg.CaseCfgCollection)
             {
                 sw.Reset();
                 sw.Start();
                 //Execute the demo case
-                PerformDemoCase(demoCaseParams);
+                PerformDemoCase(caseCfg);
                 sw.Stop();
                 TimeSpan ts = sw.Elapsed;
                 _log.Write("  Run time of demo case: " + String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10));

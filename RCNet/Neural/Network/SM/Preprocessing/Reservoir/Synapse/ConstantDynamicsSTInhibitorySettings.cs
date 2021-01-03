@@ -5,29 +5,29 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {
     /// <summary>
-    /// Configuration of the synapse constant dynamics (inhibitory spiking to hidden spiking neuron)
+    /// Configuration of the efficacy's constant dynamics of an inhibitory synapse connecting presynaptic hidden spiking neuron and postsynaptic hidden spiking neuron.
     /// </summary>
     [Serializable]
     public class ConstantDynamicsSTInhibitorySettings : ConstantDynamicsSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "SynapseConstantDynamicsSTInhibitoryType";
 
         //Default values
         /// <summary>
-        /// Default synapse's constant efficacy
+        /// The default value of the synapse's constant efficacy.
         /// </summary>
         public const double DefaultEfficacy = 1d;
 
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="efficacy">Default synapse's constant efficacy</param>
+        /// <param name="efficacy">The default value of the synapse's constant efficacy.</param>
         public ConstantDynamicsSTInhibitorySettings(double efficacy = DefaultEfficacy)
             : base(efficacy)
         {
@@ -37,7 +37,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <summary>
         /// The deep copy constructor
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public ConstantDynamicsSTInhibitorySettings(ConstantDynamicsSTInhibitorySettings source)
             : base(source)
         {
@@ -47,7 +47,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public ConstantDynamicsSTInhibitorySettings(XElement elem)
             : base(elem, XsdTypeName)
         {
@@ -59,7 +59,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         public override PlasticityCommon.DynApplication Application { get { return PlasticityCommon.DynApplication.STInhibitory; } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultEfficacy { get { return (Efficacy == DefaultEfficacy); } }
 

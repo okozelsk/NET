@@ -6,7 +6,7 @@ using System.Xml.Schema;
 namespace RCNet.XmlTools
 {
     /// <summary>
-    /// The class provides helper xml document loading/validation functionalities
+    /// Implements the xml document loader and validator.
     /// </summary>
     public class DocValidator
     {
@@ -16,7 +16,7 @@ namespace RCNet.XmlTools
 
         //Constructor
         /// <summary>
-        /// Instantiates a XmlValidator
+        /// Creates an uninitialized instance.
         /// </summary>
         public DocValidator()
         {
@@ -26,9 +26,9 @@ namespace RCNet.XmlTools
 
         //Methods
         /// <summary>
-        /// Adds given xml schema into the schema set.
+        /// Adds the specified xml schema into the schema set.
         /// </summary>
-        /// <param name="xmlSchema">Xml schema to be added</param>
+        /// <param name="xmlSchema">The xml schema to be added.</param>
         public void AddSchema(XmlSchema xmlSchema)
         {
             //Add the schema into the schema set
@@ -37,9 +37,9 @@ namespace RCNet.XmlTools
         }
 
         /// <summary>
-        /// Loads xml schema from a given stream and adds it into the schema set.
+        /// Loads the xml schema from a stream and adds it into the schema set.
         /// </summary>
-        /// <param name="schemaStream">A stream from which to load the xml schema</param>
+        /// <param name="schemaStream">The stream to load from.</param>
         public void AddSchema(Stream schemaStream)
         {
             //Load the schema
@@ -50,10 +50,12 @@ namespace RCNet.XmlTools
         }
 
         /// <summary>
-        /// Creates a new XDocument and loads its content from a given file.
-        /// Xml document is validated against the stored SchemaSet
+        /// Loads the xml document from file.
         /// </summary>
-        /// <param name="filename">File containing the xml content</param>
+        /// <remarks>
+        /// The xml document is validated against the internal SchemaSet.
+        /// </remarks>
+        /// <param name="filename">The name of the xml file.</param>
         public XDocument LoadXDocFromFile(string filename)
         {
             var binDir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
@@ -64,10 +66,12 @@ namespace RCNet.XmlTools
 
 
         /// <summary>
-        /// Creates a new XDocument and loads its content from a given string.
-        /// Xml document is validated against the stored SchemaSet
+        /// Loads the xml document from string.
         /// </summary>
-        /// <param name="xmlContent">A string containing the xml content</param>
+        /// <remarks>
+        /// The xml document is validated against the internal SchemaSet.
+        /// </remarks>
+        /// <param name="xmlContent">The xml content.</param>
         public XDocument LoadXDocFromString(string xmlContent)
         {
 
@@ -77,7 +81,7 @@ namespace RCNet.XmlTools
         }
 
         /// <summary>
-        /// Callback function called during validations.
+        /// The callback function called during the xml validation.
         /// </summary>
         private void XmlValidationCallback(object sender, ValidationEventArgs args)
         {

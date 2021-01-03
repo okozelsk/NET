@@ -6,38 +6,38 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 {
     /// <summary>
-    /// Configuration of the reservoir structure
+    /// Configuration of the reservoir structure.
     /// </summary>
     [Serializable]
     public class ReservoirStructureSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "ResStructType";
 
         //Attribute properties
         /// <summary>
-        /// Name of the reservoir structure settings
+        /// The name of the reservoir structure configuration.
         /// </summary>
         public string Name { get; }
         /// <summary>
-        /// Collection of neural pools settings
+        /// The configuration of the pools.
         /// </summary>
         public PoolsSettings PoolsCfg { get; }
         /// <summary>
-        /// Collection of pools interconnection settings
+        /// The configuration of the inter-pool connections.
         /// </summary>
         public InterPoolConnsSettings InterPoolConnectionsCfg { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="name">Name of the reservoir structure settings</param>
-        /// <param name="poolsCfg">Collection of neural pools settings</param>
-        /// <param name="interPoolConnectionsCfg">Collection of pools interconnection settings</param>
+        /// <param name="name">The name of the reservoir structure configuration.</param>
+        /// <param name="poolsCfg">The configuration of the pools.</param>
+        /// <param name="interPoolConnectionsCfg">The configuration of the inter-pool connections.</param>
         public ReservoirStructureSettings(string name,
                                           PoolsSettings poolsCfg,
                                           InterPoolConnsSettings interPoolConnectionsCfg = null
@@ -51,9 +51,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public ReservoirStructureSettings(ReservoirStructureSettings source)
             : this(source.Name, source.PoolsCfg, source.InterPoolConnectionsCfg)
         {
@@ -63,7 +63,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public ReservoirStructureSettings(XElement elem)
         {
             //Validation
@@ -85,7 +85,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 
         //Properties
         /// <summary>
-        /// Size of largest interconnected area of hidden neurons
+        /// Gets the size of the largest interconnected area of hidden neurons.
         /// </summary>
         public int LargestInterconnectedAreaSize
         {

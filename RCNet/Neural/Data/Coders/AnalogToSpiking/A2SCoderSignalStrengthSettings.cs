@@ -5,25 +5,25 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Data.Coders.AnalogToSpiking
 {
     /// <summary>
-    /// Configuration of the A2SCoderSignalStrength coder
+    /// Configuration of the A2SCoderSignalStrength coder.
     /// </summary>
     [Serializable]
     public class A2SCoderSignalStrengthSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "A2SCoderSignalStrengthType";
         //Default values
         /// <summary>
-        /// Default value of parameter specifying number of time-points
+        /// The default value of the parameter specifying the number of code time-points.
         /// </summary>
         public const int DefaultNumOfTimePoints = 8;
 
         //Attribute properties
         /// <summary>
-        /// Number of time-points
+        /// The number of code time-points.
         /// </summary>
         public int NumOfTimePoints { get; }
 
@@ -31,7 +31,7 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// <summary>
         /// Creates an itialized instance.
         /// </summary>
-        /// <param name="numOfTimePoints">Number of time-points</param>
+        /// <param name="numOfTimePoints">The number of code time-points.</param>
         public A2SCoderSignalStrengthSettings(int numOfTimePoints = DefaultNumOfTimePoints)
         {
             NumOfTimePoints = numOfTimePoints;
@@ -42,7 +42,7 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// <summary>
         /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public A2SCoderSignalStrengthSettings(A2SCoderSignalStrengthSettings source)
             : this(source.NumOfTimePoints)
         {
@@ -50,9 +50,9 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         }
 
         /// <summary>
-        /// Creates an initialized instance from the given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public A2SCoderSignalStrengthSettings(XElement elem)
         {
             //Validation
@@ -65,7 +65,7 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultNumOfTimePoints { get { return (NumOfTimePoints == DefaultNumOfTimePoints); } }
 

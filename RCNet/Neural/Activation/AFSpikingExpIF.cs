@@ -5,9 +5,11 @@ using System;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Implements Exponential Integrate and Fire neuron model.
-    /// For more information visit http://neuronaldynamics.epfl.ch/online/Ch5.S2.html
+    /// Implements the Exponential Integrate and Fire neuron model.
     /// </summary>
+    /// <remarks>
+    /// For more information visit the http://neuronaldynamics.epfl.ch/online/Ch5.S2.html site.
+    /// </remarks>
     [Serializable]
     public class AFSpikingExpIF : AFSpikingODE
     {
@@ -21,20 +23,20 @@ namespace RCNet.Neural.Activation
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="timeScale">Membrane time scale (ms)</param>
-        /// <param name="resistance">Membrane resistance (Mohm)</param>
-        /// <param name="restV">Membrane rest potential (mV)</param>
-        /// <param name="resetV">Membrane reset potential (mV)</param>
-        /// <param name="rheobaseV">Membrane rheobase threshold (mV)</param>
-        /// <param name="firingThresholdV">Membrane firing threshold (mV)</param>
-        /// <param name="sharpnessDeltaT">Sharpness of membrane potential change (mV)</param>
-        /// <param name="refractoryPeriods">Number of after spike computation cycles while an input stimuli is ignored (ms)</param>
-        /// <param name="solverMethod">ODE numerical solver method</param>
-        /// <param name="solverCompSteps">ODE numerical solver computation steps of the time step</param>
-        /// <param name="stimuliDuration">Duration of the stimulation</param>
-        /// <param name="initialVRatio">Initial membrane potential in form of the ratio between 0 and 1 where 0 corresponds to a Min(resetV, restV) potential and 1 corresponds to a firingThreshold.</param>
+        /// <param name="timeScale">The membrane time scale (ms).</param>
+        /// <param name="resistance">The membrane resistance (Mohm).</param>
+        /// <param name="restV">The membrane rest potential (mV).</param>
+        /// <param name="resetV">The membrane reset potential (mV).</param>
+        /// <param name="rheobaseV">The membrane rheobase threshold (mV).</param>
+        /// <param name="firingThresholdV">The membrane firing threshold (mV).</param>
+        /// <param name="sharpnessDeltaT">The sharpness of membrane potential change (mV).</param>
+        /// <param name="refractoryPeriods">The number of after-spike computation cycles while an input stimuli to be ignored (cycles).</param>
+        /// <param name="solverMethod">The ODE numerical solver method to be used.</param>
+        /// <param name="solverCompSteps">The number of computation sub-steps of the ODE numerical solver.</param>
+        /// <param name="stimuliDuration">The duration of the membrane stimulation (ms).</param>
+        /// <param name="initialVRatio">The membrane initial potential in form of a ratio between 0 and 1, where 0 corresponds to a Min(resetV, restV) potential and 1 corresponds to a firingThreshold.</param>
         public AFSpikingExpIF(double timeScale,
                               double resistance,
                               double restV,

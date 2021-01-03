@@ -1,13 +1,10 @@
-﻿using System.Collections.Generic;
-using RCNet.Extensions;
-using RCNet.MathTools;
+﻿using RCNet.Extensions;
 using System;
-using System.Linq;
 
 namespace RCNet.Neural.Data.Coders.AnalogToSpiking
 {
     /// <summary>
-    /// Implements Gussian Receptive Fields coder.
+    /// Implements the Gussian Receptive Fields coder.
     /// </summary>
     [Serializable]
     public class A2SCoderGaussianReceptors : A2SCoderBase
@@ -16,19 +13,17 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         private const double GaussianBellWidth = 0.5d;
 
         //Attributes
-        private readonly A2SCoderGaussianReceptorsSettings _coderCfg;
         private readonly double _gaussianMaxFx;
         private readonly double[] _peaks;
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="coderCfg">Coder configuration</param>
+        /// <param name="coderCfg">The coder configuration.</param>
         public A2SCoderGaussianReceptors(A2SCoderGaussianReceptorsSettings coderCfg)
             : base(coderCfg.NumOfTimePoints, coderCfg.NumOfReceptors)
         {
-            _coderCfg = (A2SCoderGaussianReceptorsSettings)coderCfg.DeepClone();
             _gaussianMaxFx = 1d / (GaussianBellWidth * Math.Sqrt(2d * Math.PI));
             _peaks = new double[coderCfg.NumOfReceptors];
             double divider = coderCfg.NumOfReceptors > 1 ? coderCfg.NumOfReceptors - 1 : 1;
@@ -40,19 +35,13 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         }
 
         //Methods
-        /// <summary>
-        /// Resets coder
-        /// </summary>
+        /// <inheritdoc/>
         public override void Reset()
         {
             return;
         }
 
-        /// <summary>
-        /// Codes an analog value to the spike-code
-        /// </summary>
-        /// <param name="normalizedValue">A normalized analog value between -1 and 1</param>
-        /// <returns>Resulting spike-code from all components as an array of arrays of 0/1 byte values</returns>
+        /// <inheritdoc/>
         public override byte[][] GetCode(double normalizedValue)
         {
             //Allocate and set all output to 0

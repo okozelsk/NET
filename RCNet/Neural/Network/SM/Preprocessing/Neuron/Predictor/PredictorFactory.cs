@@ -1,20 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Xml.Linq;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 {
     /// <summary>
-    /// Helper class for easier management of predictors
+    /// Provides a proper instantiation of the predictor computers and also proper loading of their configurations.
     /// </summary>
     public static class PredictorFactory
     {
 
         /// <summary>
-        /// Constructs name of predictor used in xml setup
+        /// Gets the name of the predictor for the use in a xml setup.
         /// </summary>
-        /// <param name="predictorID">Enumerated predictor identifier</param>
+        /// <param name="predictorID">An identigier of the predictor.</param>
         public static string GetXmlName(PredictorsProvider.PredictorID predictorID)
         {
             string name = predictorID.ToString();
@@ -22,12 +20,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         }
 
         /// <summary>
-        /// Loads appropriate predictor settings instance based on xml element name
+        /// Loads the predictor configuration from the specified xml element.
         /// </summary>
-        /// <param name="elem">Configuration element</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public static IPredictorSettings LoadPredictorSettings(XElement elem)
         {
-            if(elem.Name.LocalName == GetXmlName(PredictorsProvider.PredictorID.Activation))
+            if (elem.Name.LocalName == GetXmlName(PredictorsProvider.PredictorID.Activation))
             {
                 return new PredictorActivationSettings(elem);
             }
@@ -35,25 +33,25 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
             {
                 return new PredictorActivationPowerSettings(elem);
             }
-            else if (elem.Name.LocalName == GetXmlName(PredictorsProvider.PredictorID.ActivationStatFeature))
+            else if (elem.Name.LocalName == GetXmlName(PredictorsProvider.PredictorID.ActivationStatFigure))
             {
-                return new PredictorActivationStatFeatureSettings(elem);
+                return new PredictorActivationStatFigureSettings(elem);
             }
-            else if (elem.Name.LocalName == GetXmlName(PredictorsProvider.PredictorID.ActivationRescalledRange))
+            else if (elem.Name.LocalName == GetXmlName(PredictorsProvider.PredictorID.ActivationRescaledRange))
             {
-                return new PredictorActivationRescalledRangeSettings(elem);
+                return new PredictorActivationRescaledRangeSettings(elem);
             }
             else if (elem.Name.LocalName == GetXmlName(PredictorsProvider.PredictorID.ActivationLinWAvg))
             {
                 return new PredictorActivationLinWAvgSettings(elem);
             }
-            else if (elem.Name.LocalName == GetXmlName(PredictorsProvider.PredictorID.ActivationDiffStatFeature))
+            else if (elem.Name.LocalName == GetXmlName(PredictorsProvider.PredictorID.ActivationDiffStatFigure))
             {
-                return new PredictorActivationDiffStatFeatureSettings(elem);
+                return new PredictorActivationDiffStatFigureSettings(elem);
             }
-            else if (elem.Name.LocalName == GetXmlName(PredictorsProvider.PredictorID.ActivationDiffRescalledRange))
+            else if (elem.Name.LocalName == GetXmlName(PredictorsProvider.PredictorID.ActivationDiffRescaledRange))
             {
-                return new PredictorActivationDiffRescalledRangeSettings(elem);
+                return new PredictorActivationDiffRescaledRangeSettings(elem);
             }
             else if (elem.Name.LocalName == GetXmlName(PredictorsProvider.PredictorID.ActivationDiffLinWAvg))
             {
@@ -70,39 +68,39 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         }
 
         /// <summary>
-        /// Creates appropriate instance of the predictor computer
+        /// Creates an instance of the predictor computer.
         /// </summary>
-        /// <param name="cfg">Configuration of the predictor</param>
+        /// <param name="cfg">The configuration of the predictor.</param>
         public static IPredictor CreatePredictor(IPredictorSettings cfg)
         {
             Type pType = cfg.GetType();
-            if(pType == typeof(PredictorActivationSettings))
+            if (pType == typeof(PredictorActivationSettings))
             {
                 return new PredictorActivation((PredictorActivationSettings)cfg);
             }
-            else if(pType == typeof(PredictorActivationPowerSettings))
+            else if (pType == typeof(PredictorActivationPowerSettings))
             {
                 return new PredictorActivationPower((PredictorActivationPowerSettings)cfg);
             }
-            else if (pType == typeof(PredictorActivationStatFeatureSettings))
+            else if (pType == typeof(PredictorActivationStatFigureSettings))
             {
-                return new PredictorActivationStatFeature((PredictorActivationStatFeatureSettings)cfg);
+                return new PredictorActivationStatFigure((PredictorActivationStatFigureSettings)cfg);
             }
-            else if (pType == typeof(PredictorActivationRescalledRangeSettings))
+            else if (pType == typeof(PredictorActivationRescaledRangeSettings))
             {
-                return new PredictorActivationRescalledRange((PredictorActivationRescalledRangeSettings)cfg);
+                return new PredictorActivationRescaledRange((PredictorActivationRescaledRangeSettings)cfg);
             }
             else if (pType == typeof(PredictorActivationLinWAvgSettings))
             {
                 return new PredictorActivationLinWAvg((PredictorActivationLinWAvgSettings)cfg);
             }
-            else if (pType == typeof(PredictorActivationDiffStatFeatureSettings))
+            else if (pType == typeof(PredictorActivationDiffStatFigureSettings))
             {
-                return new PredictorActivationDiffStatFeature((PredictorActivationDiffStatFeatureSettings)cfg);
+                return new PredictorActivationDiffStatFigure((PredictorActivationDiffStatFigureSettings)cfg);
             }
-            else if (pType == typeof(PredictorActivationDiffRescalledRangeSettings))
+            else if (pType == typeof(PredictorActivationDiffRescaledRangeSettings))
             {
-                return new PredictorActivationDiffRescalledRange((PredictorActivationDiffRescalledRangeSettings)cfg);
+                return new PredictorActivationDiffRescaledRange((PredictorActivationDiffRescaledRangeSettings)cfg);
             }
             else if (pType == typeof(PredictorActivationDiffLinWAvgSettings))
             {

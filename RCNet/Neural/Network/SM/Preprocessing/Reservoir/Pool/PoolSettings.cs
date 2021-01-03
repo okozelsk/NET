@@ -1,5 +1,4 @@
-﻿using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup;
+﻿using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D;
 using System;
 using System.Linq;
@@ -8,48 +7,48 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
 {
     /// <summary>
-    /// Configuration of the neural pool.
+    /// Configuration of the pool of neurons.
     /// </summary>
     [Serializable]
     public class PoolSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "PoolType";
 
         //Attribute properties
         /// <summary>
-        /// Pool name
+        /// The name of the pool.
         /// </summary>
         public string Name { get; }
         /// <summary>
-        /// Pool dimensions
+        /// The configuration of the pool proportions.
         /// </summary>
         public ProportionsSettings ProportionsCfg { get; }
         /// <summary>
-        /// Pool coordinates within the 3D space
+        /// The configuration of the pool coordinates.
         /// </summary>
         public CoordinatesSettings CoordinatesCfg { get; }
         /// <summary>
-        /// Settings of the neuron groups in the pool
+        /// The configuration of neuron groups within the pool.
         /// </summary>
         public NeuronGroupsSettings NeuronGroupsCfg { get; }
         /// <summary>
-        /// Configuration of the pool's neurons interconnection
+        /// The configuration of the pool's neurons interconnection.
         /// </summary>
         public InterconnSettings InterconnectionCfg { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="name">Pool name</param>
-        /// <param name="proportionsCfg">Pool dimensions</param>
-        /// <param name="neuronGroupsCfg">Settings of the neuron groups in the pool</param>
-        /// <param name="interconnectionCfg">Configuration of the pool's neurons interconnection</param>
-        /// <param name="coordinatesCfg">Pool coordinates within the 3D space</param>
+        /// <param name="name">The name of the pool.</param>
+        /// <param name="proportionsCfg">The configuration of the pool proportions.</param>
+        /// <param name="neuronGroupsCfg">The configuration of neuron groups within the pool.</param>
+        /// <param name="interconnectionCfg">The configuration of the pool's neurons interconnection.</param>
+        /// <param name="coordinatesCfg">The configuration of the pool coordinates.</param>
         public PoolSettings(string name,
                             ProportionsSettings proportionsCfg,
                             NeuronGroupsSettings neuronGroupsCfg,
@@ -69,7 +68,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         /// <summary>
         /// The deep copy constructor
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public PoolSettings(PoolSettings source)
             : this(source.Name, source.ProportionsCfg, source.NeuronGroupsCfg, source.InterconnectionCfg, source.CoordinatesCfg)
         {
@@ -77,9 +76,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         }
 
         /// <summary>
-        /// Creates an initialized instance from the given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public PoolSettings(XElement elem)
         {
             //Validation

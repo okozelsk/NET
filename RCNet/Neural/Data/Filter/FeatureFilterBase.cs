@@ -4,27 +4,23 @@ using System;
 namespace RCNet.Neural.Data.Filter
 {
     /// <summary>
-    /// Base class of all the feature filters
+    /// Implements the base class of all the feature filters.
     /// </summary>
     [Serializable]
     public abstract class FeatureFilterBase
     {
         //Enumerations
         /// <summary>
-        /// Type of the feature
+        /// The feature type.
         /// </summary>
         public enum FeatureType
         {
             /// <summary>
-            /// Feature value is 0 or 1
+            /// The feature value is 0 or 1.
             /// </summary>
             Binary,
             /// <summary>
-            /// Feature value is one of the enumerated values 1..N
-            /// </summary>
-            Enum,
-            /// <summary>
-            /// Feature value is the Real number
+            /// The feature value is the real number.
             /// </summary>
             Real
         }
@@ -34,12 +30,12 @@ namespace RCNet.Neural.Data.Filter
         public FeatureType Type { get; }
 
         /// <summary>
-        /// Samples statistics
+        /// The statistics of the samples.
         /// </summary>
         public BasicStat Stat { get; }
 
         /// <summary>
-        /// Filter's output range
+        /// The filter's output range.
         /// </summary>
         public Interval OutputRange { get; }
 
@@ -48,8 +44,8 @@ namespace RCNet.Neural.Data.Filter
         /// <summary>
         /// Base constructor
         /// </summary>
-        /// <param name="featureType">Feature type</param>
-        /// <param name="outputRange">Filter's output range</param>
+        /// <param name="featureType">The feature type.</param>
+        /// <param name="outputRange">The filter's output range.</param>
         protected FeatureFilterBase(FeatureType featureType, Interval outputRange)
         {
             Type = featureType;
@@ -60,13 +56,13 @@ namespace RCNet.Neural.Data.Filter
 
         //Properties
         /// <summary>
-        /// Feature range
+        /// The feature range.
         /// </summary>
         public abstract Interval FeatureRange { get; }
 
         //Methods
         /// <summary>
-        /// Resets the filter to its initial state
+        /// Resets the filter to its initial state.
         /// </summary>
         public virtual void Reset()
         {
@@ -75,20 +71,20 @@ namespace RCNet.Neural.Data.Filter
         }
 
         /// <summary>
-        /// Updates internal statistics
+        /// Updates the inner statistics.
         /// </summary>
-        /// <param name="sample">Feature sample value</param>
+        /// <param name="sample">The sample.</param>
         public virtual void Update(double sample)
         {
-            Stat.AddSampleValue(sample);
+            Stat.AddSample(sample);
             return;
         }
 
         /// <summary>
-        /// Applies the filter
+        /// Applies the filter.
         /// </summary>
-        /// <param name="value">Feature value</param>
-        /// <returns>Filter value</returns>
+        /// <param name="value">The value.</param>
+        /// <returns>The result of the filter application.</returns>
         public virtual double ApplyFilter(double value)
         {
             //Default implementation
@@ -96,10 +92,10 @@ namespace RCNet.Neural.Data.Filter
         }
 
         /// <summary>
-        /// Applies the reverse filter
+        /// Applies the filter reverse.
         /// </summary>
-        /// <param name="value">Filter value</param>
-        /// <returns>Feature value</returns>
+        /// <param name="value">The result of the filter application.</param>
+        /// <returns>The value.</returns>
         public virtual double ApplyReverse(double value)
         {
             //Default implementation

@@ -5,50 +5,53 @@ using System.Collections.Generic;
 namespace RCNet.MathTools.Differential
 {
     /// <summary>
-    /// Implements simple numerical solver of Ordinary Differential Equation(s) 
+    /// Implements a simple numerical solver of the Ordinary Differential Equation(s).
     /// </summary>
     public static class ODENumSolver
     {
         //Constants
         /// <summary>
-        /// Default number of computation sub-steps within the time step 
+        /// The default number of computation sub-steps within the time interval.
         /// </summary>
-        public const int DefaultTimeSubSteps = 10;
+        public const int DefaultCompSubSteps = 10;
 
         /// <summary>
-        /// Supported solving methods
+        /// The solving method.
         /// </summary>
         public enum Method
         {
             /// <summary>
-            /// Euler 1st order numerical method
+            /// The Euler 1st order method.
             /// </summary>
             Euler,
             /// <summary>
-            /// Runge-Kutta 4th order numerical method
+            /// The Runge-Kutta 4th order method.
             /// </summary>
             RK4
         }
 
         /// <summary>
-        /// Delegate of unknown ordinary differential equation (or couple of equations)
+        /// Delegate of an unknown ordinary differential equation (or couple of equations).
         /// </summary>
-        /// <param name="t">Time</param>
-        /// <param name="v">Vector of evolving values</param>
+        /// <param name="t">The time.</param>
+        /// <param name="v">The vector of evolving values.</param>
         /// <returns>dv/dt</returns>
         public delegate Vector Eqs(double t, Vector v);
 
         /// <summary>
-        /// ODE solver function
+        /// Solves the ODE.
         /// </summary>
-        /// <param name="eqs">Ordinary differential equation or couple of differential equations</param>
-        /// <param name="t0">Known start time</param>
-        /// <param name="v0">Vector of known value(s) at start time</param>
-        /// <param name="t">Target time</param>
-        /// <param name="subSteps">Number of computation time-sub-steps</param>
-        /// <param name="method">Solution method to be used</param>
-        /// <returns>Returns solution estimations gradually at computation time sub-steps</returns>
-        public static IEnumerable<Estimation> SolveGradually(Eqs eqs, double t0, Vector v0, double t, int subSteps = DefaultTimeSubSteps, Method method = Method.Euler)
+        /// <remarks>
+        /// A gradual version.
+        /// </remarks>
+        /// <param name="eqs">An ordinary differential equation or couple of equations.</param>
+        /// <param name="t0">The start time.</param>
+        /// <param name="v0">The vector of known evolving value(s) at the start time.</param>
+        /// <param name="t">The target time.</param>
+        /// <param name="subSteps">The number of computation sub-steps within the time interval.</param>
+        /// <param name="method">The numerical solving method to be used.</param>
+        /// <returns>The solution estimations, gradually, at all computation sub-steps.</returns>
+        public static IEnumerable<Estimation> SolveGradually(Eqs eqs, double t0, Vector v0, double t, int subSteps = DefaultCompSubSteps, Method method = Method.Euler)
         {
             double h = (t - t0) / subSteps;
             double currT = t0;
@@ -71,16 +74,16 @@ namespace RCNet.MathTools.Differential
         }
 
         /// <summary>
-        /// ODE solver function
+        /// Solves the ODE.
         /// </summary>
-        /// <param name="eqs">Ordinary differential equation or couple of differential equations</param>
-        /// <param name="t0">Known start time</param>
-        /// <param name="v0">Vector of known value(s) at start time</param>
-        /// <param name="t">Target time</param>
-        /// <param name="subSteps">Number of computation time-sub-steps</param>
-        /// <param name="method">Solution method to be used</param>
-        /// <returns>Returns solution estimation at target time t</returns>
-        public static Vector Solve(Eqs eqs, double t0, Vector v0, double t, int subSteps = DefaultTimeSubSteps, Method method = Method.Euler)
+        /// <param name="eqs">An ordinary differential equation or couple of equations.</param>
+        /// <param name="t0">The start time.</param>
+        /// <param name="v0">The vector of known evolving value(s) at the start time.</param>
+        /// <param name="t">The target time.</param>
+        /// <param name="subSteps">The number of computation sub-steps within the time interval.</param>
+        /// <param name="method">The numerical solving method to be used.</param>
+        /// <returns>The solution estimation at the target time t.</returns>
+        public static Vector Solve(Eqs eqs, double t0, Vector v0, double t, int subSteps = DefaultCompSubSteps, Method method = Method.Euler)
         {
             double h = (t - t0) / subSteps;
             double currT = t0;
@@ -119,25 +122,25 @@ namespace RCNet.MathTools.Differential
 
         //Inner classes
         /// <summary>
-        /// Represents solution estimation in time T
+        /// Holds the solution estimation in the timepoint T.
         /// </summary>
         [Serializable]
         public class Estimation
         {
             /// <summary>
-            /// Time
+            /// The time.
             /// </summary>
             public double T { get; }
             /// <summary>
-            /// Estimated value(s)
+            /// The vector of estimated values.
             /// </summary>
             public Vector V { get; }
 
             /// <summary>
-            /// Instantiates an initialized instance
+            /// Creates an initialized instance.
             /// </summary>
-            /// <param name="t"></param>
-            /// <param name="v"></param>
+            /// <param name="t">The time.</param>
+            /// <param name="v">The vector of estimated values.</param>
             public Estimation(double t, Vector v)
             {
                 T = t;

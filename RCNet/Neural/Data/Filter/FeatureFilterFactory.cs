@@ -5,23 +5,20 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Data.Filter
 {
     /// <summary>
-    /// Provides proper load of settings and instantiation of feature filters
+    /// Provides a proper instantiation of the feature filters and also proper loading of their configurations.
     /// </summary>
     public static class FeatureFilterFactory
     {
         /// <summary>
-        /// Based on element name loads proper type of feature filter settings
+        /// Based on the xml element name loads the proper type of feature filter configuration.
         /// </summary>
-        /// <param name="elem">Element containing settings</param>
-        /// <returns></returns>
+        /// <param name="elem">A xml element containing the configuration.</param>
         public static IFeatureFilterSettings LoadSettings(XElement elem)
         {
             switch (elem.Name.LocalName)
             {
                 case "binFeature":
                     return new BinFeatureFilterSettings(elem);
-                case "enumFeature":
-                    return new EnumFeatureFilterSettings(elem);
                 case "realFeature":
                     return new RealFeatureFilterSettings(elem);
                 default:
@@ -30,41 +27,20 @@ namespace RCNet.Neural.Data.Filter
         }
 
         /// <summary>
-        /// Instantiates feature filter of proper type according to settings
+        /// Instantiates the appropriate feature filter.
         /// </summary>
-        /// <param name="outputRange">Output range of feature filter</param>
-        /// <param name="settings">Settings of feature filter</param>
-        public static FeatureFilterBase Create(Interval outputRange, IFeatureFilterSettings settings)
+        /// <param name="outputRange">The output range of the feature filter.</param>
+        /// <param name="cfg">The feature filter configuration.</param>
+        public static FeatureFilterBase Create(Interval outputRange, IFeatureFilterSettings cfg)
         {
-            switch (settings.Type)
+            switch (cfg.Type)
             {
                 case FeatureFilterBase.FeatureType.Binary:
-                    return new BinFeatureFilter(outputRange, (BinFeatureFilterSettings)settings);
-                case FeatureFilterBase.FeatureType.Enum:
-                    return new EnumFeatureFilter(outputRange, (EnumFeatureFilterSettings)settings);
+                    return new BinFeatureFilter(outputRange, (BinFeatureFilterSettings)cfg);
                 case FeatureFilterBase.FeatureType.Real:
-                    return new RealFeatureFilter(outputRange, (RealFeatureFilterSettings)settings);
+                    return new RealFeatureFilter(outputRange, (RealFeatureFilterSettings)cfg);
                 default:
-                    throw new ArgumentException($"Unexpected feature type {settings.Type}", "settings");
-            }
-        }
-
-        /// <summary>
-        /// Creates deep copy of given settings
-        /// </summary>
-        /// <param name="settings">Settings of feature filter</param>
-        public static IFeatureFilterSettings DeepClone(IFeatureFilterSettings settings)
-        {
-            switch (settings.Type)
-            {
-                case FeatureFilterBase.FeatureType.Binary:
-                    return new BinFeatureFilterSettings((BinFeatureFilterSettings)settings);
-                case FeatureFilterBase.FeatureType.Enum:
-                    return new EnumFeatureFilterSettings((EnumFeatureFilterSettings)settings);
-                case FeatureFilterBase.FeatureType.Real:
-                    return new RealFeatureFilterSettings((RealFeatureFilterSettings)settings);
-                default:
-                    throw new ArgumentException($"Unexpected feature type {settings.Type}", "settings");
+                    throw new ArgumentException($"Unexpected feature type {cfg.Type}", "settings");
             }
         }
 

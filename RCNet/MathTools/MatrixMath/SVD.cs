@@ -3,12 +3,18 @@ using System;
 
 namespace RCNet.MathTools.MatrixMath
 {
-    /// <summary>
-    /// Singular Value Decomposition.
-    /// This class is based on a class from the public domain JAMA package.
-    /// http://math.nist.gov/javanumerics/jama/
-    /// </summary>
 
+    /// <summary>
+    /// Implements the Singular Value decomposition of a matrix.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This class is based on a class from the public domain JAMA package.
+    /// </para>
+    /// <para>
+    /// http://math.nist.gov/javanumerics/jama/
+    /// </para>
+    /// </remarks>
     public class SVD
     {
         //Attributes
@@ -39,18 +45,18 @@ namespace RCNet.MathTools.MatrixMath
 
         //Constructor
         /// <summary>
-        /// Constructs the singular value decomposition
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="source">Source matrix</param>
-        /// <param name="prepareUMatrix">Determines whether to generate left singular vectors matrix (U)</param>
-        /// <param name="prepareVMatrix">Determines whether to generate right singular vectors matrix (V)</param>
-        public SVD(Matrix source, bool prepareUMatrix = true, bool prepareVMatrix = true)
+        /// <param name="matrix">The matrix.</param>
+        /// <param name="prepareUMatrix">Specifies whether to generate left singular vectors matrix (U).</param>
+        /// <param name="prepareVMatrix">Specifies whether to generate right singular vectors matrix (V).</param>
+        public SVD(Matrix matrix, bool prepareUMatrix = true, bool prepareVMatrix = true)
         {
             //Initialization
             //Copy source matrix data
-            double[][] A = source.GetDataClone();
-            _numOfRows = source.NumOfRows;
-            _numOfCols = source.NumOfCols;
+            double[][] A = matrix.GetDataClone();
+            _numOfRows = matrix.NumOfRows;
+            _numOfCols = matrix.NumOfCols;
 
             //Singular values
             _singularValues = new double[Math.Min(_numOfRows + 1, _numOfCols)];
@@ -548,19 +554,25 @@ namespace RCNet.MathTools.MatrixMath
 
         //Properties
         /// <summary>
-        /// Returns the left singular vectors
+        /// Gets the left singular vectors.
         /// </summary>
         public Matrix U
         {
-            get { return new Matrix(_uMatrixData); }
+            get
+            {
+                return _uMatrixData == null ? null : new Matrix(_uMatrixData);
+            }
         }
 
         /// <summary>
-        /// Returns the right singular vectors
+        /// Gets the right singular vectors.
         /// </summary>
         public Matrix V
         {
-            get { return new Matrix(_vMatrixData); }
+            get
+            {
+                return _vMatrixData == null ? null : new Matrix(_vMatrixData);
+            }
         }
 
         /// <summary>
@@ -572,18 +584,16 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Maximum singular value
+        /// Gets the maximum singular value.
         /// </summary>
-        /// <returns></returns>
         public double MaxSingularValue
         {
             get { return _singularValues[0]; }
         }
 
         /// <summary>
-        /// Two norm condition number
+        /// Gets the two norm condition number (max(singular value)/min(singular value)).
         /// </summary>
-        /// <returns>max(SingularValue)/min(SingularValue)</returns>
         public double Cond
         {
             get { return _singularValues[0] / _singularValues[Math.Min(_numOfRows, _numOfCols) - 1]; }
@@ -591,7 +601,7 @@ namespace RCNet.MathTools.MatrixMath
 
         //Methods
         /// <summary>
-        /// Returns diagonal matrix of singular values
+        /// Creates the diagonal matrix of the singular values.
         /// </summary>
         public Matrix CreateDiagonalSVMatrix()
         {
@@ -604,9 +614,8 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Determines matrix's effective numerical rank
+        /// Gets the matrix's effective numerical rank.
         /// </summary>
-        /// <returns>The rank</returns>
         public int GetRank()
         {
             double limit = Math.Max(_numOfRows, _numOfCols) * _singularValues[0] * Math.Pow(2.0, -52.0);

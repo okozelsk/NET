@@ -1,15 +1,16 @@
 ﻿using RCNet.Extensions;
-using RCNet.MathTools;
 using RCNet.Neural.Activation;
 using System;
-using System.Collections.Generic;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 {
     /// <summary>
-    /// Analog input neuron is the special type of a neuron without accosiated activation function. Its purpose is only to mediate
-    /// external input analog value for a synapse.
+    /// Implements the input analog neuron.
     /// </summary>
+    /// <remarks>
+    /// The input analog neuron is a special case of the neuron without an activation function.
+    /// Its purpose is to provide an analog input for the reservoir's synapses.
+    /// </remarks>
     [Serializable]
     public class AnalogInputNeuron : INeuron
     {
@@ -29,10 +30,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="location">Neuron's location</param>
-        /// <param name="verticalCycles">Neuron's vertical cycles</param>
+        /// <param name="location">The neuron's location.</param>
+        /// <param name="verticalCycles">The number of the neuron's vertical cycles.</param>
         public AnalogInputNeuron(NeuronLocation location, int verticalCycles = 1)
         {
             Location = location;
@@ -45,7 +46,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 
         //Properties
         /// <inheritdoc/>
-        public NeuronCommon.NeuronType Type { get { return NeuronCommon.NeuronType.Input; } }
+        public NeuronType Type { get { return NeuronType.Input; } }
 
         /// <inheritdoc/>
         public ActivationType TypeOfActivation { get { return ActivationType.Analog; } }

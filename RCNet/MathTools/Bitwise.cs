@@ -5,30 +5,30 @@ using System.Globalization;
 namespace RCNet.MathTools
 {
     /// <summary>
-    /// Helper bitwise operations.
+    /// Implements the set of bitwise operations.
     /// </summary>
     public static class Bitwise
     {
         //Constants
         /// <summary>
-        /// Maximum number of bits within the largest integer variable type
+        /// The maximum number of bits within the largest integer variable type.
         /// </summary>
         public const int MaxBits = sizeof(ulong) * 8;
 
         /// <summary>
-        /// Zero based index of the highest allowed bit
+        /// The zero-based index of the highest allowed bit.
         /// </summary>
         public const int BitMaxIndex = sizeof(ulong) * 8 - 1;
 
         //Attributes
         /// <summary>
-        /// Precomputed cache of bit values
+        /// The precomputed cache of the bit values.
         /// </summary>
         private static readonly ulong[] _bitValuesCache;
 
         //Constructor
         /// <summary>
-        /// Initializes internal static cache containing precomputed bit values
+        /// The static constructor. Initializes the internal static cache.
         /// </summary>
         static Bitwise()
         {
@@ -43,30 +43,31 @@ namespace RCNet.MathTools
 
         //Methods
         /// <summary>
-        /// Returns value of bit at specified position
+        /// Gets a value of the bit at the specified position.
         /// </summary>
-        /// <param name="bitIndex">Zero based position of the bit (lowest bit has position 0)</param>
+        /// <param name="bitIndex">The zero-based position of the bit (the lowest bit has position 0).</param>
         public static ulong BitVal(int bitIndex)
         {
             return _bitValuesCache[bitIndex];
         }
 
         /// <summary>
-        /// Returns 0 or 1 depending on whether the bit is set at the specified position in the given number.
+        /// Gets the bit (0/1) at the specified position.
         /// </summary>
-        /// <param name="number">Source number</param>
-        /// <param name="bitIndex">Zero based position of the bit (lowest bit has position 0)</param>
+        /// <param name="number">The number.</param>
+        /// <param name="bitIndex">The zero-based position of the bit (the lowest bit has position 0).</param>
         public static int GetBit(ulong number, int bitIndex)
         {
             return ((number & _bitValuesCache[bitIndex]) > 0) ? 1 : 0;
         }
 
         /// <summary>
-        /// Sets the bit in a given number at the specified position and returns the result
+        /// Sets the bit at the specified position.
         /// </summary>
-        /// <param name="number">Source number</param>
-        /// <param name="bitIndex">Zero based position of the bit (lowest bit has position 0)</param>
-        /// <param name="bit">Bit value to be set (true=1, false=0)</param>
+        /// <param name="number">The number.</param>
+        /// <param name="bitIndex">The zero-based position of the bit (the lowest bit has position 0).</param>
+        /// <param name="bit">The bit to be set (true=1, false=0).</param>
+        /// <returns>The resulting number.</returns>
         public static ulong SetBit(ulong number, int bitIndex, bool bit)
         {
             if (bit)
@@ -80,10 +81,10 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Checks if a bit at the specified position is set within the given number
+        /// Checks if a bit at the specified position is set.
         /// </summary>
-        /// <param name="number">Source number</param>
-        /// <param name="bitIndex">Zero based position of the bit (lowest bit has position 0)</param>
+        /// <param name="number">The number.</param>
+        /// <param name="bitIndex">The zero-based position of the bit (the lowest bit has position 0).</param>
         public static bool IsBitSet(ulong number, int bitIndex)
         {
             return ((number & _bitValuesCache[bitIndex]) > 0);
@@ -91,26 +92,26 @@ namespace RCNet.MathTools
 
         //Inner classes
         /// <summary>
-        /// Implements an efficient buffer of bits. Works as a moving window
+        /// Implements an efficient buffer of bits. Works as a moving window.
         /// </summary>
         [Serializable]
         public class Window
         {
             //Attribute properties
             /// <summary>
-            /// Window capacity
+            /// The capacity.
             /// </summary>
             public int Capacity { get; }
 
             /// <summary>
-            /// Used capacity
+            /// The used capacity.
             /// </summary>
-            public int BufferedHistLength { get; private set; }
+            public int UsedCapacity { get; private set; }
 
             /// <summary>
-            /// Total number of set bits within the window
+            /// The total number of ones within the window.
             /// </summary>
-            public int NumOfSetBits { get; private set; }
+            public int NumOfOnes { get; private set; }
 
             //Attributes
             private readonly int _lastSegHighestBitIndex;
@@ -118,9 +119,9 @@ namespace RCNet.MathTools
             private readonly int[] _segBitCounter;
 
             /// <summary>
-            /// Creates an initialized instance
+            /// Creates an initialized instance.
             /// </summary>
-            /// <param name="capacity">Maximum number of holded bits</param>
+            /// <param name="capacity">The maximum capacity.</param>
             public Window(int capacity)
             {
                 //Check
@@ -138,31 +139,31 @@ namespace RCNet.MathTools
 
             //Properties
             /// <summary>
-            /// Indicates fully filled window
+            /// Indicates the fully occupied window.
             /// </summary>
-            public bool Full { get { return BufferedHistLength == Capacity; } }
+            public bool Full { get { return UsedCapacity == Capacity; } }
 
             //Methods
             /// <summary>
-            /// Resets bit window to an initial state
+            /// Resets the window.
             /// </summary>
             public void Reset()
             {
                 _buffSegments.Populate(0ul);
                 _segBitCounter.Populate(0);
-                NumOfSetBits = 0;
-                BufferedHistLength = 0;
+                NumOfOnes = 0;
+                UsedCapacity = 0;
                 return;
             }
 
             /// <summary>
-            /// Adds next bit value into the window content
+            /// Adds the next bit into the window.
             /// </summary>
-            /// <param name="bit">Specifies whether the bit to be added is set or not</param>
+            /// <param name="bit">Specifies the bit value (true=1, false=0).</param>
             public void AddNext(bool bit)
             {
                 int lowestBitVal = bit ? 1 : 0;
-                NumOfSetBits += lowestBitVal;
+                NumOfOnes += lowestBitVal;
                 for (int i = 0; i < _buffSegments.Length; i++)
                 {
                     if (i < _buffSegments.Length - 1)
@@ -178,29 +179,29 @@ namespace RCNet.MathTools
                     {
                         int segHighestBitVal = Bitwise.GetBit(_buffSegments[i], _lastSegHighestBitIndex);
                         _segBitCounter[i] -= segHighestBitVal;
-                        NumOfSetBits -= segHighestBitVal;
+                        NumOfOnes -= segHighestBitVal;
                         _buffSegments[i] = SetBit(_buffSegments[i], _lastSegHighestBitIndex, false);
                         _buffSegments[i] <<= 1;
                         _buffSegments[i] += (ulong)lowestBitVal;
                         _segBitCounter[i] += lowestBitVal;
                     }
                 }
-                if (BufferedHistLength < Capacity)
+                if (UsedCapacity < Capacity)
                 {
-                    ++BufferedHistLength;
+                    ++UsedCapacity;
                 }
                 return;
             }
 
             /// <summary>
-            /// Returns num of set bits within the specified recent history of the window
+            /// Gets the number of ones within the recent history.
             /// </summary>
-            /// <param name="recentHistLength">Length of the recent history (-1 means the whole available history)</param>
-            public int GetNumOfSetBits(int recentHistLength = -1)
+            /// <param name="recentHistLength">The length of the history to be considered (-1 means the whole available history).</param>
+            public int GetNumOfOnes(int recentHistLength = -1)
             {
                 if (recentHistLength > Capacity || recentHistLength < -1)
                 {
-                    throw new ArgumentException($"Invalid buffPartSize {recentHistLength}.", "buffPartSize");
+                    throw new ArgumentException($"Invalid recentHistLength {recentHistLength}.", "recentHistLength");
                 }
                 else if (recentHistLength == 0)
                 {
@@ -208,7 +209,7 @@ namespace RCNet.MathTools
                 }
                 else if (recentHistLength == -1)
                 {
-                    return NumOfSetBits;
+                    return NumOfOnes;
                 }
                 else
                 {
@@ -228,9 +229,9 @@ namespace RCNet.MathTools
             }
 
             /// <summary>
-            /// Returns bit value at the specified index within the window
+            /// Returns the bit at the specified position within the window.
             /// </summary>
-            /// <param name="bitIndex">Zero based index of the bit (0 is the recent bit)</param>
+            /// <param name="bitIndex">The zero based index of the bit (0 is the index of recent bit).</param>
             public int GetBit(int bitIndex)
             {
                 if ((bitIndex + 1) > Capacity || bitIndex < 0)
@@ -244,10 +245,10 @@ namespace RCNet.MathTools
             }
 
             /// <summary>
-            /// Computes fading sum of bits stored in the recent history.
+            /// Computes the fading sum of bits in the recent history.
             /// </summary>
-            /// <param name="fadingStrength">Fading strength between 0-1</param>
-            /// <param name="recentHistLength">Length of the recent history (-1 means the whole available history)</param>
+            /// <param name="fadingStrength">The fading strength between 0 and 1.</param>
+            /// <param name="recentHistLength">The length of the history to be considered (-1 means the whole available history).</param>
             public double GetFadingSum(double fadingStrength, int recentHistLength = -1)
             {
                 if (fadingStrength < 0d || fadingStrength >= 1d)
@@ -256,7 +257,7 @@ namespace RCNet.MathTools
                 }
                 if (recentHistLength > Capacity || recentHistLength < -1)
                 {
-                    throw new ArgumentException($"Invalid buffPartSize {recentHistLength}.", "buffPartSize");
+                    throw new ArgumentException($"Invalid recentHistLength {recentHistLength}.", "recentHistLength");
                 }
                 else if (recentHistLength == 0)
                 {
@@ -277,11 +278,12 @@ namespace RCNet.MathTools
             }
 
             /// <summary>
-            /// Returns the sequence of bits.
+            /// Returns the bit sequence.
             /// </summary>
-            /// <param name="index">Zero based index within the window (0 is the recent bit)</param>
-            /// <param name="length">Sequence length (1-64)</param>
-            /// <param name="reverseOrder">Specifies whether to reverse order of the sequence bits</param>
+            /// <param name="index">The starting zero-based index within the window (0 is the index of recent bit)</param>
+            /// <param name="length">The length of the sequence (1 ... MaxBits).</param>
+            /// <param name="reverseOrder">Specifies whether to reverse the order of bits within the sequence.</param>
+            /// <returns>The sequence of bits.</returns>
             public ulong GetBits(int index, int length, bool reverseOrder = true)
             {
                 if ((index + 1) > Capacity || index < 0)
@@ -313,10 +315,11 @@ namespace RCNet.MathTools
             }
 
             /// <summary>
-            /// Returns the sequence of recent bits.
+            /// Returns the bit sequence.
             /// </summary>
-            /// <param name="length">Sequence length (1-64 and LE to capacity)</param>
-            /// <param name="reverseOrder">Specifies whether to reverse order of the sequence bits</param>
+            /// <param name="length">The length of the sequence (1 ... MaxBits).</param>
+            /// <param name="reverseOrder">Specifies whether to reverse the order of bits within the sequence.</param>
+            /// <returns>The sequence of bits.</returns>
             public ulong GetBits(int length, bool reverseOrder = true)
             {
                 if (length > MaxBits || length > Capacity || length < 1)

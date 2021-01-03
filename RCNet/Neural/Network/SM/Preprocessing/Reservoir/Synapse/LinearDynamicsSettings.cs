@@ -5,34 +5,34 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {
     /// <summary>
-    /// Configuration of the synapse linear short-term plasticity dynamics
+    /// Configuration of the synapse's linear efficacy dynamics.
     /// </summary>
     [Serializable]
     public abstract class LinearDynamicsSettings : RCNetBaseSettings, IDynamicsSettings
     {
         //Attribute properties
         /// <summary>
-        /// The alpha argument in the linear expression efficacy = alpha * (spike - beta)
+        /// The value of the alpha argument in the linear expression: efficacy = alpha * (spike - beta).
         /// </summary>
         public double Alpha { get; }
 
         /// <summary>
-        /// The beta argument in the linear expression efficacy = alpha * (spike - beta)
+        /// The value of the beta argument in the linear expression: efficacy = alpha * (spike - beta).
         /// </summary>
         public double Beta { get; }
 
         /// <summary>
-        /// Synapse initial efficacy
+        /// The value of the synapse's initial efficacy.
         /// </summary>
         public double InitialEfficacy { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="alpha">The alpha argument in the linear expression efficacy = alpha * (spike - beta)</param>
-        /// <param name="beta">The beta argument in the linear expression efficacy = alpha * (spike - beta)</param>
-        /// <param name="initialEfficacy">Synapse initial efficacy</param>
+        /// <param name="alpha">The value of the alpha argument in the linear expression: efficacy = alpha * (spike - beta).</param>
+        /// <param name="beta">The value of the beta argument in the linear expression: efficacy = alpha * (spike - beta).</param>
+        /// <param name="initialEfficacy">The value of the synapse's initial efficacy.</param>
         public LinearDynamicsSettings(double alpha, double beta, double initialEfficacy)
         {
             Alpha = alpha;
@@ -45,7 +45,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <summary>
         /// The deep copy constructor
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public LinearDynamicsSettings(LinearDynamicsSettings source)
             : this(source.Alpha, source.Beta, source.InitialEfficacy)
         {
@@ -55,7 +55,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         /// <param name="xsdTypeName">Name of the associated type defined in xsd</param>
         public LinearDynamicsSettings(XElement elem, string xsdTypeName)
         {

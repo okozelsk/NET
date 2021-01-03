@@ -7,35 +7,35 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
     /// <summary>
-    /// Configuration of the external input field
+    /// Configuration of the external input field.
     /// </summary>
     [Serializable]
     public class ExternalFieldSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "NPExternalInpFieldType";
         //Default values
         /// <summary>
-        /// Default value of parameter specifying if to route input field to readout layer together with other predictors 
+        /// The default value of the parameter specifying whether to route the input field to the readout layer.
         /// </summary>
         public const bool DefaultRouteToReadout = true;
 
         //Attribute properties
         /// <summary>
-        /// Input field name
+        /// The name of the input field.
         /// </summary>
         public string Name { get; }
 
         /// <summary>
-        /// Configuration of feature filter associated with the input field
+        /// The configuration of the feature filter associated with the input field.
         /// </summary>
         public IFeatureFilterSettings FeatureFilterCfg { get; }
 
         /// <summary>
-        /// Specifies whether to route input field to readout layer together with other predictors
+        /// Specifies whether to route the input field to the readout layer.
         /// </summary>
         public bool RouteToReadout { get; }
 
@@ -43,9 +43,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Creates an unitialized instance
         /// </summary>
-        /// <param name="name">Input field name</param>
-        /// <param name="featureFilterCfg">Configuration of feature filter associated with the input field</param>
-        /// <param name="routeToReadout">Specifies whether to route input field to readout layer together with other predictors</param>
+        /// <param name="name">The name of the input field.</param>
+        /// <param name="featureFilterCfg">The configuration of the feature filter associated with the input field.</param>
+        /// <param name="routeToReadout">Specifies whether to route the input field to the readout layer.</param>
         public ExternalFieldSettings(string name,
                                      IFeatureFilterSettings featureFilterCfg,
                                      bool routeToReadout = DefaultRouteToReadout
@@ -59,9 +59,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Copy constructor
+        /// The copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public ExternalFieldSettings(ExternalFieldSettings source)
             : this(source.Name, source.FeatureFilterCfg, source.RouteToReadout)
         {
@@ -71,7 +71,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml data containing the settings.</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public ExternalFieldSettings(XElement elem)
         {
             //Validation
@@ -86,7 +86,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultRouteToReadout { get { return (RouteToReadout == DefaultRouteToReadout); } }
 

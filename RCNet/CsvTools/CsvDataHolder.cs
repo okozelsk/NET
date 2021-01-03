@@ -6,36 +6,36 @@ using System.IO;
 namespace RCNet.CsvTools
 {
     /// <summary>
-    /// Provides simple loading and saving of csv data
+    /// Implements the simple loading and saving of csv data.
     /// </summary>
     public class CsvDataHolder
     {
         //Constants
         /// <summary>
-        /// Special char code (0) for delimiter auto detection
+        /// Special char code (0) to specify data delimiter auto detection requirement.
         /// </summary>
         public const char AutoDetectDelimiter = (char)0;
 
         //Attribute properties
         /// <summary>
-        /// Delimiter of data items
+        /// The delimiter of the data items.
         /// </summary>
         public char DataDelimiter { get; private set; }
 
         /// <summary>
-        /// Column names
+        /// Column names.
         /// </summary>
         public DelimitedStringValues ColNameCollection { get; private set; }
 
         /// <summary>
-        /// Data rows
+        /// Data rows.
         /// </summary>
         public List<DelimitedStringValues> DataRowCollection { get; private set; }
 
         /// <summary>
-        /// Instantiates an uninitialized instance.
+        /// Creates an uninitialized instance.
         /// </summary>
-        /// <param name="delimiter">Data items delimiter</param>
+        /// <param name="delimiter">The delimiter of the data items.</param>
         public CsvDataHolder(char delimiter)
         {
             DataDelimiter = delimiter;
@@ -45,11 +45,11 @@ namespace RCNet.CsvTools
         }
 
         /// <summary>
-        /// Loads data and instantiates an initialized instance.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="streamReader">Data stream reader</param>
-        /// <param name="header">Specifies whether first row contains column names</param>
-        /// <param name="delimiter">Data items delimiter. If AutoDetectDelimiter is specified than delimiter will be recognized automatically.</param>
+        /// <param name="streamReader">Data stream reader.</param>
+        /// <param name="header">Specifies whether the first row contains the column names.</param>
+        /// <param name="delimiter">The delimiter of the data items. If CsvDataHolder.AutoDetectDelimiter is specified than delimiter will be recognized automatically.</param>
         public CsvDataHolder(StreamReader streamReader, bool header, char delimiter = AutoDetectDelimiter)
         {
             InitFromStream(streamReader, header, delimiter);
@@ -57,10 +57,10 @@ namespace RCNet.CsvTools
         }
 
         /// <summary>
-        /// Loads data and instantiates an initialized instance.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="streamReader">Data stream reader</param>
-        /// <param name="delimiter">Data items delimiter. If AutoDetectDelimiter is specified than delimiter will be recognized automatically.</param>
+        /// <param name="streamReader">Data stream reader.</param>
+        /// <param name="delimiter">The delimiter of the data items. If CsvDataHolder.AutoDetectDelimiter is specified than delimiter will be recognized automatically.</param>
         public CsvDataHolder(StreamReader streamReader, char delimiter = AutoDetectDelimiter)
         {
             InitFromStream(streamReader, delimiter);
@@ -68,14 +68,14 @@ namespace RCNet.CsvTools
         }
 
         /// <summary>
-        /// Loads data and instantiates an initialized instance.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="fileName">Data file</param>
-        /// <param name="header">Specifies whether first row contains column names</param>
-        /// <param name="delimiter">Data items delimiter. If AutoDetectDelimiter is specified than delimiter will be recognized automatically.</param>
+        /// <param name="fileName">Name of the file containing the data to be loaded.</param>
+        /// <param name="header">Specifies whether the first row contains the column names.</param>
+        /// <param name="delimiter">The delimiter of the data items. If CsvDataHolder.AutoDetectDelimiter is specified than delimiter will be recognized automatically.</param>
         public CsvDataHolder(string fileName, bool header, char delimiter = AutoDetectDelimiter)
         {
-            using(StreamReader streamReader = new StreamReader(new FileStream(fileName, FileMode.Open)))
+            using (StreamReader streamReader = new StreamReader(new FileStream(fileName, FileMode.Open)))
             {
                 InitFromStream(streamReader, header, delimiter);
             }
@@ -83,10 +83,10 @@ namespace RCNet.CsvTools
         }
 
         /// <summary>
-        /// Loads data and instantiates an initialized instance.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="fileName">Data file</param>
-        /// <param name="delimiter">Data items delimiter. If AutoDetectDelimiter is specified than delimiter will be recognized automatically.</param>
+        /// <param name="fileName">Name of the file containing the data to be loaded.</param>
+        /// <param name="delimiter">The delimiter of the data items. If CsvDataHolder.AutoDetectDelimiter is specified than delimiter will be recognized automatically.</param>
         public CsvDataHolder(string fileName, char delimiter = AutoDetectDelimiter)
         {
             var dir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
@@ -188,11 +188,11 @@ namespace RCNet.CsvTools
         }
 
         /// <summary>
-        /// Appends data rows from given stream reader
+        /// Appends data rows from given stream reader.
         /// </summary>
-        /// <param name="streamReader">Data stream reader</param>
+        /// <param name="streamReader">Data stream reader.</param>
         /// <param name="maxRows">Maximum rows to be loaded. If GT 0 is specified then loading stops when maxRows is reached.</param>
-        /// <returns>Number of loaded rows</returns>
+        /// <returns>Number of loaded rows.</returns>
         public int AppendFromStream(StreamReader streamReader, int maxRows = 0)
         {
             int numOfLoadedRows = 0;
@@ -223,9 +223,9 @@ namespace RCNet.CsvTools
         }
 
         /// <summary>
-        /// Sets the new data delimiter for whole data rows and column names
+        /// Changes the delimiter of data items. The delimiter is changed for the whole content.
         /// </summary>
-        /// <param name="delimiter">Delimiter to be set</param>
+        /// <param name="delimiter">The new delimiter to be set.</param>
         public void SetDataDelimiter(char delimiter)
         {
             DataDelimiter = delimiter;
@@ -238,10 +238,10 @@ namespace RCNet.CsvTools
         }
 
         /// <summary>
-        /// Writes content to a specified stream
+        /// Writes the whole content into the specified stream.
         /// </summary>
-        /// <param name="streamWriter">Target stream</param>
-        public void WriteToStream(StreamWriter streamWriter)
+        /// <param name="streamWriter">The stream to be writing in.</param>
+        public void Write(StreamWriter streamWriter)
         {
             if (ColNameCollection.NumOfStringValues > 0)
             {
@@ -255,18 +255,17 @@ namespace RCNet.CsvTools
         }
 
         /// <summary>
-        /// Saves content to a specified file
+        /// Saves the whole content into the specified file.
         /// </summary>
-        /// <param name="fileName">Target file name</param>
+        /// <param name="fileName">The name of the file to be writing in.</param>
         public void Save(string fileName)
         {
             using (StreamWriter streamWriter = new StreamWriter(new FileStream(fileName, FileMode.Create)))
             {
-                WriteToStream(streamWriter);
+                Write(streamWriter);
             }
             return;
         }
-
 
     }//CsvDataHolder
 

@@ -1,5 +1,5 @@
-﻿using RCNet.MathTools.MatrixMath;
-using RCNet.MathTools.PS;
+﻿using RCNet.MathTools;
+using RCNet.MathTools.MatrixMath;
 using RCNet.MathTools.VectorMath;
 using RCNet.Neural.Activation;
 using System;
@@ -9,9 +9,13 @@ using System.Globalization;
 namespace RCNet.Neural.Network.NonRecurrent.FF
 {
     /// <summary>
-    /// Implements the ridge regression trainer.
-    /// FF network has to have only output layer with the Identity activation.
+    /// Implements the ridge regression trainer of the feed forward network.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The feed forward network to be trained must have no hidden layers and the Identity output activation.
+    /// </para>
+    /// </remarks>
     [Serializable]
     public class RidgeRegrTrainer : INonRecurrentNetworkTrainer
     {
@@ -32,7 +36,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         public string InfoMessage { get; private set; }
 
         //Attributes
-        private readonly RidgeRegrTrainerSettings _settings;
+        private readonly RidgeRegrTrainerSettings _cfg;
         private readonly FeedForwardNetwork _net;
         private readonly List<double[]> _inputVectorCollection;
         private readonly List<double[]> _outputVectorCollection;
@@ -40,21 +44,21 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         private readonly Matrix _XTdotX;
         private readonly Vector[] _XTdotY;
         private readonly List<Vector> _outputSingleColVectorCollection;
-        private readonly ParamSeeker _lambdaSeeker;
+        private readonly ParamValFinder _lambdaFinder;
         private double _currLambda;
 
         //Constructor
         /// <summary>
-        /// Constructs an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="net">FF network to be trained</param>
-        /// <param name="inputVectorCollection">Predictors (input)</param>
-        /// <param name="outputVectorCollection">Ideal outputs (the same number of rows as number of inputs)</param>
-        /// <param name="settings">Optional startup parameters of the trainer</param>
+        /// <param name="net">The FF network to be trained.</param>
+        /// <param name="inputVectorCollection">The input vectors (input).</param>
+        /// <param name="outputVectorCollection">The output vectors (ideal).</param>
+        /// <param name="cfg">The configuration of the trainer.</param>
         public RidgeRegrTrainer(FeedForwardNetwork net,
                                 List<double[]> inputVectorCollection,
                                 List<double[]> outputVectorCollection,
-                                RidgeRegrTrainerSettings settings
+                                RidgeRegrTrainerSettings cfg
                                 )
         {
             //Check network readyness
@@ -76,9 +80,9 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             _inputVectorCollection = new List<double[]>(inputVectorCollection);
             _outputVectorCollection = new List<double[]>(outputVectorCollection);
             //Parameters
-            _settings = settings;
-            MaxAttempt = _settings.NumOfAttempts;
-            MaxAttemptEpoch = _settings.NumOfAttemptEpochs;
+            _cfg = cfg;
+            MaxAttempt = _cfg.NumOfAttempts;
+            MaxAttemptEpoch = _cfg.NumOfAttemptEpochs;
             Attempt = 1;
             AttemptEpoch = 0;
             _net = net;
@@ -94,7 +98,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
                 _outputSingleColVectorCollection.Add(outputSingleColVector);
             }
             //Lambda seeker
-            _lambdaSeeker = new ParamSeeker(_settings.LambdaSeekerCfg);
+            _lambdaFinder = new ParamValFinder(_cfg.LambdaFinderCfg);
             _currLambda = 0;
             //Matrix setup
             Matrix X = new Matrix(inputVectorCollection.Count, _net.NumOfInputValues + 1);
@@ -136,7 +140,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
                 return false;
             }
             //New lambda to be tested
-            double newLambda = _lambdaSeeker.Next;
+            double newLambda = _lambdaFinder.Next;
             //Secondary stop condition
             if (AttemptEpoch > 0 && Math.Abs(_currLambda - newLambda) < StopLambdaDifference)
             {
@@ -182,7 +186,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             _net.SetWeights(newWeights);
             MSE = _net.ComputeBatchErrorStat(_inputVectorCollection, _outputVectorCollection).MeanSquare;
             //Update lambda seeker
-            _lambdaSeeker.ProcessError(MSE);
+            _lambdaFinder.ProcessError(MSE);
             return true;
         }
 

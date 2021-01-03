@@ -5,34 +5,34 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Data.Coders.AnalogToSpiking
 {
     /// <summary>
-    /// Configuration of the A2SCoderDownDirArrows coder
+    /// Configuration of the A2SCoderDownDirArrows coder.
     /// </summary>
     [Serializable]
     public class A2SCoderDownDirArrowsSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "A2SCoderDirArrowsType";
         //Default values
         /// <summary>
-        /// Default value of parameter specifying number of receptors
+        /// The default value of the parameter specifying the number of receptors.
         /// </summary>
         public const int DefaultNumOfReceptors = 8;
         /// <summary>
-        /// Default value of parameter specifying number of time-points per receptor
+        /// The default value of the parameter specifying the number of code time-points per receptor.
         /// </summary>
         public const int DefaultNumOfTimePoints = 8;
 
         //Attribute properties
         /// <summary>
-        /// Number of receptors
+        /// The number of receptors.
         /// </summary>
         public int NumOfReceptors { get; }
 
         /// <summary>
-        /// Number of time-points per receptor
+        /// The number of code time-points per receptor.
         /// </summary>
         public int NumOfTimePoints { get; }
 
@@ -40,11 +40,11 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// <summary>
         /// Creates an itialized instance.
         /// </summary>
-        /// <param name="numOfReceptors">Number of receptors</param>
-        /// <param name="numOfTimePoints">Number of intervals per receptor</param>
+        /// <param name="numOfReceptors">The number of receptors.</param>
+        /// <param name="numOfTimePoints">The number of code time-points per receptor.</param>
         public A2SCoderDownDirArrowsSettings(int numOfReceptors = DefaultNumOfReceptors,
-                                           int numOfTimePoints = DefaultNumOfTimePoints
-                                           )
+                                             int numOfTimePoints = DefaultNumOfTimePoints
+                                             )
         {
             NumOfReceptors = numOfReceptors;
             NumOfTimePoints = numOfTimePoints;
@@ -55,7 +55,7 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// <summary>
         /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public A2SCoderDownDirArrowsSettings(A2SCoderDownDirArrowsSettings source)
             : this(source.NumOfReceptors, source.NumOfTimePoints)
         {
@@ -63,9 +63,9 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         }
 
         /// <summary>
-        /// Creates an initialized instance from the given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public A2SCoderDownDirArrowsSettings(XElement elem)
         {
             //Validation
@@ -79,12 +79,12 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultNumOfReceptors { get { return (NumOfReceptors == DefaultNumOfReceptors); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultNumOfTimePoints { get { return (NumOfTimePoints == DefaultNumOfTimePoints); } }
 

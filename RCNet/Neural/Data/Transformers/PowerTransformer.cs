@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Implements the "value^exponent" input field value transformation
+    /// Implements the power transformation. It computes value^exponent.
     /// </summary>
     [Serializable]
     public class PowerTransformer : ITransformer
@@ -13,18 +13,18 @@ namespace RCNet.Neural.Data.Transformers
 
         //Attributes
         private readonly int _fieldIdx;
-        private readonly PowerTransformerSettings _settings;
+        private readonly PowerTransformerSettings _cfg;
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="availableFieldNames">Collection of names of all available input fields</param>
-        /// <param name="settings">Configuration</param>
-        public PowerTransformer(List<string> availableFieldNames, PowerTransformerSettings settings)
+        /// <param name="availableFieldNames">The collection of names of all available input fields.</param>
+        /// <param name="cfg">The configuration.</param>
+        public PowerTransformer(List<string> availableFieldNames, PowerTransformerSettings cfg)
         {
-            _settings = (PowerTransformerSettings)settings.DeepClone();
-            _fieldIdx = availableFieldNames.IndexOf(_settings.InputFieldName);
+            _cfg = (PowerTransformerSettings)cfg.DeepClone();
+            _fieldIdx = availableFieldNames.IndexOf(_cfg.InputFieldName);
             return;
         }
 
@@ -44,8 +44,8 @@ namespace RCNet.Neural.Data.Transformers
             }
 
             double arg = Math.Abs(data[_fieldIdx]).Bound();
-            double power = Math.Pow(arg, _settings.Exponent);
-            if (_settings.KeepSign)
+            double power = Math.Pow(arg, _cfg.Exponent);
+            if (_cfg.KeepSign)
             {
                 power = data[_fieldIdx] < 0 ? -1d * power : power;
             }

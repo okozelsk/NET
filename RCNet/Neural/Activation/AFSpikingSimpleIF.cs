@@ -3,7 +3,7 @@
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Implements very simple form of Integrate and Fire neuron model
+    /// Implements a very simple form of Integrate and Fire neuron model.
     /// </summary>
     [Serializable]
     public class AFSpikingSimpleIF : AFSpikingBase
@@ -14,14 +14,14 @@ namespace RCNet.Neural.Activation
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="resistance">Membrane resistance (Mohm)</param>
-        /// <param name="decayRate">Membrane potential decay rate</param>
-        /// <param name="resetV">Membrane reset potential (mV)</param>
-        /// <param name="firingThresholdV">Membrane firing threshold (mV)</param>
-        /// <param name="refractoryPeriods">Number of after spike computation cycles while an input stimuli is ignored (ms)</param>
-        /// <param name="initialVRatio">Initial membrane potential in form of the ratio between 0 and 1 where 0 corresponds to a restV potential and 1 corresponds to a firingThreshold.</param>
+        /// <param name="resistance">The membrane resistance (Mohm).</param>
+        /// <param name="decayRate">The membrane potential decay rate.</param>
+        /// <param name="resetV">The membrane reset potential (mV).</param>
+        /// <param name="firingThresholdV">The membrane firing threshold (mV).</param>
+        /// <param name="refractoryPeriods">The number of after-spike computation cycles while an input stimuli to be ignored (cycles).</param>
+        /// <param name="initialVRatio">The membrane initial potential in form of the ratio between 0 and 1 where 0 corresponds to a restV potential and 1 corresponds to a firingThreshold.</param>
         public AFSpikingSimpleIF(double resistance,
                                  double decayRate,
                                  double resetV,
@@ -29,7 +29,7 @@ namespace RCNet.Neural.Activation
                                  int refractoryPeriods,
                                  double initialVRatio = 0d
                                  )
-            :base(0d, Math.Abs(resetV), Math.Abs(firingThresholdV), refractoryPeriods, 1, 1, 1, initialVRatio)
+            : base(0d, Math.Abs(resetV), Math.Abs(firingThresholdV), refractoryPeriods, 1, 1, 1, initialVRatio)
         {
             _resistance = resistance;
             _decayRate = decayRate;

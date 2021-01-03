@@ -9,14 +9,18 @@ using System.Threading.Tasks;
 namespace RCNet.Neural.Network.NonRecurrent.FF
 {
     /// <summary>
-    /// Implements the elastic linear regression trainer.
-    /// FF network has to have only output layer with the Identity activation.
-    /// 
+    /// Implements the elastic linear regression trainer of the feed forward network.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The feed forward network to be trained must have no hidden layers and the Identity output activation.
+    /// </para>
+    /// <para>
     /// Based on Regularization Paths for Generalized Linear Models via Coordinate Descent
     /// (Jerome Friedman, Trevor Hastie, Rob Tibshirani)
     /// Publication: Journal of Statistical Software (January 2010, Volume 33, Issue 1.)
-    /// 
-    /// </summary>
+    /// </para>
+    /// </remarks>
     [Serializable]
     public class ElasticRegrTrainer : INonRecurrentNetworkTrainer
     {
@@ -36,7 +40,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         public string InfoMessage { get; private set; }
 
         //Attributes
-        private readonly ElasticRegrTrainerSettings _settings;
+        private readonly ElasticRegrTrainerSettings _cfg;
         private readonly FeedForwardNetwork _net;
         private readonly List<double[]> _inputVectorCollection;
         private readonly List<double[]> _outputVectorCollection;
@@ -45,17 +49,17 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
 
         //Constructor
         /// <summary>
-        /// Constructs an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="net">FF network to be trained</param>
-        /// <param name="inputVectorCollection">Predictors (input)</param>
-        /// <param name="outputVectorCollection">Ideal outputs (the same number of rows as number of inputs)</param>
-        /// <param name="settings">Startup parameters of the trainer</param>
+        /// <param name="net">The FF network to be trained.</param>
+        /// <param name="inputVectorCollection">The input vectors (input).</param>
+        /// <param name="outputVectorCollection">The output vectors (ideal).</param>
+        /// <param name="cfg">The configuration of the trainer.</param>
         public ElasticRegrTrainer(FeedForwardNetwork net,
-                                     List<double[]> inputVectorCollection,
-                                     List<double[]> outputVectorCollection,
-                                     ElasticRegrTrainerSettings settings
-                                     )
+                                  List<double[]> inputVectorCollection,
+                                  List<double[]> outputVectorCollection,
+                                  ElasticRegrTrainerSettings cfg
+                                  )
         {
             //Check network readyness
             if (!net.Finalized)
@@ -78,13 +82,13 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             var rangePartitioner = Partitioner.Create(0, _inputVectorCollection.Count);
             _parallelRanges = new List<Tuple<int, int>>(rangePartitioner.GetDynamicPartitions());
             //Parameters
-            _settings = settings;
-            MaxAttempt = _settings.NumOfAttempts;
-            MaxAttemptEpoch = _settings.NumOfAttemptEpochs;
+            _cfg = cfg;
+            MaxAttempt = _cfg.NumOfAttempts;
+            MaxAttemptEpoch = _cfg.NumOfAttemptEpochs;
             Attempt = 1;
             AttemptEpoch = 0;
             _net = net;
-            _gamma = _settings.Lambda * _settings.Alpha;
+            _gamma = _cfg.Lambda * _cfg.Alpha;
             return;
         }
 
@@ -136,7 +140,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             }
             //Next epoch allowed
             ++AttemptEpoch;
-            InfoMessage = $"Lambda={_settings.Lambda.ToString(CultureInfo.InvariantCulture)} Alpha={_settings.Alpha.ToString(CultureInfo.InvariantCulture)}";
+            InfoMessage = $"Lambda={_cfg.Lambda.ToString(CultureInfo.InvariantCulture)} Alpha={_cfg.Alpha.ToString(CultureInfo.InvariantCulture)}";
             //Whole network new weights buffer
             double[] newWeights = _net.GetWeightsCopy();
             //Optimization of the weights for each output separeatelly
@@ -215,7 +219,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
                     }
                     fit /= _outputVectorCollection.Count;
                     denominator /= _outputVectorCollection.Count;
-                    denominator += _settings.Lambda * (1d - _settings.Alpha);
+                    denominator += _cfg.Lambda * (1d - _cfg.Alpha);
                     double newWeight = 0;
                     if (denominator != 0)
                     {

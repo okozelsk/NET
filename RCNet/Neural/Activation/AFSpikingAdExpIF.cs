@@ -6,15 +6,17 @@ using System;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Implements Adaptive Exponential Integrate and Fire neuron model.
-    /// For more information visit http://neuronaldynamics.epfl.ch/online/Ch6.S1.html
+    /// Implements the Adaptive Exponential Integrate and Fire neuron model.
     /// </summary>
+    /// <remarks>
+    /// For more information visit the http://neuronaldynamics.epfl.ch/online/Ch6.S1.html site.
+    /// </remarks>
     [Serializable]
     public class AFSpikingAdExpIF : AFSpikingODE
     {
         //Constants
         /// <summary>
-        /// Index of AdaptationOmega evolving variable
+        /// An index of the AdaptationOmega evolving variable.
         /// </summary>
         private const int VarAdaptationOmegaIdx = 1;
 
@@ -29,22 +31,22 @@ namespace RCNet.Neural.Activation
         private readonly double _spikeTriggeredAdaptationIncrement;
 
         /// <summary>
-        /// Constructs an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="timeScale">Membrane time scale (ms)</param>
-        /// <param name="resistance">Membrane resistance (Mohm)</param>
-        /// <param name="restV">Membrane rest potential (mV)</param>
-        /// <param name="resetV">Membrane reset potential (mV)</param>
-        /// <param name="rheobaseV">Membrane rheobase threshold (mV)</param>
-        /// <param name="firingThresholdV">Membrane firing threshold (mV)</param>
-        /// <param name="sharpnessDeltaT">Sharpness of membrane potential change (mV)</param>
-        /// <param name="adaptationVoltageCoupling">Adaptation voltage coupling (nS)</param>
-        /// <param name="adaptationTimeConstant">Adaptation time constant (ms)</param>
-        /// <param name="adaptationSpikeTriggeredIncrement">Spike triggered adaptation increment (pA)</param>
-        /// <param name="solverMethod">ODE numerical solver method</param>
-        /// <param name="solverCompSteps">ODE numerical solver computation steps of the time step</param>
-        /// <param name="stimuliDuration">Duration of the stimulation</param>
-        /// <param name="initialVRatio">Initial membrane potential in form of the ratio between 0 and 1 where 0 corresponds to a Min(resetV, restV) potential and 1 corresponds to a firingThreshold.</param>
+        /// <param name="timeScale">The membrane time scale (ms).</param>
+        /// <param name="resistance">The membrane resistance (Mohm).</param>
+        /// <param name="restV">The membrane rest potential (mV).</param>
+        /// <param name="resetV">The membrane reset potential (mV).</param>
+        /// <param name="rheobaseV">The membrane rheobase threshold (mV).</param>
+        /// <param name="firingThresholdV">The membrane firing threshold (mV).</param>
+        /// <param name="sharpnessDeltaT">The sharpness of the membrane potential change (mV).</param>
+        /// <param name="adaptationVoltageCoupling">The adaptation voltage coupling (nS).</param>
+        /// <param name="adaptationTimeConstant">The adaptation time constant (ms).</param>
+        /// <param name="adaptationSpikeTriggeredIncrement">The spike triggered adaptation increment (pA).</param>
+        /// <param name="solverMethod">The ODE numerical solver method to be used.</param>
+        /// <param name="solverCompSteps">The number of computation sub-steps of the ODE numerical solver.</param>
+        /// <param name="stimuliDuration">The duration of the membrane stimulation (ms).</param>
+        /// <param name="initialVRatio">The membrane initial potential in form of a ratio between 0 and 1, where 0 corresponds to a Min(resetV, restV) potential and 1 corresponds to a firingThreshold.</param>
         public AFSpikingAdExpIF(double timeScale,
                                 double resistance,
                                 double restV,
@@ -60,26 +62,26 @@ namespace RCNet.Neural.Activation
                                 double stimuliDuration,
                                 double initialVRatio = 0d
                                 )
-            : base(PhysUnit.ToBase(restV, PhysUnit.MetricPrefix.Milli),
-                   PhysUnit.ToBase(resetV, PhysUnit.MetricPrefix.Milli),
-                   PhysUnit.ToBase(firingThresholdV, PhysUnit.MetricPrefix.Milli),
+            : base(PhysUnit.ToBase(restV, PhysUnit.UnitPrefix.Milli),
+                   PhysUnit.ToBase(resetV, PhysUnit.UnitPrefix.Milli),
+                   PhysUnit.ToBase(firingThresholdV, PhysUnit.UnitPrefix.Milli),
                    0,
                    solverMethod,
-                   PhysUnit.ToBase(stimuliDuration, PhysUnit.MetricPrefix.Milli),
+                   PhysUnit.ToBase(stimuliDuration, PhysUnit.UnitPrefix.Milli),
                    solverCompSteps,
                    2,
-                   PhysUnit.FromBase(1d, PhysUnit.MetricPrefix.Giga),
-                   PhysUnit.FromBase(1d, PhysUnit.MetricPrefix.Milli),
+                   PhysUnit.FromBase(1d, PhysUnit.UnitPrefix.Giga),
+                   PhysUnit.FromBase(1d, PhysUnit.UnitPrefix.Milli),
                    initialVRatio
                   )
         {
-            _timeScale = PhysUnit.ToBase(timeScale, PhysUnit.MetricPrefix.Milli);
-            _resistance = PhysUnit.ToBase(resistance, PhysUnit.MetricPrefix.Mega);
-            _rheobaseV = PhysUnit.ToBase(rheobaseV, PhysUnit.MetricPrefix.Milli);
-            _sharpnessDeltaT = PhysUnit.ToBase(sharpnessDeltaT, PhysUnit.MetricPrefix.Milli);
-            _adaptationVoltageCoupling = PhysUnit.ToBase(adaptationVoltageCoupling, PhysUnit.MetricPrefix.Nano);
-            _adaptationTimeConstant = PhysUnit.ToBase(adaptationTimeConstant, PhysUnit.MetricPrefix.Milli);
-            _spikeTriggeredAdaptationIncrement = PhysUnit.ToBase(adaptationSpikeTriggeredIncrement, PhysUnit.MetricPrefix.Piko);
+            _timeScale = PhysUnit.ToBase(timeScale, PhysUnit.UnitPrefix.Milli);
+            _resistance = PhysUnit.ToBase(resistance, PhysUnit.UnitPrefix.Mega);
+            _rheobaseV = PhysUnit.ToBase(rheobaseV, PhysUnit.UnitPrefix.Milli);
+            _sharpnessDeltaT = PhysUnit.ToBase(sharpnessDeltaT, PhysUnit.UnitPrefix.Milli);
+            _adaptationVoltageCoupling = PhysUnit.ToBase(adaptationVoltageCoupling, PhysUnit.UnitPrefix.Nano);
+            _adaptationTimeConstant = PhysUnit.ToBase(adaptationTimeConstant, PhysUnit.UnitPrefix.Milli);
+            _spikeTriggeredAdaptationIncrement = PhysUnit.ToBase(adaptationSpikeTriggeredIncrement, PhysUnit.UnitPrefix.Piko);
             _evolVars[VarAdaptationOmegaIdx] = 0;
             return;
         }

@@ -4,20 +4,20 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Data.Filter
 {
     /// <summary>
-    /// Configuration of the binary feature filter
+    /// Configuration of the BinFeatureFilter.
     /// </summary>
     [Serializable]
     public class BinFeatureFilterSettings : RCNetBaseSettings, IFeatureFilterSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "BinFeatureFilterType";
 
         //Constructors
         /// <summary>
-        /// Constructs an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         public BinFeatureFilterSettings()
         {
@@ -25,9 +25,9 @@ namespace RCNet.Neural.Data.Filter
         }
 
         /// <summary>
-        /// Deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public BinFeatureFilterSettings(BinFeatureFilterSettings source)
         {
             return;
@@ -36,7 +36,7 @@ namespace RCNet.Neural.Data.Filter
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public BinFeatureFilterSettings(XElement elem)
         {
             //Validation

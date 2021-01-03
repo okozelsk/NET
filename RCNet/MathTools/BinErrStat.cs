@@ -4,30 +4,33 @@ using System.Collections.Generic;
 namespace RCNet.MathTools
 {
     /// <summary>
-    /// Error statistics of binary 0/1 values
+    /// Implements the error statistics of computed and ideal binary values.
     /// </summary>
     [Serializable]
     public class BinErrStat
     {
         //Attribute properties
         /// <summary>
-        /// Binary 0/1 border. Double value LT this border is considered as 0 and GE as 1.
+        /// The binary border.
         /// </summary>
+        /// <remarks>
+        /// A value less than this border is considered as the 0. The 1 otherwise.
+        /// </remarks>
         public double BinBorder { get; }
         /// <summary>
-        /// Statistics of errors on individual 0/1 values
+        /// The error statistcs [0,1].
         /// </summary>
         public BasicStat[] BinValErrStat { get; }
         /// <summary>
-        /// Total error statistics
+        /// The total error statistics.
         /// </summary>
         public BasicStat TotalErrStat { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an uninitialized instance
+        /// Creates an uninitialized instance.
         /// </summary>
-        /// <param name="binBorder">Double value LT this border is considered as 0 and GE as 1</param>
+        /// <param name="binBorder">The binary border. A value less than this border is considered as the 0. The 1 otherwise.</param>
         public BinErrStat(double binBorder)
         {
             BinBorder = binBorder;
@@ -39,12 +42,15 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Construct an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="binBorder">Double value LT this border is considered as 0 and GE as 1</param>
-        /// <param name="computedVectorCollection">Collection of computed vectors</param>
-        /// <param name="idealVectorCollection">Collection of ideal vectors</param>
-        public BinErrStat(double binBorder, IEnumerable<double[]> computedVectorCollection, IEnumerable<double[]> idealVectorCollection)
+        /// <param name="binBorder">The binary border. A value less than this border is considered as the 0. The 1 otherwise.</param>
+        /// <param name="computedVectorCollection">The collection of computed vectors.</param>
+        /// <param name="idealVectorCollection">The collection of ideal vectors.</param>
+        public BinErrStat(double binBorder,
+                          IEnumerable<double[]> computedVectorCollection,
+                          IEnumerable<double[]> idealVectorCollection
+                          )
             : this(binBorder)
         {
             Update(computedVectorCollection, idealVectorCollection);
@@ -54,10 +60,13 @@ namespace RCNet.MathTools
         /// <summary>
         /// Construct an initialized instance
         /// </summary>
-        /// <param name="binBorder">Double value LT this border is considered as 0 and GE as 1</param>
-        /// <param name="computedValueCollection">Collection of computed vectors</param>
-        /// <param name="idealValueCollection">Collection of ideal vectors</param>
-        public BinErrStat(double binBorder, IEnumerable<double> computedValueCollection, IEnumerable<double> idealValueCollection)
+        /// <param name="binBorder">The binary border. A value less than this border is considered as the 0. The 1 otherwise.</param>
+        /// <param name="computedValueCollection">The collection of computed values.</param>
+        /// <param name="idealValueCollection">The collection of ideal values.</param>
+        public BinErrStat(double binBorder,
+                          IEnumerable<double> computedValueCollection,
+                          IEnumerable<double> idealValueCollection
+                          )
             : this(binBorder)
         {
             Update(computedValueCollection, idealValueCollection);
@@ -65,9 +74,9 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public BinErrStat(BinErrStat source)
         {
             BinBorder = source.BinBorder;
@@ -80,10 +89,10 @@ namespace RCNet.MathTools
 
         //Methods
         /// <summary>
-        /// Decides if two values represent the same binary value
+        /// Decides whether the computed and ideal value represent the same binary value.
         /// </summary>
-        /// <param name="computedValue">Computed value</param>
-        /// <param name="idealValue">Ideal value</param>
+        /// <param name="computedValue">The computed value.</param>
+        /// <param name="idealValue">The ideal value.</param>
         private bool BinMatch(double computedValue, double idealValue)
         {
             if (computedValue >= BinBorder && idealValue >= BinBorder) return true;
@@ -92,24 +101,24 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Updates the statistics
+        /// Updates the error statistics.
         /// </summary>
-        /// <param name="computedValue">Computed value</param>
-        /// <param name="idealValue">Ideal value</param>
+        /// <param name="computedValue">The computed value.</param>
+        /// <param name="idealValue">The ideal value.</param>
         public void Update(double computedValue, double idealValue)
         {
             int idealBinVal = (idealValue >= BinBorder) ? 1 : 0;
             int errValue = BinMatch(computedValue, idealValue) ? 0 : 1;
-            BinValErrStat[idealBinVal].AddSampleValue(errValue);
-            TotalErrStat.AddSampleValue(errValue);
+            BinValErrStat[idealBinVal].AddSample(errValue);
+            TotalErrStat.AddSample(errValue);
             return;
         }
 
         /// <summary>
-        /// Updates the statistics
+        /// Updates the error statistics.
         /// </summary>
-        /// <param name="computedValueCollection">Collection of computed binary values</param>
-        /// <param name="idealValueCollection">Collection of ideal binary values</param>
+        /// <param name="computedValueCollection">The collection of computed values.</param>
+        /// <param name="idealValueCollection">The collection of ideal values.</param>
         public void Update(IEnumerable<double> computedValueCollection, IEnumerable<double> idealValueCollection)
         {
             IEnumerator<double> idealValueEnumerator = idealValueCollection.GetEnumerator();
@@ -123,27 +132,27 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Updates the statistics
+        /// Updates the error statistics.
         /// </summary>
-        /// <param name="computedValuesCollection">Collection of computed binary values</param>
-        /// <param name="idealValuesCollection">Collection of ideal binary values</param>
-        public void Update(IEnumerable<double[]> computedValuesCollection, IEnumerable<double[]> idealValuesCollection)
+        /// <param name="computedVectorCollection">The collection of computed vectors.</param>
+        /// <param name="idealVectorCollection">The collection of ideal vectors.</param>
+        public void Update(IEnumerable<double[]> computedVectorCollection, IEnumerable<double[]> idealVectorCollection)
         {
-            IEnumerator<double[]> idealValueEnumerator = idealValuesCollection.GetEnumerator();
-            foreach (double[] computedValues in computedValuesCollection)
+            IEnumerator<double[]> idealVectorEnumerator = idealVectorCollection.GetEnumerator();
+            foreach (double[] computedVector in computedVectorCollection)
             {
-                idealValueEnumerator.MoveNext();
-                double[] idealValues = idealValueEnumerator.Current;
-                for (int i = 0; i < idealValues.Length; i++)
+                idealVectorEnumerator.MoveNext();
+                double[] idealVector = idealVectorEnumerator.Current;
+                for (int i = 0; i < idealVector.Length; i++)
                 {
-                    Update(computedValues[i], idealValues[i]);
+                    Update(computedVector[i], idealVector[i]);
                 }
             }
             return;
         }
 
         /// <summary>
-        /// Creates the deep copy of this instance
+        /// Creates the deep copy instance.
         /// </summary>
         public BinErrStat DeepClone()
         {

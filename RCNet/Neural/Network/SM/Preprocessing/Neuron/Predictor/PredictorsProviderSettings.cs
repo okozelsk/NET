@@ -1,35 +1,34 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Xml.Linq;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 {
     /// <summary>
-    /// Configuration of the PredictorsProvider
+    /// Configuration of the PredictorsProvider.
     /// </summary>
     [Serializable]
     public class PredictorsProviderSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "PredictorsType";
 
         //Attribute properties
         /// <summary>
-        ///Collection of predictors configurations
+        ///The collection of the predictor computer configurations.
         /// </summary>
         public List<IPredictorSettings> PredictorCfgCollection { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="predictorsCfg">Collection of predictors configurations</param>
+        /// <param name="predictorsCfg">The collection of the predictor computer configurations.</param>
         public PredictorsProviderSettings(IEnumerable predictorsCfg = null)
         {
             PredictorCfgCollection = new List<IPredictorSettings>();
@@ -45,9 +44,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="predictorsCfg">Predictors configurations</param>
+        /// <param name="predictorsCfg">The predictor computer configurations.</param>
         public PredictorsProviderSettings(params IPredictorSettings[] predictorsCfg)
             : this(predictorsCfg.AsEnumerable())
         {
@@ -57,7 +56,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// <summary>
         /// The deep copy constructor
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public PredictorsProviderSettings(PredictorsProviderSettings source)
             : this(source.PredictorCfgCollection)
         {
@@ -67,7 +66,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public PredictorsProviderSettings(XElement elem)
         {
             //Validation
@@ -89,7 +88,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 
         //Properties
         /// <summary>
-        /// Total number of predictors
+        /// The total number of predictors.
         /// </summary>
         public int NumOfPredictors
         {
@@ -100,7 +99,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         }
 
         /// <summary>
-        /// Specifies necessary size of the moving window of activations
+        /// The necessary size of the moving data window of the activations.
         /// </summary>
         public int RequiereActivationMDWSize
         {
@@ -119,7 +118,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         }
 
         /// <summary>
-        /// Specifies necessary size of the moving window of firings
+        /// The necessary size of the moving data window of the firings.
         /// </summary>
         public int RequiereFiringMDWSize
         {
@@ -163,7 +162,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
-            foreach(IPredictorSettings predictorCfg in PredictorCfgCollection)
+            foreach (IPredictorSettings predictorCfg in PredictorCfgCollection)
             {
                 rootElem.Add(((RCNetBaseSettings)predictorCfg).GetXml(suppressDefaults));
             }

@@ -4,34 +4,34 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Configuration of the DivTransformer
+    /// Configuration of the DivTransformer.
     /// </summary>
     [Serializable]
     public class DivTransformerSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "DivTransformerType";
 
         //Attribute properties
         /// <summary>
-        /// Name of the first (X) input field (numerator)
+        /// The name of the first (X) input field (numerator).
         /// </summary>
         public string XInputFieldName { get; }
 
         /// <summary>
-        /// Name of the second (Y) input field (denominator)
+        /// The name of the second (Y) input field (denominator).
         /// </summary>
         public string YInputFieldName { get; }
 
         //Constructors
         /// <summary>
-        /// Constructs an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="xInputFieldName">Name of the first (X) input field (numerator)</param>
-        /// <param name="yInputFieldName">Name of the second (Y) input field (denominator)</param>
+        /// <param name="xInputFieldName">The name of the first (X) input field (numerator).</param>
+        /// <param name="yInputFieldName">The name of the second (Y) input field (denominator).</param>
         public DivTransformerSettings(string xInputFieldName, string yInputFieldName)
         {
             XInputFieldName = xInputFieldName;
@@ -41,9 +41,9 @@ namespace RCNet.Neural.Data.Transformers
         }
 
         /// <summary>
-        /// Deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public DivTransformerSettings(DivTransformerSettings source)
             : this(source.XInputFieldName, source.YInputFieldName)
         {
@@ -53,7 +53,7 @@ namespace RCNet.Neural.Data.Transformers
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public DivTransformerSettings(XElement elem)
         {
             //Validation

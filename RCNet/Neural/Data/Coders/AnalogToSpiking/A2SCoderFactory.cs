@@ -1,19 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Xml.Linq;
 
 namespace RCNet.Neural.Data.Coders.AnalogToSpiking
 {
     /// <summary>
-    /// Provides proper load of A2S coders settings and related instantiation of A2S coders
+    /// Provides a proper instantiation of the A2S coders and also proper loading of their configurations.
     /// </summary>
     public static class A2SCoderFactory
     {
         /// <summary>
-        /// Based on element name loads proper type of A2S coder settings
+        /// Based on the xml element name loads the proper type of A2S coder configuration.
         /// </summary>
-        /// <param name="elem">Element containing settings</param>
+        /// <param name="elem">A xml element containing the configuration.</param>
         public static RCNetBaseSettings LoadSettings(XElement elem)
         {
             switch (elem.Name.LocalName)
@@ -32,9 +30,9 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         }
 
         /// <summary>
-        /// Based on element name checks if it is proper type of A2S coder settings
+        /// Based on the xml element name checks whether it is an existing type of A2S coder configuration.
         /// </summary>
-        /// <param name="elem">Element containing settings</param>
+        /// <param name="elem">A xml element containing the configuration.</param>
         public static bool CheckSettingsElemName(XElement elem)
         {
             switch (elem.Name.LocalName)
@@ -53,27 +51,27 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         }
 
         /// <summary>
-        /// Instantiates A2S coder of proper type according to given settings
+        /// Instantiates the appropriate A2S coder.
         /// </summary>
-        /// <param name="settings">Settings of A2S coder</param>
-        public static A2SCoderBase Create(RCNetBaseSettings settings)
+        /// <param name="cfg">The coder configuration.</param>
+        public static A2SCoderBase Create(RCNetBaseSettings cfg)
         {
-            Type type = settings.GetType();
+            Type type = cfg.GetType();
             if (type == typeof(A2SCoderGaussianReceptorsSettings))
             {
-                return new A2SCoderGaussianReceptors((A2SCoderGaussianReceptorsSettings)settings);
+                return new A2SCoderGaussianReceptors((A2SCoderGaussianReceptorsSettings)cfg);
             }
             else if (type == typeof(A2SCoderSignalStrengthSettings))
             {
-                return new A2SCoderSignalStrength((A2SCoderSignalStrengthSettings)settings);
+                return new A2SCoderSignalStrength((A2SCoderSignalStrengthSettings)cfg);
             }
             else if (type == typeof(A2SCoderUpDirArrowsSettings))
             {
-                return new A2SCoderUpDirArrows((A2SCoderUpDirArrowsSettings)settings);
+                return new A2SCoderUpDirArrows((A2SCoderUpDirArrowsSettings)cfg);
             }
             else if (type == typeof(A2SCoderDownDirArrowsSettings))
             {
-                return new A2SCoderDownDirArrows((A2SCoderDownDirArrowsSettings)settings);
+                return new A2SCoderDownDirArrows((A2SCoderDownDirArrowsSettings)cfg);
             }
             else
             {
@@ -82,12 +80,12 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         }
 
         /// <summary>
-        /// Checks whether the given settings class is the proper A2S coder settings type
+        /// Checks whether the specified configuration is an existing type of A2S coder configuration.
         /// </summary>
-        /// <param name="settings">Settings of A2S coder</param>
-        public static bool CheckSettings(RCNetBaseSettings settings)
+        /// <param name="cfg">The coder configuration.</param>
+        public static bool CheckSettings(RCNetBaseSettings cfg)
         {
-            Type type = settings.GetType();
+            Type type = cfg.GetType();
             if (type == typeof(A2SCoderGaussianReceptorsSettings))
             {
                 return true;

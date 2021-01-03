@@ -5,43 +5,43 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Data.Filter
 {
     /// <summary>
-    /// Configuration of the real number feature filter
+    /// Configuration of the RealFeatureFilter.
     /// </summary>
     [Serializable]
     public class RealFeatureFilterSettings : RCNetBaseSettings, IFeatureFilterSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "RealFeatureFilterType";
 
         //Default values
         /// <summary>
-        /// Default value of Standardize
+        /// The default value of the parameter specifying whether to apply the data standardization.
         /// </summary>
         public const bool DefaultStandardize = true;
         /// <summary>
-        /// Default value of KeepReserve
+        /// The default value of the parameter specifying whether to keep the range reserve for possible unseen data.
         /// </summary>
         public const bool DefaultKeepReserve = true;
 
         //Attribute properties
         /// <summary>
-        /// Standardize?
+        /// Specifies whether to apply the data standardization.
         /// </summary>
         public bool Standardize { get; }
         /// <summary>
-        /// Keep range reserve?
+        /// Specifies whether to keep the range reserve for possible unseen data.
         /// </summary>
         public bool KeepReserve { get; }
 
         //Constructors
         /// <summary>
-        /// Constructs an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="standardize">Standardize?</param>
-        /// <param name="keepReserve">Keep range reserve?</param>
+        /// <param name="standardize">Specifies whether to apply the data standardization.</param>
+        /// <param name="keepReserve">Specifies whether to keep the range reserve for possible unseen data.</param>
         public RealFeatureFilterSettings(bool standardize = DefaultStandardize,
                                          bool keepReserve = DefaultKeepReserve
                                          )
@@ -52,9 +52,9 @@ namespace RCNet.Neural.Data.Filter
         }
 
         /// <summary>
-        /// Deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public RealFeatureFilterSettings(RealFeatureFilterSettings source)
             : this(source.Standardize, source.KeepReserve)
         {
@@ -64,7 +64,7 @@ namespace RCNet.Neural.Data.Filter
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public RealFeatureFilterSettings(XElement elem)
         {
             //Validation
@@ -80,12 +80,12 @@ namespace RCNet.Neural.Data.Filter
         public FeatureFilterBase.FeatureType Type { get { return FeatureFilterBase.FeatureType.Real; } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultStandardize { get { return (Standardize == DefaultStandardize); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultKeepReserve { get { return (KeepReserve == DefaultKeepReserve); } }
 

@@ -6,26 +6,26 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
     /// <summary>
-    /// The collection of the external fields configurations
+    /// The configuration of the external input fields.
     /// </summary>
     [Serializable]
     public class ExternalFieldsSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "NPExternalInpFieldsType";
 
         //Attribute properties
         /// <summary>
-        /// Collection of external input field settings
+        /// The collection of the external input field configurations.
         /// </summary>
         public List<ExternalFieldSettings> FieldCfgCollection { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         private ExternalFieldsSettings()
         {
@@ -34,9 +34,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="fieldCfgCollection">Collection of external input field settings</param>
+        /// <param name="fieldCfgCollection">The collection of the external input field configurations.</param>
         public ExternalFieldsSettings(IEnumerable<ExternalFieldSettings> fieldCfgCollection)
             : this()
         {
@@ -46,9 +46,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="fieldCfgCollection">Collection of external input field settings</param>
+        /// <param name="fieldCfgCollection">The external input field configurations.</param>
         public ExternalFieldsSettings(params ExternalFieldSettings[] fieldCfgCollection)
             : this()
         {
@@ -60,7 +60,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// The deep copy constructor
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public ExternalFieldsSettings(ExternalFieldsSettings source)
             : this()
         {
@@ -71,7 +71,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings.</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public ExternalFieldsSettings(XElement elem)
         {
             //Validation
@@ -113,7 +113,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Returns collection of field names
+        /// Gets the collection of the external input field names.
         /// </summary>
         public List<string> GetFieldNames()
         {
@@ -126,9 +126,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Adds cloned settings from given collection into the internal collection
+        /// Adds the external input field configurations from the specified collection into the internal collection.
         /// </summary>
-        /// <param name="fieldCfgCollection">Collection of external input field settings</param>
+        /// <param name="fieldCfgCollection">The collection of the external input field configurations.</param>
         private void AddFields(IEnumerable<ExternalFieldSettings> fieldCfgCollection)
         {
             foreach (ExternalFieldSettings fieldCfg in fieldCfgCollection)
@@ -139,10 +139,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Returns the zero-based index of the field or -1 if given name not found
+        /// Gets the zero-based index of the external input field.
         /// </summary>
-        /// <param name="fieldName">Name of the field</param>
-        /// <param name="ex">Specifies whether to throw exception when not found</param>
+        /// <param name="fieldName">The name of the external input field.</param>
+        /// <param name="ex">Specifies whether to throw an exception or return -1 in case the external input field not found.</param>
         public int GetFieldID(string fieldName, bool ex = true)
         {
             for (int i = 0; i < FieldCfgCollection.Count; i++)
@@ -163,9 +163,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Returns configuration of the given field
+        /// Gets the configuration of the specified external input field.
         /// </summary>
-        /// <param name="fieldName">Field name</param>
+        /// <param name="fieldName">The name of the external input field.</param>
         public ExternalFieldSettings GetFieldCfg(string fieldName)
         {
             return FieldCfgCollection[GetFieldID(fieldName)];

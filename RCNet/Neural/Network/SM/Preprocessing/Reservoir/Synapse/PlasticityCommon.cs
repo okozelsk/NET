@@ -4,73 +4,73 @@ using System;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {
     /// <summary>
-    /// Helper class for synapse's plasticity
+    /// Implements the common enumerations and methods related to the synapse's plasticity.
     /// </summary>
     public static class PlasticityCommon
     {
         /// <summary>
-        /// Type of synapse's dynamics
+        /// The type of synapse's efficacy dynamics.
         /// </summary>
         public enum DynType
         {
             /// <summary>
-            /// Constant dynamics
+            /// The constant dynamics.
             /// </summary>
             Constant,
             /// <summary>
-            /// Linear dynamics
+            /// The linear dynamics.
             /// </summary>
             Linear,
             /// <summary>
-            /// Nonlinear dynamics
+            /// The nonlinear dynamics.
             /// </summary>
             Nonlinear
         }//DynType
 
         /// <summary>
-        /// Application of the synapse's dynamics
+        /// The application of the synapse's efficacy dynamics.
         /// </summary>
         public enum DynApplication
         {
             /// <summary>
-            /// Input spiking synapse connecting spiking hidden neuron
+            /// Applicable on an input synapse connecting presynaptic input spiking neuron and postsynaptic hidden spiking neuron.
             /// </summary>
             STInput,
             /// <summary>
-            /// Excitatory spiking synapse connecting spiking hidden neuron
+            /// Applicable on an excitatory synapse connecting presynaptic hidden spiking neuron and postsynaptic hidden spiking neuron.
             /// </summary>
             STExcitatory,
             /// <summary>
-            /// Inhibitory spiking synapse connecting spiking hidden neuron
+            /// Applicable on an inhibitory synapse connecting presynaptic hidden spiking neuron and postsynaptic hidden spiking neuron.
             /// </summary>
             STInhibitory,
             /// <summary>
-            /// Input spiking synapse connecting analog hidden neuron
+            /// Applicable on an input synapse connecting presynaptic input spiking neuron and postsynaptic hidden analog neuron.
             /// </summary>
             ATInput,
             /// <summary>
-            /// Indifferent spiking synapse connecting analog hidden neuron
+            /// Applicable on an indifferent synapse connecting presynaptic hidden spiking neuron and postsynaptic hidden analog neuron.
             /// </summary>
             ATIndifferent
         }//DynApplication
 
         /// <summary>
-        /// Creates appropriate instance of the efficacy computer
+        /// Creates an instance of the efficacy computer.
         /// </summary>
-        /// <param name="sourceNeuron">Source neuron</param>
-        /// <param name="dynamicsCfg">Dynamics configuration</param>
-        public static IEfficacy GetEfficacyComputer(INeuron sourceNeuron, IDynamicsSettings dynamicsCfg)
+        /// <param name="presynapticNeuron">The presynaptic neuron.</param>
+        /// <param name="dynamicsCfg">The configuration of the dynamics.</param>
+        public static IEfficacy GetEfficacyComputer(INeuron presynapticNeuron, IDynamicsSettings dynamicsCfg)
         {
             switch (dynamicsCfg.Type)
             {
                 case DynType.Constant: return new ConstantEfficacy((ConstantDynamicsSettings)dynamicsCfg);
-                case DynType.Linear: return new LinearEfficacy(sourceNeuron, (LinearDynamicsSettings)dynamicsCfg);
-                case DynType.Nonlinear: return new NonlinearEfficacy(sourceNeuron, (NonlinearDynamicsSettings)dynamicsCfg);
+                case DynType.Linear: return new LinearEfficacy(presynapticNeuron, (LinearDynamicsSettings)dynamicsCfg);
+                case DynType.Nonlinear: return new NonlinearEfficacy(presynapticNeuron, (NonlinearDynamicsSettings)dynamicsCfg);
                 default:
                     throw new InvalidOperationException($"Unsupported dynamics configuration {dynamicsCfg.GetType().Name}.");
             }
         }
 
-
     }//PlasticityCommon
+
 }//Namespace

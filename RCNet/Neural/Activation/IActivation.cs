@@ -3,7 +3,7 @@
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Common interface of all activation functions
+    /// The common interface of all activation functions.
     /// </summary>
     public interface IActivation
     {
@@ -12,15 +12,15 @@ namespace RCNet.Neural.Activation
         ActivationType TypeOfActivation { get; }
 
         /// <summary>
-        /// Output range of the activation function
+        /// The output range of an activation function.
         /// </summary>
         Interval OutputRange { get; }
 
         /// <summary>
-        /// Computes the activation
+        /// Computes the activation.
         /// </summary>
-        /// <param name="x">Activation input</param>
-        /// <returns>Computed activation</returns>
+        /// <param name="x">An activation input.</param>
+        /// <returns>The computed activation.</returns>
         double Compute(double x);
 
 

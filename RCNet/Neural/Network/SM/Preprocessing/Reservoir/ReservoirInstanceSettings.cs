@@ -1,5 +1,4 @@
 ﻿using RCNet.Neural.Network.SM.Preprocessing.Input;
-using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS;
 using System;
 using System.Linq;
@@ -8,46 +7,46 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 {
     /// <summary>
-    /// Configuration of the reservoir instance
+    /// Configuration of the reservoir instance.
     /// </summary>
     [Serializable]
     public class ReservoirInstanceSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "NPResInstanceType";
 
         //Attribute properties
         /// <summary>
-        /// Name of the reservoir instance
+        /// The name of the reservoir instance.
         /// </summary>
         public string Name { get; }
 
         /// <summary>
-        /// Name of the reservoir structure settings
+        /// The name of the reservoir structure configuration.
         /// </summary>
         public string StructureCfgName { get; }
 
         /// <summary>
-        /// Collection of input connections settings
+        /// The configuration of the input fields connections.
         /// </summary>
         public InputConnsSettings InputConnsCfg { get; }
 
         /// <summary>
-        /// Synapse configuration
+        /// The configuration of a synapse.
         /// </summary>
         public SynapseSettings SynapseCfg { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="name">Name of the reservoir structure settings</param>
-        /// <param name="structureCfgName">Name of the reservoir structure settings</param>
-        /// <param name="inputConnsCfg">Collection of input connections settings</param>
-        /// <param name="synapseCfg">Synapse configuration</param>
+        /// <param name="name">The name of the reservoir instance.</param>
+        /// <param name="structureCfgName">The name of the reservoir structure configuration.</param>
+        /// <param name="inputConnsCfg">The configuration of the input fields connections.</param>
+        /// <param name="synapseCfg">The configuration of a synapse.</param>
         public ReservoirInstanceSettings(string name,
                                          string structureCfgName,
                                          InputConnsSettings inputConnsCfg,
@@ -63,9 +62,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public ReservoirInstanceSettings(ReservoirInstanceSettings source)
             : this(source.Name, source.StructureCfgName, source.InputConnsCfg, source.SynapseCfg)
         {
@@ -75,7 +74,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public ReservoirInstanceSettings(XElement elem)
         {
             //Validation
@@ -117,12 +116,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             return;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Performs an additional consistency check.
+        /// </summary>
+        /// <param name="inputCfg">The configuration of the input encoder.</param>
+        /// <param name="reservoirStructureCfg">The configuration of the reservoir structure.</param>
         public void CheckConsistency(InputEncoderSettings inputCfg, ReservoirStructureSettings reservoirStructureCfg)
         {
             if (StructureCfgName != reservoirStructureCfg.Name)
             {
-                throw new InvalidOperationException($"Name of the reservoir structure configuration {StructureCfgName} is not equal to name of given reservoir structure configuration name {reservoirStructureCfg.Name}.");
+                throw new ArgumentException($"The specified name of the reservoir structure configuration {StructureCfgName} does not correspond.", "StructureCfgName");
             }
             foreach (InputConnSettings inputConnCfg in InputConnsCfg.ConnCfgCollection)
             {

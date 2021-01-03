@@ -5,56 +5,56 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Configuration of the DiffTransformer
+    /// Configuration of the DiffTransformer.
     /// </summary>
     [Serializable]
     public class DiffTransformerSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "DiffTransformerType";
         //Default values
         /// <summary>
-        /// Default value of interval argument
+        /// The default value of the parameter specifying the interval between the current and the past value.
         /// </summary>
-        public const int DefaultInterval = 1;
+        public const int DefaultPastInterval = 1;
 
 
 
         //Attribute properties
         /// <summary>
-        /// Name of the input field to be transformed
+        /// The name of the input field to be transformed.
         /// </summary>
         public string InputFieldName { get; }
 
         /// <summary>
-        /// Difference interval
+        /// Specifies the interval between the current and the past value.
         /// </summary>
-        public int Interval { get; }
+        public int PastInterval { get; }
 
 
         //Constructors
         /// <summary>
-        /// Constructs an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="inputFieldName">Name of the input field to be transformed</param>
-        /// <param name="interval">Difference interval</param>
-        public DiffTransformerSettings(string inputFieldName, int interval = DefaultInterval)
+        /// <param name="inputFieldName">The name of the input field to be transformed.</param>
+        /// <param name="pastInterval">Specifies the interval between the current and the past value.</param>
+        public DiffTransformerSettings(string inputFieldName, int pastInterval = DefaultPastInterval)
         {
             InputFieldName = inputFieldName;
-            Interval = interval;
+            PastInterval = pastInterval;
             Check();
             return;
         }
 
         /// <summary>
-        /// Deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public DiffTransformerSettings(DiffTransformerSettings source)
-            : this(source.InputFieldName, source.Interval)
+            : this(source.InputFieldName, source.PastInterval)
         {
             return;
         }
@@ -62,23 +62,23 @@ namespace RCNet.Neural.Data.Transformers
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public DiffTransformerSettings(XElement elem)
         {
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             InputFieldName = settingsElem.Attribute("fieldName").Value;
-            Interval = int.Parse(settingsElem.Attribute("interval").Value, CultureInfo.InvariantCulture);
+            PastInterval = int.Parse(settingsElem.Attribute("pastInterval").Value, CultureInfo.InvariantCulture);
             Check();
             return;
         }
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
-        public bool IsDefaultInterval { get { return (Interval == DefaultInterval); } }
+        public bool IsDefaultPastInterval { get { return (PastInterval == DefaultPastInterval); } }
 
         /// <inheritdoc />
         public override bool ContainsOnlyDefaults { get { return false; } }
@@ -92,9 +92,9 @@ namespace RCNet.Neural.Data.Transformers
             {
                 throw new ArgumentException($"Name of the input field must be specified.", "InputFieldName");
             }
-            if (Interval < 1)
+            if (PastInterval < 1)
             {
-                throw new ArgumentException($"Invalid difference interval {Interval.ToString(CultureInfo.InvariantCulture)}. Interval must be GE to 1.", "Interval");
+                throw new ArgumentException($"Invalid past interval {PastInterval.ToString(CultureInfo.InvariantCulture)}. Interval must be GE to 1.", "PastInterval");
             }
             return;
         }
@@ -111,9 +111,9 @@ namespace RCNet.Neural.Data.Transformers
             XElement rootElem = new XElement(rootElemName,
                                              new XAttribute("fieldName", InputFieldName)
                                              );
-            if (!suppressDefaults || !IsDefaultInterval)
+            if (!suppressDefaults || !IsDefaultPastInterval)
             {
-                rootElem.Add(new XAttribute("interval", Interval.ToString(CultureInfo.InvariantCulture)));
+                rootElem.Add(new XAttribute("pastInterval", PastInterval.ToString(CultureInfo.InvariantCulture)));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;

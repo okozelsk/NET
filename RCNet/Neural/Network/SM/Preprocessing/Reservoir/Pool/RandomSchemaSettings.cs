@@ -5,64 +5,62 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
 {
     /// <summary>
-    /// Configuration of the Random schema of pool's neurons interconnection
+    /// Configuration of the Random interconnection schema of the pool's neurons.
     /// </summary>
     [Serializable]
     public class RandomSchemaSettings : RCNetBaseSettings, IInterconnSchemaSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "PoolInterconnectionRandomSchemaType";
-        //Default values
         /// <summary>
-        /// Default interconnection density
-        /// </summary>
-        public const double DefaultDensity = 0.1d;
-        /// <summary>
-        /// Default average distance of interconnected neurons - code
+        /// The string code of the default average distance of interconnected neurons.
         /// </summary>
         public const string DefaultAvgDistanceCode = "NA";
         /// <summary>
-        /// Default average distance of interconnected neurons - numeric value
+        /// The numeric code of the default average distance of interconnected neurons.
         /// </summary>
         public const double DefaultAvgDistanceNum = 0;
+        //Default values
         /// <summary>
-        /// Default allow self connection
+        /// The default value of the density of interconnected neurons.
+        /// </summary>
+        public const double DefaultDensity = 0.1d;
+        /// <summary>
+        /// The default value of the parameter specifying whether to allow neurons to be self connected.
         /// </summary>
         public const bool DefaultAllowSelfConnection = true;
         /// <summary>
-        /// Default keep constant number of incoming synapses
+        /// The default value of the parameter specifying whether to keep the constant number of synapses.
         /// </summary>
         public const bool DefaultConstantNumOfConnections = false;
         /// <summary>
-        /// Default replacement of existing connections
+        /// The default value of the parameter specifying whether the connections of this schema will replace the existing connections.
         /// </summary>
         public const bool DefaultReplaceExistingConnections = true;
         /// <summary>
-        /// Default number of schema repetitions
+        /// The default number of applications of this schema.
         /// </summary>
         public const int DefaultRepetitions = 1;
 
 
         //Attribute properties
         /// <summary>
-        /// Density of interconnected neurons.
-        /// Each pool neuron will be connected as a source neuron for Pool.Size * Density neurons.
+        /// The density of interconnected neurons.
         /// </summary>
         public double Density { get; }
         /// <summary>
-        /// Average distance of interconnected neurons.
-        /// 0 means random distance.
+        /// The average distance of interconnected neurons (0 means the random distance).
         /// </summary>
         public double AvgDistance { get; }
         /// <summary>
-        /// Specifies whether to allow neurons to be self connected
+        /// Specifies whether to allow neurons to be self connected.
         /// </summary>
         public bool AllowSelfConnection { get; }
         /// <summary>
-        /// Specifies whether to keep constant number of synapses per target neuron
+        /// Specifies whether to keep the constant number of synapses.
         /// </summary>
         public bool ConstantNumOfConnections { get; }
         /// <inheritdoc/>
@@ -72,14 +70,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="density">Density of interconnected neurons</param>
-        /// <param name="avgDistance">Average distance of interconnected neurons</param>
-        /// <param name="allowSelfConnection">Specifies whether to allow neurons to be self connected</param>
-        /// <param name="constantNumOfConnections">Specifies whether to keep constant number of synapses per target neuron</param>
-        /// <param name="replaceExistingConnections">Specifies whether the connections of this schema will replace existing connections</param>
-        /// <param name="repetitions">Number of applications of this schema</param>
+        /// <param name="density">The density of interconnected neurons.</param>
+        /// <param name="avgDistance">The average distance of interconnected neurons (0 means the random distance).</param>
+        /// <param name="allowSelfConnection">Specifies whether to allow neurons to be self connected.</param>
+        /// <param name="constantNumOfConnections">Specifies whether to keep the constant number of synapses.</param>
+        /// <param name="replaceExistingConnections">Specifies whether the connections of this schema will replace the existing connections.</param>
+        /// <param name="repetitions">The number of applications of this schema.</param>
         public RandomSchemaSettings(double density = DefaultDensity,
                                     double avgDistance = DefaultAvgDistanceNum,
                                     bool allowSelfConnection = DefaultAllowSelfConnection,
@@ -99,9 +97,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         }
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public RandomSchemaSettings(RandomSchemaSettings source)
             : this(source.Density, source.AvgDistance, source.AllowSelfConnection,
                   source.ConstantNumOfConnections, source.ReplaceExistingConnections, source.Repetitions)
@@ -112,7 +110,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public RandomSchemaSettings(XElement elem)
         {
             //Validation
@@ -136,32 +134,32 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultDensity { get { return (Density == DefaultDensity); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultAvgDistance { get { return (AvgDistance == DefaultAvgDistanceNum); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultAllowSelfConnection { get { return (AllowSelfConnection == DefaultAllowSelfConnection); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultConstantNumOfConnections { get { return (ConstantNumOfConnections == DefaultConstantNumOfConnections); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultReplaceExistingConnections { get { return (ReplaceExistingConnections == DefaultReplaceExistingConnections); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultRepetitions { get { return (Repetitions == DefaultRepetitions); } }
 

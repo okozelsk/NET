@@ -1,30 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using RCNet.Extensions;
+﻿using RCNet.Extensions;
 using RCNet.Neural.Data.Coders.AnalogToSpiking;
+using System;
+using System.Collections.Generic;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
     /// <summary>
-    /// Provides composite coding of input analog value to spikes
+    /// Implements the coder of input analog value to spike codes.
     /// </summary>
     [Serializable]
     public class InputSpikesCoder
     {
         //Attribute properties
         /// <summary>
-        /// Number of spikes of the largest component
+        /// The length of the largest component spike code.
         /// </summary>
         public int LargestComponentLength { get; }
 
         /// <summary>
-        /// Spikes of component by component
+        /// The spike codes - component by component.
         /// </summary>
         public byte[][] ComponentSpikesCollection { get; }
 
         /// <summary>
-        /// Spikes of all components in one row
+        /// All the spike codes from all components in a one row.
         /// </summary>
         public byte[] AllSpikesFlatCollection { get; }
 
@@ -35,16 +34,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="encodingCfg">Encoding configuration</param>
-        public InputSpikesCoder(InputSpikesCoderSettings encodingCfg)
+        /// <param name="cfg">The configuration of the coder.</param>
+        public InputSpikesCoder(InputSpikesCoderSettings cfg)
         {
-            _encodingCfg = (InputSpikesCoderSettings)encodingCfg.DeepClone();
+            _encodingCfg = (InputSpikesCoderSettings)cfg.DeepClone();
             _coderCollection = new List<A2SCoderBase>(_encodingCfg.CoderCfgCollection.Count);
             _numOfComponents = 0;
             LargestComponentLength = 0;
-            foreach(RCNetBaseSettings coderCfg in _encodingCfg.CoderCfgCollection)
+            foreach (RCNetBaseSettings coderCfg in _encodingCfg.CoderCfgCollection)
             {
                 A2SCoderBase coder = A2SCoderFactory.Create(coderCfg);
                 _coderCollection.Add(coder);
@@ -54,16 +53,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             ComponentSpikesCollection = new byte[_numOfComponents][];
             switch (_encodingCfg.Regime)
             {
-                case InputEncoder.SpikingInputEncodingRegime.Forbidden:
+                case InputEncoder.InputSpikesCoding.Forbidden:
                     {
                         AllSpikesFlatCollection = new byte[0];
                     }
                     break;
-                case InputEncoder.SpikingInputEncodingRegime.Horizontal:
+                case InputEncoder.InputSpikesCoding.Horizontal:
                     {
                         int idx = 0;
                         int allSpikesLength = 0;
-                        foreach(A2SCoderBase coder in _coderCollection)
+                        foreach (A2SCoderBase coder in _coderCollection)
                         {
                             for (int i = 0; i < coder.NumOfComponents; i++)
                             {
@@ -77,7 +76,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                         AllSpikesFlatCollection.Populate((byte)0);
                     }
                     break;
-                case InputEncoder.SpikingInputEncodingRegime.Vertical:
+                case InputEncoder.InputSpikesCoding.Vertical:
                     {
                         int idx = 0;
                         int allSpikesLength = 0;
@@ -102,14 +101,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         //Properties
-        /// <summary>
-        /// Encoding regime
-        /// </summary>
-        public InputEncoder.SpikingInputEncodingRegime Regime { get { return _encodingCfg.Regime; } }
+        /// <inheritdoc cref="InputEncoder.InputSpikesCoding"/>
+        public InputEncoder.InputSpikesCoding Regime { get { return _encodingCfg.Regime; } }
 
         //Methods
         /// <summary>
-        /// Resets coders and buffers
+        /// Resets the coder to its initial state.
         /// </summary>
         public void Reset()
         {
@@ -117,7 +114,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             {
                 coder.Reset();
             }
-            foreach(byte[] buffer in ComponentSpikesCollection)
+            foreach (byte[] buffer in ComponentSpikesCollection)
             {
                 buffer.Populate((byte)0);
             }
@@ -126,16 +123,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Encodes given analog value as the spikes
+        /// Encodes the normalized analog value.
         /// </summary>
-        /// <param name="normalizedValue">Normalized analog value between -1 and 1</param>
+        /// <param name="normalizedValue">The analog value normalized between -1 and 1.</param>
         public void Encode(double normalizedValue)
         {
-            if(Regime != InputEncoder.SpikingInputEncodingRegime.Forbidden)
+            if (Regime != InputEncoder.InputSpikesCoding.Forbidden)
             {
                 int componentIdx = 0;
                 int flatIdx = 0;
-                foreach(A2SCoderBase coder in _coderCollection)
+                foreach (A2SCoderBase coder in _coderCollection)
                 {
                     byte[][] buffer = coder.GetCode(normalizedValue);
                     for (int i = 0; i < buffer.Length; i++)
@@ -152,4 +149,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
     }//InputSpikesCoder
-}
+
+}//Namespace
+

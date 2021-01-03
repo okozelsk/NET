@@ -6,26 +6,26 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
 {
     /// <summary>
-    /// The collection of neuron groups configurations
+    /// Configuration of the neuron group configurations.
     /// </summary>
     [Serializable]
     public class NeuronGroupsSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "PoolNeuronGroupsType";
 
         //Attribute properties
         /// <summary>
-        /// Collection of neuron groups settings
+        /// The collection of neuron group configurations.
         /// </summary>
         public List<INeuronGroupSettings> GroupCfgCollection { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         private NeuronGroupsSettings()
         {
@@ -34,9 +34,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="groupCfgCollection">Schema settings</param>
+        /// <param name="groupCfgCollection">The collection of neuron group configurations.</param>
         public NeuronGroupsSettings(IEnumerable<INeuronGroupSettings> groupCfgCollection)
             : this()
         {
@@ -46,9 +46,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="groupCfgCollection">Group settings</param>
+        /// <param name="groupCfgCollection">The neuron group configurations.</param>
         public NeuronGroupsSettings(params INeuronGroupSettings[] groupCfgCollection)
             : this()
         {
@@ -58,9 +58,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         }
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public NeuronGroupsSettings(NeuronGroupsSettings source)
             : this()
         {
@@ -71,7 +71,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings.</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public NeuronGroupsSettings(XElement elem)
         {
             //Validation
@@ -114,9 +114,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         }
 
         /// <summary>
-        /// Adds cloned group settings from given collection into the internal collection
+        /// Adds the group configurations from the specified collection into the internal collection.
         /// </summary>
-        /// <param name="groupCfgCollection"></param>
+        /// <param name="groupCfgCollection">The collection of neuron group configurations.</param>
         private void AddGroups(IEnumerable<INeuronGroupSettings> groupCfgCollection)
         {
             foreach (INeuronGroupSettings schemaCfg in groupCfgCollection)
@@ -127,11 +127,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         }
 
         /// <summary>
-        /// Based on given target neurons total count sets appropriate neurons
-        /// sub-counts for neuron groups.
+        /// Distributes the specified total number of neurons over the neuron groups.
         /// </summary>
-        /// <param name="targetTotalCount">Target neurons total count</param>
-        public void SetGrpNeuronsSubCounts(int targetTotalCount)
+        /// <param name="totalNumOfNeurons">The total number of neurons.</param>
+        public void SetGrpNeuronsSubCounts(int totalNumOfNeurons)
         {
             //Compute sum
             double sumRelShare = 0;
@@ -139,20 +138,20 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             {
                 sumRelShare += grp.RelShare;
             }
-            //First distribution of sub-counts
+            //The first distribution of sub-counts
             int[] subCounts = new int[GroupCfgCollection.Count];
             int distributedCount = 0;
             for (int i = 0; i < GroupCfgCollection.Count; i++)
             {
                 double ratio = GroupCfgCollection[i].RelShare / sumRelShare;
-                subCounts[i] = (int)Math.Round(((double)targetTotalCount) * ratio, 0);
+                subCounts[i] = (int)Math.Round(((double)totalNumOfNeurons) * ratio, 0);
                 distributedCount += subCounts[i];
             }
             //Sub-counts finetuning
-            while (distributedCount != targetTotalCount)
+            while (distributedCount != totalNumOfNeurons)
             {
                 //Correction of sub-counts
-                int sign = Math.Sign(targetTotalCount - distributedCount);
+                int sign = Math.Sign(totalNumOfNeurons - distributedCount);
                 int index = sign < 0 ? subCounts.IndexOfMax() : subCounts.IndexOfMin();
                 subCounts[index] += sign;
                 distributedCount += sign;

@@ -69,55 +69,67 @@
         </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer>
-        <cluster>
-          <crossvalidation foldDataRatio="0.1" folds="Auto" repetitions="1"/>
-          <defaultNetworks>
-            <classification>
-              <ff>
-                <activationIdentity/>
-                <resPropTrainer attempts="10" attemptEpochs="500"/>
-              </ff>
-            </classification>
-          </defaultNetworks>
-        </cluster>
+        <taskDefaults>
+          <classification>
+            <clusterChain>
+              <crossvalidation foldDataRatio="0.1" folds="Auto" repetitions="1"/>
+              <clusters>
+                <cluster>
+                  <networks>
+                    <ff>
+                      <activationIdentity/>
+                      <resPropTrainer attempts="10" attemptEpochs="500"/>
+                    </ff>
+                  </networks>
+                  <weights/>
+                </cluster>
+              </clusters>
+            </clusterChain>
+          </classification>
+        </taskDefaults>
         <readoutUnits>
           <readoutUnit name="Cancel Call">
-            <classification oneWinnerGroupName="Gesture"/>
+            <classification oneTakesAllGroupName="Gesture"/>
           </readoutUnit>
           <readoutUnit name="Dead Ball">
-            <classification oneWinnerGroupName="Gesture"/>
+            <classification oneTakesAllGroupName="Gesture"/>
           </readoutUnit>
           <readoutUnit name="Four">
-            <classification oneWinnerGroupName="Gesture"/>
+            <classification oneTakesAllGroupName="Gesture"/>
           </readoutUnit>
           <readoutUnit name="Last Hour">
-            <classification oneWinnerGroupName="Gesture"/>
+            <classification oneTakesAllGroupName="Gesture"/>
           </readoutUnit>
           <readoutUnit name="Leg Bye">
-            <classification oneWinnerGroupName="Gesture"/>
+            <classification oneTakesAllGroupName="Gesture"/>
           </readoutUnit>
           <readoutUnit name="No Ball">
-            <classification oneWinnerGroupName="Gesture"/>
+            <classification oneTakesAllGroupName="Gesture"/>
           </readoutUnit>
           <readoutUnit name="One Short">
-            <classification oneWinnerGroupName="Gesture"/>
+            <classification oneTakesAllGroupName="Gesture"/>
           </readoutUnit>
           <readoutUnit name="Out">
-            <classification oneWinnerGroupName="Gesture"/>
+            <classification oneTakesAllGroupName="Gesture"/>
           </readoutUnit>
           <readoutUnit name="Penalty Runs">
-            <classification oneWinnerGroupName="Gesture"/>
+            <classification oneTakesAllGroupName="Gesture"/>
           </readoutUnit>
           <readoutUnit name="Six">
-            <classification oneWinnerGroupName="Gesture"/>
+            <classification oneTakesAllGroupName="Gesture"/>
           </readoutUnit>
           <readoutUnit name="TV Replay">
-            <classification oneWinnerGroupName="Gesture"/>
+            <classification oneTakesAllGroupName="Gesture"/>
           </readoutUnit>
           <readoutUnit name="Wide">
-            <classification oneWinnerGroupName="Gesture"/>
+            <classification oneTakesAllGroupName="Gesture"/>
           </readoutUnit>
         </readoutUnits>
+        <oneTakesAllGroups>
+          <group name="Gesture">
+            <basicDecision/>
+          </group>
+        </oneTakesAllGroups>
       </readoutLayer>
     </stateMachine>
   </case>
@@ -212,34 +224,46 @@
         </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer>
-        <cluster>
-          <crossvalidation foldDataRatio="0.1" folds="Auto" repetitions="1"/>
-          <defaultNetworks>
-            <classification>
-              <ff>
-                <activationElliot/>
-                <resPropTrainer attempts="5" attemptEpochs="1500"/>
-              </ff>
-            </classification>
-          </defaultNetworks>
-        </cluster>
+        <taskDefaults>
+          <classification>
+            <clusterChain>
+              <crossvalidation foldDataRatio="0.1" folds="Auto" repetitions="1"/>
+              <clusters>
+                <cluster>
+                  <networks>
+                    <ff>
+                      <activationElliot/>
+                      <resPropTrainer attempts="5" attemptEpochs="1500"/>
+                    </ff>
+                  </networks>
+                  <weights/>
+                </cluster>
+              </clusters>
+            </clusterChain>
+          </classification>
+        </taskDefaults>
         <readoutUnits>
           <readoutUnit name="Wild-N2">
-            <classification oneWinnerGroupName="WormDNA"/>
+            <classification oneTakesAllGroupName="WormDNAType"/>
           </readoutUnit>
           <readoutUnit name="Mutant-goa1">
-            <classification oneWinnerGroupName="WormDNA"/>
+            <classification oneTakesAllGroupName="WormDNAType"/>
           </readoutUnit>
           <readoutUnit name="Mutant-unc1">
-            <classification oneWinnerGroupName="WormDNA"/>
+            <classification oneTakesAllGroupName="WormDNAType"/>
           </readoutUnit>
           <readoutUnit name="Mutant-unc38">
-            <classification oneWinnerGroupName="WormDNA"/>
+            <classification oneTakesAllGroupName="WormDNAType"/>
           </readoutUnit>
           <readoutUnit name="Mutant-unc63">
-            <classification oneWinnerGroupName="WormDNA"/>
+            <classification oneTakesAllGroupName="WormDNAType"/>
           </readoutUnit>
         </readoutUnits>
+        <oneTakesAllGroups>
+          <group name="WormDNAType">
+            <basicDecision/>
+          </group>
+        </oneTakesAllGroups>
       </readoutLayer>
     </stateMachine>
   </case>
@@ -348,19 +372,24 @@
         </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer>
-        <cluster>
-          <crossvalidation/>
-          <defaultNetworks/>
-        </cluster>
+        <taskDefaults/>
         <readoutUnits>
           <readoutUnit name="Beetle1Fly0">
             <classification>
-              <networks>
-                <ff>
-                  <activationTanH/>
-                  <resPropTrainer attempts="5" attemptEpochs="500"/>
-                </ff>
-              </networks>
+              <clusterChain>
+                <crossvalidation foldDataRatio="0.1"/>
+                <clusters>
+                  <cluster>
+                    <networks>
+                      <ff>
+                        <activationTanH/>
+                        <resPropTrainer attempts="5" attemptEpochs="500"/>
+                      </ff>
+                    </networks>
+                    <weights/>
+                  </cluster>
+                </clusters>
+              </clusterChain>
             </classification>
           </readoutUnit>
         </readoutUnits>
@@ -430,19 +459,24 @@
         </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer>
-        <cluster>
-          <crossvalidation/>
-          <defaultNetworks/>
-        </cluster>
+        <taskDefaults/>
         <readoutUnits>
           <readoutUnit name="Chicken1Bird0">
             <classification>
-              <networks>
-                <ff>
-                  <activationTanH/>
-                  <resPropTrainer attempts="5" attemptEpochs="200"/>
-                </ff>
-              </networks>
+              <clusterChain>
+                <crossvalidation foldDataRatio="0.1"/>
+                <clusters>
+                  <cluster>
+                    <networks>
+                      <ff>
+                        <activationTanH/>
+                        <resPropTrainer attempts="5" attemptEpochs="200"/>
+                      </ff>
+                    </networks>
+                    <weights/>
+                  </cluster>
+                </clusters>
+              </clusterChain>
             </classification>
           </readoutUnit>
         </readoutUnits>
@@ -453,7 +487,7 @@
   <!--
     This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
     the new ability of the analog neurons to fire a spike.
-    Demo also shows use of the 2nd level network computation on cluster of the  ReadoutUnit.
+    Demo also shows use of the cluster chain's decision in "One Takes All" group.
     Following configuration of the StateMachine leads to 87.8% accuracy, slightly worse than the best algorithm
     called ST (88.09), referenced at the dataset's home site:
     "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
@@ -473,7 +507,7 @@
     the stage of development. The final three bone image classification problems, DistalPhalanxTW, MiddlePhalanxTW and ProximalPhalanxTW},
     involve predicting the Tanner-Whitehouse score (as labelled by a human expert) from the outline.
   -->
-  <case name="Classification task ProximalPhalanxOutlineAgeGroup: Pure ESN reservoir generating FiringTrace predictors, one Elliot neuron as a 1st level classifier + MLP 2nd level cluster computation.">
+  <case name="Classification task ProximalPhalanxOutlineAgeGroup: Pure ESN reservoir generating FiringTrace predictors, one Elliot neuron as classifier, Cluster chain winner decision.">
     <samples trainingData="ProximalPhalanxOutlineAgeGroup_train.csv" verificationData="ProximalPhalanxOutlineAgeGroup_verify.csv"/>
     <stateMachine randomizerSeek="0">
       <neuralPreprocessor>
@@ -527,44 +561,77 @@
         </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer>
-        <cluster>
-          <crossvalidation foldDataRatio="0.25" folds="Auto" repetitions="1"/>
-          <defaultNetworks>
-            <classification>
-              <ff>
-                <activationElliot/>
-                <resPropTrainer attempts="10" attemptEpochs="400"/>
-              </ff>
-            </classification>
-          </defaultNetworks>
-          <secondLevelComputation mode="AveragedOutputs">
-            <crossvalidation foldDataRatio="0.25" folds="Auto" repetitions="1"/>
-            <ff>
-              <activationIdentity/>
-              <hiddenLayers>
-                <layer neurons="10">
-                  <activationLeakyReLU/>
-                </layer>
-              </hiddenLayers>
-              <resPropTrainer attempts="5" attemptEpochs="400"/>
-            </ff>
-          </secondLevelComputation>
-        </cluster>
+        <taskDefaults>
+          <classification>
+            <clusterChain>
+              <crossvalidation foldDataRatio="0.25" folds="Auto" repetitions="1"/>
+              <clusters>
+                <cluster>
+                  <networks>
+                    <ff>
+                      <activationElliot/>
+                      <resPropTrainer attempts="10" attemptEpochs="400"/>
+                    </ff>
+                  </networks>
+                  <weights/>
+                </cluster>
+              </clusters>
+            </clusterChain>
+          </classification>
+        </taskDefaults>
         <readoutUnits>
           <readoutUnit name="0-6 years">
-            <classification oneWinnerGroupName="AgeGroup"/>
+            <classification oneTakesAllGroupName="AgeGroup"/>
           </readoutUnit>
           <readoutUnit name="7-12 years">
-            <classification oneWinnerGroupName="AgeGroup"/>
+            <classification oneTakesAllGroupName="AgeGroup"/>
           </readoutUnit>
           <readoutUnit name="13-19 years">
-            <classification oneWinnerGroupName="AgeGroup"/>
+            <classification oneTakesAllGroupName="AgeGroup"/>
           </readoutUnit>
         </readoutUnits>
+        <oneTakesAllGroups>
+          <group name="AgeGroup">
+            <clusterChainDecision>
+              <clusterChain>
+                <crossvalidation foldDataRatio="0.1"/>
+                <clusters>
+                  <cluster>
+                    <networks>
+                      <ff>
+                        <activationSoftMax/>
+                        <hiddenLayers>
+                          <layer neurons="20">
+                            <activationLeakyReLU/>
+                          </layer>
+                        </hiddenLayers>
+                        <resPropTrainer attempts="5" attemptEpochs="400"/>
+                      </ff>
+                    </networks>
+                    <weights/>
+                  </cluster>
+                  <cluster>
+                    <networks>
+                      <ff>
+                        <activationSoftMax/>
+                        <hiddenLayers>
+                          <layer neurons="20">
+                            <activationLeakyReLU/>
+                          </layer>
+                        </hiddenLayers>
+                        <resPropTrainer attempts="5" attemptEpochs="400"/>
+                      </ff>
+                    </networks>
+                    <weights/>
+                  </cluster>
+                </clusters>
+              </clusterChain>
+            </clusterChainDecision>
+          </group>
+        </oneTakesAllGroups>
       </readoutLayer>
     </stateMachine>
   </case>
-
 
   <!--
     This demo case demonstrates successful use of the pure analog ESN reservoir for the fast and accurate classifications enabled by
@@ -602,7 +669,7 @@
                     <activationTanH/>
                     <predictors>
                       <firingTrace fading="0.001"/>
-                      <activationStatFeature feature="ArithAvg"/>
+                      <activationStatFigure figure="ArithAvg"/>
                     </predictors>
                   </analogGroup>
                 </neuronGroups>
@@ -622,28 +689,35 @@
         </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer>
-        <cluster>
-          <crossvalidation foldDataRatio="0.05" folds="Auto" repetitions="1"/>
-          <defaultNetworks/>
-        </cluster>
+        <taskDefaults>
+          <classification>
+            <clusterChain>
+              <crossvalidation foldDataRatio="0.05" folds="Auto" repetitions="1"/>
+              <clusters>
+                <cluster>
+                  <networks>
+                    <ff>
+                      <activationIdentity/>
+                      <hiddenLayers>
+                        <layer neurons="10">
+                          <activationLeakyReLU/>
+                        </layer>
+                        <layer neurons="10">
+                          <activationLeakyReLU/>
+                        </layer>
+                      </hiddenLayers>
+                      <resPropTrainer attempts="5" attemptEpochs="400"/>
+                    </ff>
+                  </networks>
+                  <weights/>
+                </cluster>
+              </clusters>
+            </clusterChain>
+          </classification>
+        </taskDefaults>
         <readoutUnits>
           <readoutUnit name="Female1Male0">
-            <classification>
-              <networks>
-                <ff>
-                  <activationIdentity/>
-                  <hiddenLayers>
-                    <layer neurons="10">
-                      <activationLeakyReLU/>
-                    </layer>
-                    <layer neurons="10">
-                      <activationLeakyReLU/>
-                    </layer>
-                  </hiddenLayers>
-                  <resPropTrainer attempts="5" attemptEpochs="400"/>
-                </ff>
-              </networks>
-            </classification>
+            <classification/>
           </readoutUnit>
         </readoutUnits>
       </readoutLayer>
@@ -721,64 +795,76 @@
         </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer>
-        <cluster>
-          <crossvalidation foldDataRatio="0.0825" folds="Auto" repetitions="1"/>
-          <defaultNetworks>
-            <classification>
-              <ff>
-                <activationIdentity/>
-                <resPropTrainer attempts="10" attemptEpochs="300"/>
-              </ff>
-            </classification>
-          </defaultNetworks>
-        </cluster>
+        <taskDefaults>
+          <classification>
+            <clusterChain>
+              <crossvalidation foldDataRatio="0.0825" folds="Auto" repetitions="1"/>
+              <clusters>
+                <cluster>
+                  <networks>
+                    <ff>
+                      <activationIdentity/>
+                      <resPropTrainer attempts="10" attemptEpochs="300"/>
+                    </ff>
+                  </networks>
+                  <weights/>
+                </cluster>
+              </clusters>
+            </clusterChain>
+          </classification>
+        </taskDefaults>
         <readoutUnits>
           <readoutUnit name="curved swing">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="horizontal swing">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="vertical swing">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="anti-clockwise arc">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="clockwise arc">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="circle">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="horizontal straight-line">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="vertical straight-line">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="horizontal zigzag">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="vertical zigzag">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="horizontal wavy">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="vertical wavy">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="face-up curve">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="face-down curve">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="tremble">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
         </readoutUnits>
+        <oneTakesAllGroups>
+          <group name="Hand movement type">
+            <basicDecision/>
+          </group>
+        </oneTakesAllGroups>
       </readoutLayer>
     </stateMachine>
   </case>
@@ -809,43 +895,57 @@
     <samples trainingData="ProximalPhalanxOutlineAgeGroup_train.csv" verificationData="ProximalPhalanxOutlineAgeGroup_verify.csv"/>
     <stateMachine randomizerSeek="0">
       <readoutLayer>
-        <cluster>
-          <crossvalidation foldDataRatio="0.1" folds="Auto" repetitions="1"/>
-          <defaultNetworks>
-            <classification>
-              <ff>
-                <activationIdentity/>
-                <hiddenLayers>
-                  <layer neurons="20">
-                    <activationLeakyReLU/>
-                  </layer>
-                  <layer neurons="20">
-                    <activationLeakyReLU/>
-                  </layer>
-                </hiddenLayers>
-                <resPropTrainer attempts="10" attemptEpochs="500"/>
-              </ff>
-            </classification>
-          </defaultNetworks>
-          <secondLevelComputation mode="AveragedOutputs">
-            <crossvalidation foldDataRatio="0.5" folds="Auto" repetitions="1"/>
-            <ff>
-              <activationIdentity/>
-              <resPropTrainer attempts="5" attemptEpochs="400"/>
-            </ff>
-          </secondLevelComputation>
-        </cluster>
+        <taskDefaults>
+          <classification>
+            <clusterChain>
+              <crossvalidation foldDataRatio="0.1" folds="Auto" repetitions="1"/>
+              <clusters>
+                <cluster>
+                  <networks>
+                    <ff>
+                      <activationIdentity/>
+                      <hiddenLayers>
+                        <layer neurons="20">
+                          <activationLeakyReLU/>
+                        </layer>
+                        <layer neurons="20">
+                          <activationLeakyReLU/>
+                        </layer>
+                      </hiddenLayers>
+                      <resPropTrainer attempts="10" attemptEpochs="500"/>
+                    </ff>
+                  </networks>
+                  <weights/>
+                </cluster>
+                <cluster>
+                  <networks>
+                    <ff>
+                      <activationIdentity/>
+                      <resPropTrainer attempts="5" attemptEpochs="400"/>
+                    </ff>
+                  </networks>
+                  <weights/>
+                </cluster>
+              </clusters>
+            </clusterChain>
+          </classification>
+        </taskDefaults>
         <readoutUnits>
           <readoutUnit name="0-6 years">
-            <classification oneWinnerGroupName="AgeGroup"/>
+            <classification oneTakesAllGroupName="AgeGroup"/>
           </readoutUnit>
           <readoutUnit name="7-12 years">
-            <classification oneWinnerGroupName="AgeGroup"/>
+            <classification oneTakesAllGroupName="AgeGroup"/>
           </readoutUnit>
           <readoutUnit name="13-19 years">
-            <classification oneWinnerGroupName="AgeGroup"/>
+            <classification oneTakesAllGroupName="AgeGroup"/>
           </readoutUnit>
         </readoutUnits>
+        <oneTakesAllGroups>
+          <group name="AgeGroup">
+            <basicDecision/>
+          </group>
+        </oneTakesAllGroups>
       </readoutLayer>
     </stateMachine>
   </case>
@@ -963,23 +1063,29 @@
         </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer>
-        <cluster>
-          <crossvalidation foldDataRatio="0.1" folds="1" repetitions="1"/>
-          <defaultNetworks/>
-        </cluster>
+        <taskDefaults>
+          <forecast>
+            <clusterChain>
+              <crossvalidation foldDataRatio="0.1" folds="1" repetitions="1"/>
+              <clusters>
+                <cluster>
+                  <networks>
+                    <ff>
+                      <activationIdentity/>
+                      <qrdRegrTrainer attempts="1" attemptEpochs="1">
+                        <noise min="0" max="0" subIntervals="1"/>
+                      </qrdRegrTrainer>
+                    </ff>
+                  </networks>
+                  <weights/>
+                </cluster>
+              </clusters>
+            </clusterChain>
+          </forecast>
+        </taskDefaults>
         <readoutUnits>
           <readoutUnit name="Value">
-            <forecast>
-              <realFeature/>
-              <networks>
-                <ff>
-                  <activationIdentity/>
-                  <qrdRegrTrainer attempts="1" attemptEpochs="1">
-                    <noise min="0" max="0" subIntervals="1"/>
-                  </qrdRegrTrainer>
-                </ff>
-              </networks>
-            </forecast>
+            <forecast/>
           </readoutUnit>
         </readoutUnits>
       </readoutLayer>
@@ -1059,32 +1165,33 @@
         </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer>
-        <cluster>
-          <crossvalidation foldDataRatio="0.1" folds="Auto" repetitions="1"/>
-          <defaultNetworks>
-            <forecast>
-              <ff>
-                <activationIdentity/>
-                <elasticRegrTrainer attemptEpochs="400" lambda="1e-6" alpha="0.5"/>
-              </ff>
-            </forecast>
-          </defaultNetworks>
-        </cluster>
+        <taskDefaults>
+          <forecast>
+            <clusterChain>
+              <crossvalidation foldDataRatio="0.1" folds="Auto" repetitions="1"/>
+              <clusters>
+                <cluster>
+                  <networks>
+                    <ff>
+                      <activationIdentity/>
+                      <elasticRegrTrainer attemptEpochs="400" lambda="1e-6" alpha="0.5"/>
+                    </ff>
+                  </networks>
+                  <weights/>
+                </cluster>
+              </clusters>
+            </clusterChain>
+          </forecast>
+        </taskDefaults>
         <readoutUnits>
           <readoutUnit name="High">
-            <forecast>
-              <realFeature standardize="true" keepReserve="true"/>
-            </forecast>
+            <forecast/>
           </readoutUnit>
           <readoutUnit name="Low">
-            <forecast>
-              <realFeature standardize="true" keepReserve="true"/>
-            </forecast>
+            <forecast/>
           </readoutUnit>
           <readoutUnit name="Adj Close">
-            <forecast>
-              <realFeature standardize="true" keepReserve="true"/>
-            </forecast>
+            <forecast/>
           </readoutUnit>
         </readoutUnits>
       </readoutLayer>
@@ -1152,28 +1259,35 @@
         </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer>
-        <cluster>
-          <crossvalidation foldDataRatio="0.1" folds="Auto" repetitions="1"/>
-          <defaultNetworks/>
-        </cluster>
+        <taskDefaults>
+          <classification>
+            <clusterChain>
+              <crossvalidation foldDataRatio="0.1" folds="Auto" repetitions="1"/>
+              <clusters>
+                <cluster>
+                  <networks>
+                    <ff>
+                      <activationIdentity/>
+                      <hiddenLayers>
+                        <layer neurons="20">
+                          <activationTanH/>
+                        </layer>
+                        <layer neurons="20">
+                          <activationTanH/>
+                        </layer>
+                      </hiddenLayers>
+                      <resPropTrainer attempts="2" attemptEpochs="1000"/>
+                    </ff>
+                  </networks>
+                  <weights/>
+                </cluster>
+              </clusters>
+            </clusterChain>
+          </classification>
+        </taskDefaults>
         <readoutUnits>
           <readoutUnit name="EpilepticSeizure">
-            <classification>
-              <networks>
-                <ff>
-                  <activationIdentity/>
-                  <hiddenLayers>
-                    <layer neurons="20">
-                      <activationTanH/>
-                    </layer>
-                    <layer neurons="20">
-                      <activationTanH/>
-                    </layer>
-                  </hiddenLayers>
-                  <resPropTrainer attempts="2" attemptEpochs="1000"/>
-                </ff>
-              </networks>
-            </classification>
+            <classification/>
           </readoutUnit>
         </readoutUnits>
       </readoutLayer>
@@ -1245,35 +1359,38 @@
         </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer>
-        <cluster>
-          <crossvalidation foldDataRatio="0.5" folds="Auto" repetitions="1"/>
-          <defaultNetworks>
-            <forecast>
-              <ff>
-                <activationIdentity/>
-                <hiddenLayers>
-                  <layer neurons="10">
-                    <activationLeakyReLU/>
-                  </layer>
-                  <layer neurons="10">
-                    <activationLeakyReLU/>
-                  </layer>
-                </hiddenLayers>
-                <resPropTrainer attempts="5" attemptEpochs="1000"/>
-              </ff>
-            </forecast>
-          </defaultNetworks>
-        </cluster>
+        <taskDefaults>
+          <forecast>
+            <clusterChain>
+              <crossvalidation foldDataRatio="0.5" folds="Auto" repetitions="1"/>
+              <clusters>
+                <cluster>
+                  <networks>
+                    <ff>
+                      <activationIdentity/>
+                      <hiddenLayers>
+                        <layer neurons="10">
+                          <activationLeakyReLU/>
+                        </layer>
+                        <layer neurons="10">
+                          <activationLeakyReLU/>
+                        </layer>
+                      </hiddenLayers>
+                      <resPropTrainer attempts="5" attemptEpochs="1000"/>
+                    </ff>
+                  </networks>
+                  <weights/>
+                </cluster>
+              </clusters>
+            </clusterChain>
+          </forecast>
+        </taskDefaults>
         <readoutUnits>
           <readoutUnit name="MG-with-steady">
-            <forecast>
-              <realFeature/>
-            </forecast>
+            <forecast/>
           </readoutUnit>
           <readoutUnit name="MG-w/o-steady">
-            <forecast>
-              <realFeature/>
-            </forecast>
+            <forecast/>
           </readoutUnit>
         </readoutUnits>
       </readoutLayer>
@@ -1327,10 +1444,10 @@
             </externalFields>
             <transformedFields>
               <field name="coord_abcissa_diff" routeToReadout="false">
-                <diff fieldName="coord_abcissa" interval="1"/>
+                <diff fieldName="coord_abcissa" pastInterval="1"/>
               </field>
               <field name="coord_ordinate_diff" routeToReadout="false">
-                <diff fieldName="coord_ordinate" interval="1"/>
+                <diff fieldName="coord_ordinate" pastInterval="1"/>
               </field>
             </transformedFields>
           </varyingFields>
@@ -1344,7 +1461,7 @@
                   <analogGroup name="TanH-grp" relShare="1" thresholdMaxRefDeepness="1">
                     <activationTanH/>
                     <predictors>
-                      <activationStatFeature feature="Mid"/>
+                      <activationStatFigure figure="Mid"/>
                       <firingTrace fading="0"/>
                     </predictors>
                   </analogGroup>
@@ -1359,7 +1476,7 @@
                   <analogGroup name="TanH-grp" relShare="1" thresholdMaxRefDeepness="1">
                     <activationTanH/>
                     <predictors>
-                      <activationStatFeature feature="Mid"/>
+                      <activationStatFigure figure="Mid"/>
                       <firingTrace fading="0"/>
                     </predictors>
                   </analogGroup>
@@ -1389,69 +1506,81 @@
         </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer>
-        <cluster>
-          <crossvalidation foldDataRatio="0.0825" folds="Auto" repetitions="1"/>
-          <defaultNetworks>
-            <classification>
-              <ff>
-                <activationIdentity/>
-                <resPropTrainer attempts="5" attemptEpochs="400"/>
-              </ff>
-            </classification>
-          </defaultNetworks>
-        </cluster>
+        <taskDefaults>
+          <classification>
+            <clusterChain>
+              <crossvalidation foldDataRatio="0.0825" folds="Auto" repetitions="1"/>
+              <clusters>
+                <cluster>
+                  <networks>
+                    <ff>
+                      <activationIdentity/>
+                      <resPropTrainer attempts="5" attemptEpochs="400"/>
+                    </ff>
+                  </networks>
+                  <weights/>
+                </cluster>
+              </clusters>
+            </clusterChain>
+          </classification>
+        </taskDefaults>
         <readoutUnits>
           <readoutUnit name="curved swing">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="horizontal swing">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="vertical swing">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="anti-clockwise arc">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="clockwise arc">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="circle">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="horizontal straight-line">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="vertical straight-line">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="horizontal zigzag">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="vertical zigzag">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="horizontal wavy">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="vertical wavy">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="face-up curve">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="face-down curve">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="tremble">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
         </readoutUnits>
+        <oneTakesAllGroups>
+          <group name="Hand movement type">
+            <basicDecision/>
+          </group>
+        </oneTakesAllGroups>
       </readoutLayer>
       <mapper>
         <map readoutUnitName="face-down curve">
           <allowedPredictors>
-            <predictor name="ActivationStatFeature"/>
+            <predictor name="ActivationStatFigure"/>
           </allowedPredictors>
           <allowedPools>
             <pool reservoirInstanceName="Main" poolName="PureESN2"/>
@@ -1477,72 +1606,84 @@
     <samples trainingData="LibrasMovement_train.csv" verificationData="LibrasMovement_verify.csv"/>
     <stateMachine randomizerSeek="0">
       <readoutLayer>
-        <cluster>
-          <crossvalidation foldDataRatio="0.0825" folds="Auto" repetitions="1"/>
-          <defaultNetworks>
-            <classification>
-              <ff>
-                <activationIdentity/>
-                <hiddenLayers>
-                  <layer neurons="10">
-                    <activationLeakyReLU/>
-                  </layer>
-                  <layer neurons="10">
-                    <activationLeakyReLU/>
-                  </layer>
-                </hiddenLayers>
-                <resPropTrainer attempts="5" attemptEpochs="400"/>
-              </ff>
-            </classification>
-          </defaultNetworks>
-        </cluster>
+        <taskDefaults>
+          <classification>
+            <clusterChain>
+              <crossvalidation foldDataRatio="0.0825" folds="Auto" repetitions="1"/>
+              <clusters>
+                <cluster>
+                  <networks>
+                    <ff>
+                      <activationIdentity/>
+                      <hiddenLayers>
+                        <layer neurons="10">
+                          <activationLeakyReLU/>
+                        </layer>
+                        <layer neurons="10">
+                          <activationLeakyReLU/>
+                        </layer>
+                      </hiddenLayers>
+                      <resPropTrainer attempts="5" attemptEpochs="400"/>
+                    </ff>
+                  </networks>
+                  <weights/>
+                </cluster>
+              </clusters>
+            </clusterChain>
+          </classification>
+        </taskDefaults>
         <readoutUnits>
           <readoutUnit name="curved swing">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="horizontal swing">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="vertical swing">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="anti-clockwise arc">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="clockwise arc">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="circle">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="horizontal straight-line">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="vertical straight-line">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="horizontal zigzag">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="vertical zigzag">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="horizontal wavy">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="vertical wavy">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="face-up curve">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="face-down curve">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="tremble">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
         </readoutUnits>
+        <oneTakesAllGroups>
+          <group name="Hand movement type">
+            <basicDecision/>
+          </group>
+        </oneTakesAllGroups>
       </readoutLayer>
     </stateMachine>
   </case>
@@ -1651,72 +1792,84 @@
         </reservoirInstances>
       </neuralPreprocessor>
       <readoutLayer>
-        <cluster>
-          <crossvalidation foldDataRatio="0.0825" folds="Auto" repetitions="1"/>
-          <defaultNetworks>
-            <classification>
-              <ff>
-                <activationIdentity/>
-                <hiddenLayers>
-                  <layer neurons="10">
-                    <activationLeakyReLU/>
-                  </layer>
-                  <layer neurons="10">
-                    <activationLeakyReLU/>
-                  </layer>
-                </hiddenLayers>
-                <resPropTrainer attempts="5" attemptEpochs="400"/>
-              </ff>
-            </classification>
-          </defaultNetworks>
-        </cluster>
+        <taskDefaults>
+          <classification>
+            <clusterChain>
+              <crossvalidation foldDataRatio="0.0825" folds="Auto" repetitions="1"/>
+              <clusters>
+                <cluster>
+                  <networks>
+                    <ff>
+                      <activationIdentity/>
+                      <hiddenLayers>
+                        <layer neurons="10">
+                          <activationLeakyReLU/>
+                        </layer>
+                        <layer neurons="10">
+                          <activationLeakyReLU/>
+                        </layer>
+                      </hiddenLayers>
+                      <resPropTrainer attempts="5" attemptEpochs="400"/>
+                    </ff>
+                  </networks>
+                  <weights/>
+                </cluster>
+              </clusters>
+            </clusterChain>
+          </classification>
+        </taskDefaults>
         <readoutUnits>
           <readoutUnit name="curved swing">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="horizontal swing">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="vertical swing">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="anti-clockwise arc">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="clockwise arc">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="circle">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="horizontal straight-line">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="vertical straight-line">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="horizontal zigzag">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="vertical zigzag">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="horizontal wavy">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="vertical wavy">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="face-up curve">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="face-down curve">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
           <readoutUnit name="tremble">
-            <classification oneWinnerGroupName="Hand movement type"/>
+            <classification oneTakesAllGroupName="Hand movement type"/>
           </readoutUnit>
         </readoutUnits>
+        <oneTakesAllGroups>
+          <group name="Hand movement type">
+            <basicDecision/>
+          </group>
+        </oneTakesAllGroups>
       </readoutLayer>
     </stateMachine>
   </case>

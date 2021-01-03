@@ -5,26 +5,29 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Implements the Yeo-Johnson transformation of the input field value
+    /// Implements the Yeo-Johnson transformation.
     /// </summary>
+    /// <remarks>
+    /// For more detailed information visit the https://www.stat.umn.edu/arc/yjpower.pdf page.
+    /// </remarks>
     [Serializable]
     public class YeoJohnsonTransformer : ITransformer
     {
 
         //Attributes
         private readonly int _fieldIdx;
-        private readonly YeoJohnsonTransformerSettings _settings;
+        private readonly YeoJohnsonTransformerSettings _cfg;
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="availableFieldNames">Collection of names of all available input fields</param>
-        /// <param name="settings">Configuration</param>
-        public YeoJohnsonTransformer(List<string> availableFieldNames, YeoJohnsonTransformerSettings settings)
+        /// <param name="availableFieldNames">The collection of names of all available input fields.</param>
+        /// <param name="cfg">The configuration.</param>
+        public YeoJohnsonTransformer(List<string> availableFieldNames, YeoJohnsonTransformerSettings cfg)
         {
-            _settings = (YeoJohnsonTransformerSettings)settings.DeepClone();
-            _fieldIdx = availableFieldNames.IndexOf(_settings.InputFieldName);
+            _cfg = (YeoJohnsonTransformerSettings)cfg.DeepClone();
+            _fieldIdx = availableFieldNames.IndexOf(_cfg.InputFieldName);
             return;
         }
 
@@ -44,17 +47,17 @@ namespace RCNet.Neural.Data.Transformers
             }
             double arg = data[_fieldIdx].Bound();
             double result;
-            if (_settings.Lambda != 0 && arg >= 0)
+            if (_cfg.Lambda != 0 && arg >= 0)
             {
-                result = (Math.Pow(arg + 1d, _settings.Lambda) - 1d) / _settings.Lambda;
+                result = (Math.Pow(arg + 1d, _cfg.Lambda) - 1d) / _cfg.Lambda;
             }
-            else if (_settings.Lambda == 0 && arg >= 0)
+            else if (_cfg.Lambda == 0 && arg >= 0)
             {
                 result = Math.Log(arg + 1d);
             }
-            else if (_settings.Lambda != 2 && arg < 0)
+            else if (_cfg.Lambda != 2 && arg < 0)
             {
-                result = -(Math.Pow(-arg + 1d, 2d - _settings.Lambda) - 1d) / (2d - _settings.Lambda);
+                result = -(Math.Pow(-arg + 1d, 2d - _cfg.Lambda) - 1d) / (2d - _cfg.Lambda);
             }
             else
             {

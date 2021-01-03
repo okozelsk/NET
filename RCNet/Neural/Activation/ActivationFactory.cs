@@ -1,52 +1,51 @@
-﻿using System;
-using System.Xml.Linq;
-using RCNet.Extensions;
-using RCNet.MathTools;
+﻿using RCNet.Extensions;
 using RCNet.MathTools.Differential;
+using System;
+using System.Xml.Linq;
 
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Class mediates operations with activation functions and af configurations
+    /// Mediates the operations with activation functions and their configurations.
     /// </summary>
     public static class ActivationFactory
     {
         //Constants
         /// <summary>
-        /// Minimal initial voltage ratio of the spiking activation function
+        /// The minimal initial voltage ratio of the spiking activation function.
         /// </summary>
         private const double MinInitialVRatio = 0.05d;
         /// <summary>
-        /// Maximal initial voltage ratio of the spiking activation function
+        /// The maximal initial voltage ratio of the spiking activation function.
         /// </summary>
         private const double MaxInitialVRatio = 0.95d;
         //Default values
         /// <summary>
-        /// Default value of the refractory periods
+        /// The default number of refractory periods of the spiking activation function.
         /// </summary>
         public const int DefaultRefractoryPeriods = 1;
 
         /// <summary>
-        /// Default ODE numerical solver method
+        /// The default ODE numerical solving method.
         /// </summary>
         public const ODENumSolver.Method DefaultSolverMethod = ODENumSolver.Method.Euler;
 
         /// <summary>
-        /// Default ODE numerical solver computation steps
+        /// The default number of computation steps of the ODE numerical solver.
         /// </summary>
         public const int DefaultSolverCompSteps = 2;
 
         /// <summary>
-        /// Default duration of the spiking neuron stimulation in ms.
+        /// The default duration of the spiking neuron stimulation (in ms).
         /// </summary>
         public const double DefaultStimuliDuration = 1;
 
 
         //Methods
         /// <summary>
-        /// Loads configuration of the activation function from the given xml element
+        /// Loads the configuration of the activation function.
         /// </summary>
-        /// <param name="settingsElem">XML element containing the configuration</param>
+        /// <param name="settingsElem">A xml element containing the configuration data.</param>
         public static IActivationSettings LoadSettings(XElement settingsElem)
         {
             switch (settingsElem.Name.LocalName)
@@ -97,17 +96,17 @@ namespace RCNet.Neural.Activation
         }
 
         /// <summary>
-        /// Creates an instance of the activation function according to given configuration.
+        /// Creates the instance of the activation function.
         /// </summary>
-        /// <param name="settings">Configuration of the activation function</param>
-        /// <param name="rand">Random object to be used for randomly generated parameters</param>
-        public static IActivation CreateAF(IActivationSettings settings, Random rand)
+        /// <param name="cfg">The configuration.</param>
+        /// <param name="rand">A random object to be used for randomly generated parameters.</param>
+        public static IActivation CreateAF(IActivationSettings cfg, Random rand)
         {
             IActivation af;
-            Type settingsType = settings.GetType();
+            Type settingsType = cfg.GetType();
             if (settingsType == typeof(AFSpikingAdExpIFSettings))
             {
-                AFSpikingAdExpIFSettings afs = (AFSpikingAdExpIFSettings)settings;
+                AFSpikingAdExpIFSettings afs = (AFSpikingAdExpIFSettings)cfg;
                 af = new AFSpikingAdExpIF(rand.NextDouble(afs.TimeScale),
                                           rand.NextDouble(afs.Resistance),
                                           rand.NextDouble(afs.RestV),
@@ -130,12 +129,12 @@ namespace RCNet.Neural.Activation
             }
             else if (settingsType == typeof(AFAnalogElliotSettings))
             {
-                AFAnalogElliotSettings afs = (AFAnalogElliotSettings)settings;
+                AFAnalogElliotSettings afs = (AFAnalogElliotSettings)cfg;
                 af = new AFAnalogElliot(rand.NextDouble(afs.Slope));
             }
             else if (settingsType == typeof(AFSpikingExpIFSettings))
             {
-                AFSpikingExpIFSettings afs = (AFSpikingExpIFSettings)settings;
+                AFSpikingExpIFSettings afs = (AFSpikingExpIFSettings)cfg;
                 af = new AFSpikingExpIF(rand.NextDouble(afs.TimeScale),
                                         rand.NextDouble(afs.Resistance),
                                         rand.NextDouble(afs.RestV),
@@ -160,12 +159,12 @@ namespace RCNet.Neural.Activation
             }
             else if (settingsType == typeof(AFAnalogISRUSettings))
             {
-                AFAnalogISRUSettings afs = (AFAnalogISRUSettings)settings;
+                AFAnalogISRUSettings afs = (AFAnalogISRUSettings)cfg;
                 af = new AFAnalogISRU(rand.NextDouble(afs.Alpha));
             }
             else if (settingsType == typeof(AFSpikingIzhikevichIFSettings))
             {
-                AFSpikingIzhikevichIFSettings afs = (AFSpikingIzhikevichIFSettings)settings;
+                AFSpikingIzhikevichIFSettings afs = (AFSpikingIzhikevichIFSettings)cfg;
                 af = new AFSpikingIzhikevichIF(rand.NextDouble(afs.RecoveryTimeScale),
                                                rand.NextDouble(afs.RecoverySensitivity),
                                                rand.NextDouble(afs.RecoveryReset),
@@ -183,7 +182,7 @@ namespace RCNet.Neural.Activation
             else if (settingsType == typeof(AFSpikingAutoIzhikevichIFSettings))
             {
                 double randomValue = rand.NextDouble().Power(2);
-                AFSpikingAutoIzhikevichIFSettings afs = (AFSpikingAutoIzhikevichIFSettings)settings;
+                AFSpikingAutoIzhikevichIFSettings afs = (AFSpikingAutoIzhikevichIFSettings)cfg;
                 //Ranges
                 af = new AFSpikingIzhikevichIF(0.02,
                                                0.2,
@@ -200,7 +199,7 @@ namespace RCNet.Neural.Activation
             }
             else if (settingsType == typeof(AFSpikingLeakyIFSettings))
             {
-                AFSpikingLeakyIFSettings afs = (AFSpikingLeakyIFSettings)settings;
+                AFSpikingLeakyIFSettings afs = (AFSpikingLeakyIFSettings)cfg;
                 af = new AFSpikingLeakyIF(rand.NextDouble(afs.TimeScale),
                                           rand.NextDouble(afs.Resistance),
                                           rand.NextDouble(afs.RestV),
@@ -215,7 +214,7 @@ namespace RCNet.Neural.Activation
             }
             else if (settingsType == typeof(AFAnalogLeakyReLUSettings))
             {
-                AFAnalogLeakyReLUSettings afs = (AFAnalogLeakyReLUSettings)settings;
+                AFAnalogLeakyReLUSettings afs = (AFAnalogLeakyReLUSettings)cfg;
                 af = new AFAnalogLeakyReLU(rand.NextDouble(afs.NegSlope));
             }
             else if (settingsType == typeof(AFAnalogSigmoidSettings))
@@ -224,7 +223,7 @@ namespace RCNet.Neural.Activation
             }
             else if (settingsType == typeof(AFSpikingSimpleIFSettings))
             {
-                AFSpikingSimpleIFSettings afs = (AFSpikingSimpleIFSettings)settings;
+                AFSpikingSimpleIFSettings afs = (AFSpikingSimpleIFSettings)cfg;
                 af = new AFSpikingSimpleIF(rand.NextDouble(afs.Resistance),
                                            rand.NextDouble(afs.DecayRate),
                                            rand.NextDouble(afs.ResetV),
@@ -243,7 +242,7 @@ namespace RCNet.Neural.Activation
             }
             else if (settingsType == typeof(AFAnalogSoftExponentialSettings))
             {
-                AFAnalogSoftExponentialSettings afs = (AFAnalogSoftExponentialSettings)settings;
+                AFAnalogSoftExponentialSettings afs = (AFAnalogSoftExponentialSettings)cfg;
                 af = new AFAnalogSoftExponential(rand.NextDouble(afs.Alpha));
             }
             else if (settingsType == typeof(AFAnalogSoftMaxSettings))

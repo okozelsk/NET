@@ -5,43 +5,43 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 {
     /// <summary>
-    /// Configuration of the input connection
+    /// Configuration of the input field connection.
     /// </summary>
     [Serializable]
     public class InputConnSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "NPResInstanceInputConnectionType";
         //Default values
         /// <summary>
-        /// Default spiking target density
+        /// The default density on target spiking neurons.
         /// </summary>
         public const double DefaultSpikingTargetDensity = 1d;
         /// <summary>
-        /// Default analog target density
+        /// The default density on target analog neurons.
         /// </summary>
         public const double DefaultAnalogTargetDensity = 1d;
 
         /// <summary>
-        /// Name of the input field
+        /// The name of the input field.
         /// </summary>
         public string InputFieldName { get; }
 
         /// <summary>
-        /// Name of target pool
+        /// The name of the target pool.
         /// </summary>
         public string PoolName { get; }
 
         /// <summary>
-        /// Spiking target density
+        /// The density on the target spiking neurons.
         /// </summary>
         public double SpikingTargetDensity { get; }
 
         /// <summary>
-        /// Analog target density
+        /// The density on the target analog neurons.
         /// </summary>
         public double AnalogTargetDensity { get; }
 
@@ -49,10 +49,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <summary>
         /// Creates an itialized instance.
         /// </summary>
-        /// <param name="inputFieldName">Name of the input field</param>
-        /// <param name="poolName">Name of target pool</param>
-        /// <param name="spikingTargetDensity">Spiking target density</param>
-        /// <param name="analogTargetDensity">Analog target density</param>
+        /// <param name="inputFieldName">The name of the input field.</param>
+        /// <param name="poolName">The name of the target pool.</param>
+        /// <param name="spikingTargetDensity">The density on the target spiking neurons.</param>
+        /// <param name="analogTargetDensity">The density on the target analog neurons.</param>
         public InputConnSettings(string inputFieldName,
                                  string poolName,
                                  double spikingTargetDensity = DefaultSpikingTargetDensity,
@@ -70,7 +70,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <summary>
         /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public InputConnSettings(InputConnSettings source)
             : this(source.InputFieldName, source.PoolName, source.SpikingTargetDensity, source.AnalogTargetDensity)
         {
@@ -78,9 +78,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// Creates an initialized instance from the given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public InputConnSettings(XElement elem)
         {
             //Validation
@@ -96,12 +96,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultSpikingTargetDensity { get { return (SpikingTargetDensity == DefaultSpikingTargetDensity); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultAnalogTargetDensity { get { return (AnalogTargetDensity == DefaultAnalogTargetDensity); } }
 

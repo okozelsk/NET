@@ -3,13 +3,19 @@ using System.Threading.Tasks;
 
 namespace RCNet.MathTools.MatrixMath
 {
+
     /// <summary>
-    /// QR Decomposition.
-    /// This class is based on a class from the public domain JAMA package.
-    /// http://math.nist.gov/javanumerics/jama/
-    /// 
-    /// Added parallel processing feature.
+    /// Implements the QR decomposition of a matrix.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This class is based on a class from the public domain JAMA package.
+    /// RCNet project adds the parallel computation to improve the performance.
+    /// </para>
+    /// <para>
+    /// http://math.nist.gov/javanumerics/jama/
+    /// </para>
+    /// </remarks>
     public class QRD
     {
         //Attributes
@@ -20,15 +26,15 @@ namespace RCNet.MathTools.MatrixMath
 
         //Constructor
         /// <summary>
-        /// Instantiates the QR decomposition
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="source">Source matrix</param>
-        public QRD(Matrix source)
+        /// <param name="matrix">The matrix.</param>
+        public QRD(Matrix matrix)
         {
             //Initialization
-            _QRData = source.GetDataClone();
-            _numOfRows = source.NumOfRows;
-            _numOfCols = source.NumOfCols;
+            _QRData = matrix.GetDataClone();
+            _numOfRows = matrix.NumOfRows;
+            _numOfCols = matrix.NumOfCols;
             _RDiagData = new double[_numOfCols];
             //Main loop
             for (int k = 0; k < _numOfCols; k++)
@@ -70,14 +76,14 @@ namespace RCNet.MathTools.MatrixMath
             }//k
             if (!FullRank)
             {
-                throw new InvalidOperationException($"Matrix is rank deficient.");
+                throw new ArgumentException($"Matrix is rank deficient.", "matrix");
             }
             return;
         }
 
         //Properties
         /// <summary>
-        /// Returns the Householder vectors
+        /// Returns the Householder vectors.
         /// </summary>
         public Matrix H
         {
@@ -104,7 +110,7 @@ namespace RCNet.MathTools.MatrixMath
         }//H
 
         /// <summary>
-        /// Returns the upper triangular factor
+        /// Returns the upper triangular factor.
         /// </summary>
         public Matrix R
         {
@@ -135,7 +141,7 @@ namespace RCNet.MathTools.MatrixMath
         }//R
 
         /// <summary>
-        /// Generates and returns the (economy-sized) orthogonal factor
+        /// Generates and returns the (economy-sized) orthogonal factor.
         /// </summary>
         public Matrix Q
         {
@@ -173,7 +179,7 @@ namespace RCNet.MathTools.MatrixMath
 
 
         /// <summary>
-        /// Is full rank? 
+        /// Is full rank?
         /// </summary>
         public bool FullRank
         {
@@ -187,7 +193,7 @@ namespace RCNet.MathTools.MatrixMath
                         return false;
                     }
                     */
-                    //Improvement of the original zero condition to "close to zero" for the stability
+                    //Improved original zero condition to "close to zero" for the stability
                     if (Math.Abs(_RDiagData[col]) < 1E-20)
                     {
                         return false;
@@ -200,20 +206,19 @@ namespace RCNet.MathTools.MatrixMath
         //Methods
         //Instance methods
         /// <summary>
-        /// Least squares solution of A*X = B
+        /// Solves the least squares of A*X = B.
         /// </summary>
-        /// <param name="B">A Matrix with as many rows as A and at least one column (desired values).</param>
-        public Matrix Solve(Matrix B)
+        /// <param name="matrixB">The matrix with as many rows as A and at least one column (desired values).</param>
+        public Matrix Solve(Matrix matrixB)
         {
-            if (B.NumOfRows != _numOfRows)
+            //Check the number of rows in matrix B
+            if (matrixB.NumOfRows != _numOfRows)
             {
-                throw new InvalidOperationException($"Different number of rows in Matrix B.");
+                throw new ArgumentException($"Different number of rows in Matrix B.", "matrixB");
             }
-
             // Copy right hand side
-            int nx = B.NumOfCols;
-            double[][] X = B.GetDataClone();
-
+            int nx = matrixB.NumOfCols;
+            double[][] X = matrixB.GetDataClone();
             // Compute Y = transpose(Q)*B
             for (int k = 0; k < _numOfCols; k++)
             {
@@ -246,7 +251,7 @@ namespace RCNet.MathTools.MatrixMath
                     }
                 }
             }
-            return (new Matrix(X).GetSubMatrix(0, _numOfCols - 1, 0, nx - 1));
+            return (new Matrix(X).CreateSubMatrix(0, _numOfCols - 1, 0, nx - 1));
         }
 
     }//QRD

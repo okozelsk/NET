@@ -5,7 +5,7 @@ using System;
 namespace RCNet.MathTools
 {
     /// <summary>
-    /// Class implements moving data window providing additional functions such as statistics, weighted average, etc.
+    /// Implements the moving data window providing additional functions such as statistics, weighted average, etc.
     /// </summary>
     [Serializable]
     public class MovingDataWindow
@@ -15,9 +15,9 @@ namespace RCNet.MathTools
 
         //Constructors
         /// <summary>
-        /// Creates an empty instance.
+        /// Creates an uninitialized instance.
         /// </summary>
-        /// <param name="size">Defines internal moving data window size.</param>
+        /// <param name="size">The moving data window size.</param>
         public MovingDataWindow(int size)
         {
             _dataQueue = new SimpleQueue<double>(size);
@@ -25,9 +25,9 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Deep copy constructor
+        /// The copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public MovingDataWindow(MovingDataWindow source)
         {
             _dataQueue = source._dataQueue.ShallowClone();
@@ -36,49 +36,49 @@ namespace RCNet.MathTools
 
         //Properties
         /// <summary>
-        /// Internal capacity
+        /// Gets the capacity.
         /// </summary>
         public int Capacity { get { return _dataQueue.Capacity; } }
 
         /// <summary>
-        /// Indicates the full data in the window
+        /// The used capacity of the windpw.
+        /// </summary>
+        public int UsedCapacity { get { return _dataQueue.Count; } }
+
+        /// <summary>
+        /// Indicates the capacity of the window is fully used.
         /// </summary>
         public bool Full { get { return _dataQueue.Full; } }
 
-        /// <summary>
-        /// Number of samples in the moving data window
-        /// </summary>
-        public int NumOfSamples { get { return _dataQueue.Count; } }
-
         //Methods
         /// <summary>
-        /// Checks number of samples and throws exception in case of insufficient number of samples.
+        /// Checks the number of samples and throws exception in case of insufficient number of samples.
         /// </summary>
-        /// <param name="reqNumOfSamples">Number of requiered samples</param>
+        /// <param name="reqNumOfSamples">The requiered number of samples.</param>
         private void CheckReadyness(int reqNumOfSamples = -1)
         {
             reqNumOfSamples = reqNumOfSamples == -1 ? 1 : reqNumOfSamples;
-            if (NumOfSamples < reqNumOfSamples)
+            if (UsedCapacity < reqNumOfSamples)
             {
-                throw new InvalidOperationException($"Insufficient number of samples ({reqNumOfSamples}/{NumOfSamples}).");
+                throw new InvalidOperationException($"Insufficient number of samples ({reqNumOfSamples}/{UsedCapacity}).");
             }
             return;
         }
 
         /// <summary>
-        /// Returns number at the specified position within the moving data window
+        /// Returns a number at the specified position within the moving data window.
         /// </summary>
-        /// <param name="index">Position</param>
-        /// <param name="latestFirst">Specifies logical order (latest..oldest or oldest..latest)</param>
+        /// <param name="index">The zero-based index wthin the window.</param>
+        /// <param name="latestFirst">Specifies a logical order (latest..oldest or oldest..latest).</param>
         public double GetAt(int index, bool latestFirst = false)
         {
             return _dataQueue.GetElementAt(index, latestFirst);
         }
 
         /// <summary>
-        /// Returns weighted average of data samples currently stored in the internal sliding window
+        /// Computes the weighted average of the data currently stored in the window.
         /// </summary>
-        /// <param name="weights">Weights to be used</param>
+        /// <param name="weights">The weights.</param>
         public WeightedAvg GetDataWeightedAvg(double[] weights)
         {
             CheckReadyness(weights.Length);
@@ -86,15 +86,15 @@ namespace RCNet.MathTools
             WeightedAvg wAvg = new WeightedAvg();
             for (int i = numOfSamplesToBeProcessed - 1, j = 0; i >= 0; i--, j++)
             {
-                wAvg.AddSampleValue(_dataQueue.GetElementAt(i, true), weights[j]);
+                wAvg.AddSample(_dataQueue.GetElementAt(i, true), weights[j]);
             }
             return wAvg;
         }
 
         /// <summary>
-        /// Returns weighted average of differences of data samples currently stored in the internal sliding window
+        /// Computes the weighted average of the differences of the data currently stored in the window.
         /// </summary>
-        /// <param name="weights">Weights to be used</param>
+        /// <param name="weights">The weights.</param>
         public WeightedAvg GetDataDiffWeightedAvg(double[] weights)
         {
             CheckReadyness(weights.Length + 1);
@@ -102,15 +102,15 @@ namespace RCNet.MathTools
             WeightedAvg wAvg = new WeightedAvg();
             for (int i = numOfSamplesToBeProcessed - 2, j = 0; i >= 0; i--, j++)
             {
-                wAvg.AddSampleValue(_dataQueue.GetElementAt(i, true) - _dataQueue.GetElementAt(i + 1, true), weights[j]);
+                wAvg.AddSample(_dataQueue.GetElementAt(i, true) - _dataQueue.GetElementAt(i + 1, true), weights[j]);
             }
             return wAvg;
         }
 
         /// <summary>
-        /// Returns linearly weighted average of data samples currently stored in the internal sliding window
+        /// Computes the linearly weighted average of the data in the window.
         /// </summary>
-        /// <param name="reqNumOfSamples">Number of requiered samples</param>
+        /// <param name="reqNumOfSamples">The requiered mumber of samples (-1 means all).</param>
         public WeightedAvg GetDataLinWeightedAvg(int reqNumOfSamples = -1)
         {
             int numOfSamplesToBeProcessed = reqNumOfSamples == -1 ? _dataQueue.Count : reqNumOfSamples;
@@ -118,15 +118,15 @@ namespace RCNet.MathTools
             WeightedAvg wAvg = new WeightedAvg();
             for (int i = numOfSamplesToBeProcessed - 1, w = 1; i >= 0; i--, w++)
             {
-                wAvg.AddSampleValue(_dataQueue.GetElementAt(i, true), w);
+                wAvg.AddSample(_dataQueue.GetElementAt(i, true), w);
             }
             return wAvg;
         }
 
         /// <summary>
-        /// Returns linearly weighted average of differences of data samples currently stored in the internal sliding window
+        /// Computes the linearly weighted average of the differences of the data in the window.
         /// </summary>
-        /// <param name="reqNumOfSamples">Number of requiered samples</param>
+        /// <param name="reqNumOfSamples">The requiered mumber of samples (-1 means all).</param>
         public WeightedAvg GetDataDiffLinWeightedAvg(int reqNumOfSamples = -1)
         {
             int numOfSamplesToBeProcessed = reqNumOfSamples == -1 ? _dataQueue.Count : reqNumOfSamples;
@@ -134,15 +134,15 @@ namespace RCNet.MathTools
             WeightedAvg wAvg = new WeightedAvg();
             for (int i = numOfSamplesToBeProcessed - 2, w = 1; i >= 0; i--, w++)
             {
-                wAvg.AddSampleValue(_dataQueue.GetElementAt(i, true) - _dataQueue.GetElementAt(i + 1, true));
+                wAvg.AddSample(_dataQueue.GetElementAt(i, true) - _dataQueue.GetElementAt(i + 1, true));
             }
             return wAvg;
         }
 
         /// <summary>
-        /// Returns statistics of data samples currently stored in the internal sliding window
+        /// Computes the statistics of the data in the window.
         /// </summary>
-        /// <param name="reqNumOfSamples">Number of requiered samples</param>
+        /// <param name="reqNumOfSamples">The requiered mumber of samples (-1 means all).</param>
         public BasicStat GetDataStat(int reqNumOfSamples = -1)
         {
             int numOfSamplesToBeProcessed = reqNumOfSamples == -1 ? _dataQueue.Count : reqNumOfSamples;
@@ -150,15 +150,15 @@ namespace RCNet.MathTools
             BasicStat stat = new BasicStat();
             for (int i = numOfSamplesToBeProcessed - 1; i >= 0; i--)
             {
-                stat.AddSampleValue(_dataQueue.GetElementAt(i, true));
+                stat.AddSample(_dataQueue.GetElementAt(i, true));
             }
             return stat;
         }
 
         /// <summary>
-        /// Returns statistics of differences of data samples currently stored in the internal sliding window
+        /// Computes the statistics of the differences of the data in the window.
         /// </summary>
-        /// <param name="reqNumOfSamples">Number of requiered samples</param>
+        /// <param name="reqNumOfSamples">The requiered mumber of samples (-1 means all).</param>
         public BasicStat GetDataDiffStat(int reqNumOfSamples = -1)
         {
             int numOfSamplesToBeProcessed = reqNumOfSamples == -1 ? _dataQueue.Count : reqNumOfSamples;
@@ -166,20 +166,20 @@ namespace RCNet.MathTools
             BasicStat stat = new BasicStat();
             for (int i = numOfSamplesToBeProcessed - 2; i >= 0; i--)
             {
-                stat.AddSampleValue(_dataQueue.GetElementAt(i, true) - _dataQueue.GetElementAt(i + 1, true));
+                stat.AddSample(_dataQueue.GetElementAt(i, true) - _dataQueue.GetElementAt(i + 1, true));
             }
             return stat;
         }
 
         /// <summary>
-        /// Returns rescalled range of data samples currently stored in the internal sliding window
+        /// Computes the rescaled range of the data in the window.
         /// </summary>
-        /// <param name="reqNumOfSamples">Number of requiered samples</param>
-        public double GetDataRescalledRange(int reqNumOfSamples = -1)
+        /// <param name="reqNumOfSamples">The requiered mumber of samples (-1 means all).</param>
+        public double GetDataRescaledRange(int reqNumOfSamples = -1)
         {
             int numOfSamplesToBeProcessed = reqNumOfSamples == -1 ? _dataQueue.Count : reqNumOfSamples;
             CheckReadyness(numOfSamplesToBeProcessed);
-            RescalledRange rr = new RescalledRange(numOfSamplesToBeProcessed);
+            RescaledRange rr = new RescaledRange(numOfSamplesToBeProcessed);
             for (int i = numOfSamplesToBeProcessed - 1; i >= 0; i--)
             {
                 rr.AddValue(_dataQueue.GetElementAt(i, true));
@@ -188,14 +188,14 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Returns rescalled range of differences of data samples currently stored in the internal sliding window
+        /// Computes the rescaled range of the differences of the data in the window.
         /// </summary>
-        /// <param name="reqNumOfSamples">Number of requiered samples</param>
-        public double GetDataDiffRescalledRange(int reqNumOfSamples = -1)
+        /// <param name="reqNumOfSamples">The requiered mumber of samples (-1 means all).</param>
+        public double GetDataDiffRescaledRange(int reqNumOfSamples = -1)
         {
             int numOfSamplesToBeProcessed = reqNumOfSamples == -1 ? _dataQueue.Count : reqNumOfSamples;
             CheckReadyness(numOfSamplesToBeProcessed);
-            RescalledRange rr = new RescalledRange(numOfSamplesToBeProcessed - 1);
+            RescaledRange rr = new RescaledRange(numOfSamplesToBeProcessed - 1);
             for (int i = numOfSamplesToBeProcessed - 2; i >= 0; i--)
             {
                 rr.AddValue(_dataQueue.GetElementAt(i, true) - _dataQueue.GetElementAt(i + 1, true));
@@ -204,7 +204,7 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Creates a deep copy of this instance
+        /// Creates the deep copy instance.
         /// </summary>
         public MovingDataWindow DeepClone()
         {
@@ -212,7 +212,7 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Resets the instance to the initial state
+        /// Resets the instance to the initial state.
         /// </summary>
         public void Reset()
         {
@@ -221,12 +221,12 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Adds the sample value into the internal moving data window
+        /// Adds the sample.
         /// </summary>
-        /// <param name="value">Value</param>
-        public void AddSampleValue(double value)
+        /// <param name="sample">The sample.</param>
+        public void AddSample(double sample)
         {
-            _dataQueue.Enqueue(value, true);
+            _dataQueue.Enqueue(sample, true);
             return;
         }
 

@@ -5,56 +5,56 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D
 {
     /// <summary>
-    /// Configuration of the coordinates
+    /// Configuration of the 3D coordinates.
     /// </summary>
     [Serializable]
     public class CoordinatesSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "CoordinatesType";
         //Default values
         /// <summary>
-        /// Default X coordinate
+        /// The default X coordinate.
         /// </summary>
         public const int DefaultX = 0;
         /// <summary>
-        /// Default Y coordinate
+        /// The default Y coordinate.
         /// </summary>
         public const int DefaultY = 0;
         /// <summary>
-        /// Default Z coordinate
+        /// The default Z coordinate.
         /// </summary>
         public const int DefaultZ = 0;
 
         /// <summary>
-        /// X coordinate
+        /// The X coordinate.
         /// </summary>
         public int X { get; }
 
         /// <summary>
-        /// Y coordinate
+        /// The Y coordinate.
         /// </summary>
         public int Y { get; }
 
         /// <summary>
-        /// Z coordinate
+        /// The Z coordinate.
         /// </summary>
         public int Z { get; }
 
         //Constructor
         /// <summary>
-        /// Instantiates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="x">X-Coordinate</param>
-        /// <param name="y">Y-Coordinate</param>
-        /// <param name="z">Z-Coordinate</param>
+        /// <param name="x">The X coordinate.</param>
+        /// <param name="y">The Y coordinate.</param>
+        /// <param name="z">The Z coordinate.</param>
         public CoordinatesSettings(int x = DefaultX,
-                                 int y = DefaultY,
-                                 int z = DefaultZ
-                                 )
+                                   int y = DefaultY,
+                                   int z = DefaultZ
+                                   )
         {
             X = x;
             Y = y;
@@ -66,7 +66,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D
         /// <summary>
         /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public CoordinatesSettings(CoordinatesSettings source)
             : this(source.X, source.Y, source.Z)
         {
@@ -74,9 +74,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D
         }
 
         /// <summary>
-        /// Creates an initialized instance from the given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public CoordinatesSettings(XElement elem)
         {
             //Validation
@@ -91,17 +91,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultX { get { return (X == DefaultX); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultY { get { return (Y == DefaultY); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultZ { get { return (Z == DefaultZ); } }
 

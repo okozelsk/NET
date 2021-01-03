@@ -4,17 +4,18 @@ using System;
 namespace RCNet.MathTools.VectorMath
 {
     /// <summary>
-    /// Represents a vector and implements vector simple operations
+    /// Implements the vector.
     /// </summary>
     [Serializable]
     public class Vector
     {
+        //Attributes
         private readonly double[] _data;
 
         /// <summary>
-        /// Creates an initialized instance
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source vector</param>
+        /// <param name="source">The source vector.</param>
         public Vector(Vector source)
         {
             _data = (double[])source._data.Clone();
@@ -22,10 +23,10 @@ namespace RCNet.MathTools.VectorMath
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="data">Source data</param>
-        /// <param name="copy">Specifies whether to create copy of the data or adopt given instance</param>
+        /// <param name="data">The source data.</param>
+        /// <param name="copy">Specifies whether to create a copy of the source data or whether to use the source data directly.</param>
         public Vector(double[] data, bool copy = true)
         {
             _data = copy ? (double[])data.Clone() : data;
@@ -33,9 +34,9 @@ namespace RCNet.MathTools.VectorMath
         }
 
         /// <summary>
-        /// Creates an initialized instance (all elements sets to zero)
+        /// Creates an initialized zeroized instance.
         /// </summary>
-        /// <param name="length">Vector length</param>
+        /// <param name="length">The vector length.</param>
         public Vector(int length)
         {
             _data = new double[length];
@@ -45,27 +46,27 @@ namespace RCNet.MathTools.VectorMath
 
         //Properties
         /// <summary>
-        /// Vector length
+        /// Gets the vector length.
         /// </summary>
         public int Length { get { return _data.Length; } }
 
         /// <summary>
-        /// Vector data
+        /// Gets the vector data.
         /// </summary>
         public double[] Data { get { return _data; } }
 
         //Methods
         /// <summary>
-        /// Sets all values to specified value
+        /// Sets the vector to specified value.
         /// </summary>
-        /// <param name="value">Value to be populated</param>
+        /// <param name="value">The value to be populated.</param>
         public void Set(double value = 0)
         {
             _data.Populate(value);
         }
 
         /// <summary>
-        /// Creates a copy
+        /// Clones the vector.
         /// </summary>
         public Vector Clone()
         {
@@ -73,9 +74,9 @@ namespace RCNet.MathTools.VectorMath
         }
 
         /// <summary>
-        /// Access to vector's element
+        /// Gets or sets an element.
         /// </summary>
-        /// <param name="idx">Element index</param>
+        /// <param name="idx">The element index.</param>
         public double this[int idx]
         {
             get
@@ -88,10 +89,13 @@ namespace RCNet.MathTools.VectorMath
             }
         }
 
-        //Operations
-        /// <summary>Sums vectors.</summary>
-        /// <param name="v1">First vector</param>
-        /// <param name="v2">Second vector</param>
+        //Operators
+        /// <summary>
+        /// Computes v1 + v2.
+        /// </summary>
+        /// <param name="v1">The vector v1.</param>
+        /// <param name="v2">The vector v2.</param>
+        /// <returns>The resulting vector.</returns>
         public static Vector operator +(Vector v1, Vector v2)
         {
             Vector result = v1.Clone();
@@ -102,9 +106,11 @@ namespace RCNet.MathTools.VectorMath
             return result;
         }
 
-        /// <summary>Adds a scalar to a vector.</summary>
-        /// <param name="v">Vector</param>
-        /// <param name="s">Scalar</param>
+        /// <summary>
+        /// Adds a scalar to the vector.
+        /// </summary>
+        /// <param name="v">The vector.</param>
+        /// <param name="s">The scalar.</param>
         public static Vector operator +(Vector v, double s)
         {
             Vector result = v.Clone();
@@ -115,18 +121,18 @@ namespace RCNet.MathTools.VectorMath
             return result;
         }
 
-        /// <summary>Adds a scalar to a vector.</summary>
-        /// <param name="s">Scalar</param>
-        /// <param name="v">Vector</param>
+        /// <inheritdoc cref="operator +(Vector, double)"/>
         public static Vector operator +(double s, Vector v)
         {
             return v + s;
         }
 
-        //Operations
-        /// <summary>Substracts second vector from first vector.</summary>
-        /// <param name="v1">First vector</param>
-        /// <param name="v2">Second vector</param>
+        /// <summary>
+        /// Computes v1 - v2.
+        /// </summary>
+        /// <param name="v1">The vector v1.</param>
+        /// <param name="v2">The vector v2.</param>
+        /// <returns>The resulting vector.</returns>
         public static Vector operator -(Vector v1, Vector v2)
         {
             Vector result = v1.Clone();
@@ -137,9 +143,11 @@ namespace RCNet.MathTools.VectorMath
             return result;
         }
 
-        /// <summary>Substracts a scalar from a vector.</summary>
-        /// <param name="v">Vector</param>
-        /// <param name="s">Scalar</param>
+        /// <summary>
+        /// Substracts a scalar from the vector.
+        /// </summary>
+        /// <param name="v">The vector.</param>
+        /// <param name="s">The scalar.</param>
         public static Vector operator -(Vector v, double s)
         {
             Vector result = v.Clone();
@@ -150,9 +158,12 @@ namespace RCNet.MathTools.VectorMath
             return result;
         }
 
-        /// <summary>Multiplies vectors elements</summary>
-        /// <param name="v1">First vector</param>
-        /// <param name="v2">Second vector</param>
+        /// <summary>
+        /// Computes v1 * v2.
+        /// </summary>
+        /// <param name="v1">The vector v1.</param>
+        /// <param name="v2">The vector v2.</param>
+        /// <returns>The resulting vector.</returns>
         public static Vector operator *(Vector v1, Vector v2)
         {
             Vector result = v1.Clone();
@@ -163,9 +174,11 @@ namespace RCNet.MathTools.VectorMath
             return result;
         }
 
-        /// <summary>Multiplies a vector by a scalar</summary>
-        /// <param name="v">Vector</param>
-        /// <param name="s">Scalar</param>
+        /// <summary>
+        /// Multiplies a vector by the scalar.
+        /// </summary>
+        /// <param name="v">The vector.</param>
+        /// <param name="s">The scalar.</param>
         public static Vector operator *(Vector v, double s)
         {
             Vector result = v.Clone();
@@ -176,17 +189,18 @@ namespace RCNet.MathTools.VectorMath
             return result;
         }
 
-        /// <summary>Multiplies a vector by a scalar</summary>
-        /// <param name="s">Scalar</param>
-        /// <param name="v">Vector</param>
+        /// <inheritdoc cref="operator *(Vector, double)"/>
         public static Vector operator *(double s, Vector v)
         {
             return v * s;
         }
 
-        /// <summary>Divides vectors elements</summary>
-        /// <param name="v1">First vector (numerator)</param>
-        /// <param name="v2">Second vector (denominator)</param>
+        /// <summary>
+        /// Computes v1 / v2.
+        /// </summary>
+        /// <param name="v1">The vector v1.</param>
+        /// <param name="v2">The vector v2.</param>
+        /// <returns>The resulting vector.</returns>
         public static Vector operator /(Vector v1, Vector v2)
         {
             Vector result = v1.Clone();
@@ -197,9 +211,11 @@ namespace RCNet.MathTools.VectorMath
             return result;
         }
 
-        /// <summary>Divides vector by a scalar</summary>
-        /// <param name="v">Vector</param>
-        /// <param name="s">Scalar</param>
+        /// <summary>
+        /// Divides a vector by the scalar.
+        /// </summary>
+        /// <param name="v">The vector.</param>
+        /// <param name="s">The scalar.</param>
         public static Vector operator /(Vector v, double s)
         {
             Vector result = v.Clone();
@@ -211,4 +227,5 @@ namespace RCNet.MathTools.VectorMath
         }
 
     }//Vector
+
 }//Namespace

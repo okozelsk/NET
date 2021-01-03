@@ -9,24 +9,23 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
 {
     /// <summary>
-    /// Configuration of the group of analog neurons
+    /// Configuration of a group of analog neurons.
     /// </summary>
     [Serializable]
     public class AnalogNeuronGroupSettings : RCNetBaseSettings, INeuronGroupSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "PoolAnalogNeuronGroupType";
+        //Default values
         /// <summary>
-        /// Default value of the firing threshold.
-        /// Every time the new normalized activation value is higher than the previous
-        /// normalized activation value by at least the threshold, it is evaluated as a firing event
+        /// The default value of the firing threshold.
         /// </summary>
         public const double DefaultFiringThreshold = 0.00125d;
         /// <summary>
-        /// Default maximum deepness of historical normalized activation value to be compared with current normalized activation value when evaluating firing event.
+        /// The default value of the maximum age of the past activation for the evaluation of the firing event.
         /// </summary>
         public const int DefaultThresholdMaxRefDeepness = 1;
 
@@ -41,13 +40,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         public IActivationSettings ActivationCfg { get; }
 
         /// <summary>
-        /// A number between 0 and 1 (LT1). Every time the new normalized activation value is higher than the previous
-        /// normalized activation value by at least the threshold, it is evaluated as a firing event.
+        /// The firing threshold value. Every time the current normalized activation is higher than the normalized past reference activation by at least this threshold, it is evaluated as a firing event.
         /// </summary>
         public double FiringThreshold { get; }
 
         /// <summary>
-        /// Maximum deepness of historical normalized activation value to be compared with current normalized activation value when evaluating firing event.
+        /// Maximum age of the past activation for the evaluation of the firing event.
         /// </summary>
         public int ThresholdMaxRefDeepness { get; }
 
@@ -55,7 +53,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         public RandomValueSettings BiasCfg { get; }
 
         /// <summary>
-        /// Neurons' retainment property configuration
+        /// The configuration of the neurons' retainment property.
         /// </summary>
         public RetainmentSettings RetainmentCfg { get; }
 
@@ -67,19 +65,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="name">Name of the neuron group</param>
-        /// <param name="relShare">Specifies how big relative portion of pool's neurons is formed by this group of the neurons</param>
-        /// <param name="activationCfg">Common activation function settings of the groupped neurons</param>
-        /// <param name="predictorsCfg">Configuration of the predictors</param>
-        /// <param name="firingThreshold">
-        /// A number between 0 and 1 (LT1). Every time the new normalized activation value is higher than the previous
-        /// normalized activation value by at least the threshold, it is evaluated as a firing event.
-        /// </param>
-        /// <param name="thresholdMaxRefDeepness">Maximum deepness of historical normalized activation value to be compared with current normalized activation value when evaluating firing event.</param>
-        /// <param name="biasCfg">Each neuron within the group receives constant input bias. Value of the neuron's bias is driven by this random settings</param>
-        /// <param name="retainmentCfg">Neurons' retainment property configuration</param>
+        /// <param name="name">The name of the neuron group.</param>
+        /// <param name="relShare">Specifies how big relative portion of pool's neurons is formed by this group of the neurons.</param>
+        /// <param name="activationCfg">The common configuration of the neurons' activation function.</param>
+        /// <param name="predictorsCfg">The common configuration of the predictors provider.</param>
+        /// <param name="firingThreshold">The firing threshold value. Every time the current normalized activation is higher than the normalized past reference activation by at least this threshold, it is evaluated as a firing event.</param>
+        /// <param name="thresholdMaxRefDeepness">Maximum age of the past activation for the evaluation of the firing event.</param>
+        /// <param name="biasCfg">The configuration of the constant input bias.</param>
+        /// <param name="retainmentCfg">The configuration of the neurons' retainment property.</param>
         public AnalogNeuronGroupSettings(string name,
                                          double relShare,
                                          IActivationSettings activationCfg,
@@ -103,9 +98,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         }
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public AnalogNeuronGroupSettings(AnalogNeuronGroupSettings source)
             : this(source.Name, source.RelShare, source.ActivationCfg, source.PredictorsCfg, source.FiringThreshold, source.ThresholdMaxRefDeepness,
                   source.BiasCfg, source.RetainmentCfg)
@@ -116,7 +111,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings.</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public AnalogNeuronGroupSettings(XElement elem)
         {
             //Validation
@@ -145,12 +140,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultFiringThreshold { get { return (FiringThreshold == DefaultFiringThreshold); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultThresholdMaxRefDeepness { get { return (ThresholdMaxRefDeepness == DefaultThresholdMaxRefDeepness); } }
 

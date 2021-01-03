@@ -8,22 +8,22 @@ using System.Threading.Tasks;
 namespace RCNet.Neural.Network.NonRecurrent.FF
 {
     /// <summary>
-    /// Implements the feed forward network supporting multiple hidden layers
+    /// Implements the feed forward network supporting multiple hidden layers.
     /// </summary>
     [Serializable]
     public class FeedForwardNetwork : INonRecurrentNetwork
     {
         //Constants
         /// <summary>
-        /// Dummy bias input value
+        /// The dummy bias input.
         /// </summary>
         public const double BiasValue = 1d;
         /// <summary>
-        /// Default minimum weight range limit for random initialization
+        /// The default minimum weight for the random initialization.
         /// </summary>
         public const double WeightDefaultIniMin = 0.005;
         /// <summary>
-        /// Default maximum weight range limit for random initialization
+        /// The default maximum weight for the random initialization.
         /// </summary>
         public const double WeightDefaultIniMax = 0.05;
 
@@ -33,11 +33,11 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// <inheritdoc/>
         public int NumOfOutputValues { get; }
         /// <summary>
-        /// Total number of network's neurons
+        /// The total number of network's neurons.
         /// </summary>
         public int NumOfNeurons { get; private set; }
         /// <summary>
-        /// Collection of network's layers
+        /// The collection of the network's layers.
         /// </summary>
         public List<Layer> LayerCollection { get; }
 
@@ -48,10 +48,10 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
 
         //Constructor
         /// <summary>
-        /// Instantiates an unitialized feed forward network
+        /// Creates an unitialized instance.
         /// </summary>
-        /// <param name="numOfInputValues">Number of network's input values</param>
-        /// <param name="numOfOutputValues">Number of network's output values</param>
+        /// <param name="numOfInputValues">The number of the network's input values.</param>
+        /// <param name="numOfOutputValues">The number of the network's output values.</param>
         public FeedForwardNetwork(int numOfInputValues, int numOfOutputValues)
         {
             //Input/Output counts
@@ -68,29 +68,29 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         }
 
         /// <summary>
-        /// Instantiates an initialized feed forward network
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="numOfInputValues">Number of network's input values</param>
-        /// <param name="numOfOutputValues">Number of network's output values</param>
-        /// <param name="settings">Configuration parameters</param>
-        public FeedForwardNetwork(int numOfInputValues, int numOfOutputValues, FeedForwardNetworkSettings settings)
+        /// <param name="numOfInputValues">The number of the network's input values.</param>
+        /// <param name="numOfOutputValues">The number of the network's output values.</param>
+        /// <param name="cfg">The configuration of the network and associated trainer.</param>
+        public FeedForwardNetwork(int numOfInputValues, int numOfOutputValues, FeedForwardNetworkSettings cfg)
             : this(numOfInputValues, numOfOutputValues)
         {
             Random rand = new Random(1);
             //Initialize FF network
-            for (int i = 0; i < settings.HiddenLayersCfg.HiddenLayerCfgCollection.Count; i++)
+            for (int i = 0; i < cfg.HiddenLayersCfg.HiddenLayerCfgCollection.Count; i++)
             {
-                AddLayer(settings.HiddenLayersCfg.HiddenLayerCfgCollection[i].NumOfNeurons,
-                         (AFAnalogBase)ActivationFactory.CreateAF(settings.HiddenLayersCfg.HiddenLayerCfgCollection[i].ActivationCfg, rand)
+                AddLayer(cfg.HiddenLayersCfg.HiddenLayerCfgCollection[i].NumOfNeurons,
+                         (AFAnalogBase)ActivationFactory.CreateAF(cfg.HiddenLayersCfg.HiddenLayerCfgCollection[i].ActivationCfg, rand)
                          );
             }
-            FinalizeStructure((AFAnalogBase)ActivationFactory.CreateAF(settings.OutputActivationCfg, rand));
+            FinalizeStructure((AFAnalogBase)ActivationFactory.CreateAF(cfg.OutputActivationCfg, rand));
             return;
         }
 
         //Properties
         /// <summary>
-        /// Indicates whether the network structure is finalized
+        /// Indicates the network structure is finalized.
         /// </summary>
         public bool Finalized { get { return NumOfNeurons > 0; } }
         /// <inheritdoc/>
@@ -100,9 +100,9 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
 
         //Static methods
         /// <summary>
-        /// Tests if the activation function specified by its given configuration can be used in FF network's output layer
+        /// Tests whether the activation function can be used as the FF network's output layer activation.
         /// </summary>
-        /// <param name="activationCfg">Activation configuration</param>
+        /// <param name="activationCfg">The configuration of the activation function.</param>
         public static bool IsAllowedOutputAF(IActivationSettings activationCfg)
         {
             if (activationCfg.TypeOfActivation != ActivationType.Analog)
@@ -118,9 +118,9 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         }
 
         /// <summary>
-        /// Tests if the activation function specified by its given configuration can be used in FF network's hidden layer
+        /// Tests whether the activation function can be used as the FF network's hidden layer activation.
         /// </summary>
-        /// <param name="activationCfg">Activation configuration</param>
+        /// <param name="activationCfg">The configuration of the activation function.</param>
         public static bool IsAllowedHiddenAF(IActivationSettings activationCfg)
         {
             if (activationCfg.TypeOfActivation != ActivationType.Analog)
@@ -128,7 +128,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
                 return false;
             }
             AFAnalogBase analogAF = (AFAnalogBase)ActivationFactory.CreateAF(activationCfg, new Random(0));
-            if (!analogAF.SupportsDerivative || analogAF.RequiresMultipleInput)
+            if (!analogAF.SupportsDerivative || analogAF.DependsOnSorround)
             {
                 return false;
             }
@@ -137,15 +137,15 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
 
         //Methods
         /// <summary>
-        /// Adds the new hidden layer into this network
+        /// Adds the new hidden layer into the network structure.
         /// </summary>
-        /// <param name="numOfNeurons">Number of layer's neurons</param>
-        /// <param name="activation">Each of layer's neuron will be activated by this activation function</param>
+        /// <param name="numOfNeurons">The number of layer's neurons.</param>
+        /// <param name="activation">The activation function of the layer neurons.</param>
         public void AddLayer(int numOfNeurons, AFAnalogBase activation)
         {
             if (!Finalized)
             {
-                if(activation.RequiresMultipleInput)
+                if (activation.DependsOnSorround)
                 {
                     throw new ArgumentException("Activation requires multiple input for the Compute method. It is not allowed for the hidden layer.", "activation");
                 }
@@ -160,16 +160,16 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         }
 
         /// <summary>
-        /// Finalizes the network internal structure and locks it against further changes.
+        /// Finalizes the network internal structure and locks it against the further changes.
         /// </summary>
-        /// <param name="outputActivation">Activation function of the output layer's neurons</param>
+        /// <param name="outputActivation">The activation function of the output layer.</param>
         public void FinalizeStructure(AFAnalogBase outputActivation)
         {
             if (Finalized)
             {
                 throw new InvalidOperationException($"Network structure has been already finalized.");
             }
-            if (outputActivation.RequiresMultipleInput && NumOfOutputValues < 2)
+            if (outputActivation.DependsOnSorround && NumOfOutputValues < 2)
             {
                 throw new ArgumentException("Activation requires multiple input for the Compute method but number of output values is less than 2.", "outputActivation");
             }
@@ -203,9 +203,9 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         }
 
         /// <summary>
-        /// Applies the Nguyen Widrow randomization method.
+        /// Randomizes internal weights using the Nguyen Widrow method.
         /// </summary>
-        /// <param name="rand">The random generator to be used</param>
+        /// <param name="rand">The random generator to be used.</param>
         private void RandomizeWeightsByNguyenWidrowMethod(Random rand)
         {
             foreach (Layer layer in LayerCollection)
@@ -271,20 +271,12 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         }
 
         /// <summary>
-        /// Computes network output values (slower version for training purposes)
+        /// Computes the output values (slower version for training purposes).
         /// </summary>
-        /// <param name="input">
-        /// Input values to be passed into the network
-        /// </param>
-        /// <param name="layerInputCollection">
-        /// It must be an instantiated empty collection.
-        /// Function will add inputs for each network layer into the collection.
-        /// </param>
-        /// <param name="flatDerivatives">
-        /// It must be an allocated array of length = NumOfNeurons (flat structure).
-        /// Function will set the activation derivatives into the array.
-        /// </param>
-        /// <returns>Computed output values</returns>
+        /// <param name="input">The input values to be passed into the network.</param>
+        /// <param name="layerInputCollection">It must be the instantiated empty collection. Function will add inputs for each network layer into this collection.</param>
+        /// <param name="flatDerivatives">It must be the allocated array of length = NumOfNeurons (flat structure). Function will set the activation derivatives into this array.</param>
+        /// <returns>The computed output values.</returns>
         public double[] Compute(double[] input, List<double[]> layerInputCollection, double[] flatDerivatives)
         {
             double[] result = input;
@@ -330,7 +322,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         }
 
         /// <summary>
-        /// Returns copy of all network internal weights (in a flat format)
+        /// Gets the copy of internal weights (in a flat format).
         /// </summary>
         public double[] GetWeightsCopy()
         {
@@ -338,9 +330,9 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         }
 
         /// <summary>
-        /// Adopts the given weights.
+        /// Sets the internal weights.
         /// </summary>
-        /// <param name="newFlatWeights">New weights to be adopted (in a flat format)</param>
+        /// <param name="newFlatWeights">The new weights to be adopted (in a flat format).</param>
         public void SetWeights(double[] newFlatWeights)
         {
             newFlatWeights.CopyTo(_flatWeights, 0);
@@ -355,44 +347,44 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
 
         //Inner classes
         /// <summary>
-        /// Class represents the layer of the feed forward network
+        /// Implements the layer of the feed forward network.
         /// </summary>
         [Serializable]
         public class Layer
         {
             //Attribute properties
             /// <summary>
-            /// The activation function of the layer's neurons
+            /// The activation function of the layer.
             /// </summary>
             public AFAnalogBase Activation { get; }
             /// <summary>
-            /// Number of layer input nodes
+            /// The number of layer input nodes.
             /// </summary>
             public int NumOfInputNodes { get; private set; }
             /// <summary>
-            /// Number of layer neurons
+            /// The number of layer neurons.
             /// </summary>
             public int NumOfLayerNeurons { get; }
             /// <summary>
-            /// Starting index of this layer weights in a flat structure
+            /// The starting index of this layer weights in a flat structure.
             /// </summary>
             public int WeightsStartFlatIdx { get; private set; }
             /// <summary>
-            /// Starting index of this layer biases in a flat structure
+            /// The starting index of this layer biases in a flat structure.
             /// </summary>
             public int BiasesStartFlatIdx { get; private set; }
             /// <summary>
-            /// Starting index of this layer neurons in a flat structure
+            /// The starting index of this layer neurons in a flat structure.
             /// </summary>
             public int NeuronsStartFlatIdx { get; private set; }
 
 
             //Constructor
             /// <summary>
-            /// Instantiates the layer
+            /// Creates an initialized instance.
             /// </summary>
-            /// <param name="numOfNeurons">Number of layer's neurons</param>
-            /// <param name="activation">Each of the layer's neuron will be activated by this activation function</param>
+            /// <param name="numOfNeurons">The number of layer neurons.</param>
+            /// <param name="activation">The activation function of the layer.</param>
             public Layer(int numOfNeurons, AFAnalogBase activation)
             {
                 //Check correctness
@@ -412,17 +404,17 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
 
             //Properties
             /// <summary>
-            /// Indicates whether the layer structure is finalized
+            /// Indicates the layer structure is finalized.
             /// </summary>
             public bool Finalized { get { return NumOfInputNodes > 0; } }
 
             //Methods
             /// <summary>
-            /// Finalizes the layer structure
+            /// Finalizes the layer structure.
             /// </summary>
-            /// <param name="numOfInputNodes">Number of input nodes</param>
-            /// <param name="neuronsFlatStartIdx">Starting index of this layer neurons in a flat structure</param>
-            /// <param name="weightsFlatStartIdx">Starting index of this layer weights in a flat structure</param>
+            /// <param name="numOfInputNodes">The number of input nodes.</param>
+            /// <param name="neuronsFlatStartIdx">The starting index of this layer neurons in a flat structure.</param>
+            /// <param name="weightsFlatStartIdx">The starting index of this layer weights in a flat structure.</param>
             internal void FinalizeStructure(int numOfInputNodes, int neuronsFlatStartIdx, int weightsFlatStartIdx)
             {
                 NumOfInputNodes = numOfInputNodes;
@@ -433,7 +425,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             }
 
             /// <summary>
-            /// Creates the deep copy instance of this layer
+            /// Creates the deep copy instance of this layer.
             /// </summary>
             internal Layer DeepClone()
             {
@@ -448,12 +440,12 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             }
 
             /// <summary>
-            /// Computes the states of the layer's neurons
+            /// Computes the layer neurons.
             /// </summary>
-            /// <param name="inputs">The inputs for this layer</param>
-            /// <param name="flatWeights">Network's weights in a flat structure</param>
-            /// <param name="flatDerivatives">Network's neuron state derivatives in a flat structure</param>
-            /// <returns>The layer's neurons states</returns>
+            /// <param name="inputs">The inputs for this layer.</param>
+            /// <param name="flatWeights">The network's weights in a flat structure.</param>
+            /// <param name="flatDerivatives">The network's derivatives in a flat structure.</param>
+            /// <returns>The layer activations.</returns>
             internal double[] Compute(double[] inputs, double[] flatWeights, double[] flatDerivatives = null)
             {
                 int weightFlatIdx = WeightsStartFlatIdx;

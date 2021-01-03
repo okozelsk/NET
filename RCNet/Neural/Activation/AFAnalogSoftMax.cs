@@ -5,14 +5,14 @@ using System;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Implements the Soft Max activation function
+    /// Implements the Soft Max activation function.
     /// </summary>
     [Serializable]
     public class AFAnalogSoftMax : AFAnalogBase
     {
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         public AFAnalogSoftMax()
             : base(Interval.IntZP1)
@@ -22,19 +22,19 @@ namespace RCNet.Neural.Activation
 
         //Properties
         /// <inheritdoc/>
-        public override bool RequiresMultipleInput { get { return true; } }
+        public override bool DependsOnSorround { get { return true; } }
 
         //Methods
         /// <inheritdoc/>
         public override double Compute(double x)
         {
-            throw new InvalidOperationException("Called the Compute(double) method instead of the Compute(double[], double[]) method. SoftMax requires multiple input.");
+            throw new InvalidOperationException("The wrong version of the Compute method was called. It was called Compute(double) method instead of the Compute(double[], double[]) method. SoftMax method requires the sorroundings.");
         }
 
         /// <inheritdoc/>
         public override void Compute(double[] xVector, double[] cVector)
         {
-            if(xVector.Length < 2)
+            if (xVector.Length < 2)
             {
                 throw new ArgumentException("The length of the xVector must be GE to 2.", "xVector");
             }

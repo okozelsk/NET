@@ -5,32 +5,32 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
     /// <summary>
-    /// Configuration of the continuous input feeding regime
+    /// Configuration of the continuous input feeding regime.
     /// </summary>
     [Serializable]
     public class FeedingContinuousSettings : RCNetBaseSettings, IFeedingSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "NPInpFeedingContinuousType";
         /// <summary>
-        /// Automatic boot cycles (code)
+        /// The string code for the automatic boot cycles.
         /// </summary>
         public const string AutoBootCyclesCode = "Auto";
         /// <summary>
-        /// Automatic boot cycles (num)
+        /// The numeric code for the automatic boot cycles.
         /// </summary>
         public const int AutoBootCyclesNum = -1;
         /// <summary>
-        /// Default value of parameter specifying number of boot-cycles
+        /// The default value of the parameter specifying the number of the boot cycles.
         /// </summary>
         public const int DefaultBootCycles = AutoBootCyclesNum;
 
         //Attribute properties
         /// <summary>
-        /// Number of boot cycles
+        /// Specifies the number of the boot cycles.
         /// </summary>
         public int BootCycles { get; }
 
@@ -38,7 +38,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Creates an itialized instance.
         /// </summary>
-        /// <param name="bootCycles">Number of boot cycles</param>
+        /// <param name="bootCycles">Specifies the number of the boot cycles.</param>
         public FeedingContinuousSettings(int bootCycles = DefaultBootCycles)
         {
             BootCycles = bootCycles;
@@ -49,7 +49,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public FeedingContinuousSettings(FeedingContinuousSettings source)
             : this(source.BootCycles)
         {
@@ -57,9 +57,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Creates an initialized instance from the given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public FeedingContinuousSettings(XElement elem)
         {
             //Validation
@@ -76,7 +76,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public InputEncoder.InputFeedingType FeedingType { get { return InputEncoder.InputFeedingType.Continuous; } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultBootCycles { get { return (BootCycles == DefaultBootCycles); } }
 

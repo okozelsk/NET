@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using RCNet.MathTools;
+﻿using RCNet.MathTools;
 using RCNet.Queue;
+using System;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 {
     /// <summary>
-    /// Traced neuron's firing.
+    /// Implements the "FiringTrace" predictor computer.
     /// </summary>
+    /// <remarks>
+    /// The predictor value expresses the trace of the neuron's firings over the time.
+    /// </remarks>
     [Serializable]
     public class PredictorFiringTrace : IPredictor
     {
@@ -21,9 +22,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="cfg">Configuration of the predictor</param>
+        /// <param name="cfg">The configuration of the predictor.</param>
         public PredictorFiringTrace(PredictorFiringTraceSettings cfg)
         {
             Cfg = cfg;
@@ -64,7 +65,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
                        )
         {
             PredictorFiringTraceSettings cfg = (PredictorFiringTraceSettings)Cfg;
-            if(cfg.Window == PredictorFiringTraceSettings.NAWindowNum)
+            if (cfg.Window == PredictorFiringTraceSettings.NAWindowNum)
             {
                 return _continuousTrace;
             }
@@ -73,7 +74,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
                 if (firingMDW.Count >= cfg.Window)
                 {
                     double trace = 0d;
-                    for(int i = cfg.Window - 1; i >= 0; i--)
+                    for (int i = cfg.Window - 1; i >= 0; i--)
                     {
                         trace *= (1d - cfg.Fading);
                         trace += firingMDW.GetElementAt(i, true);

@@ -8,26 +8,26 @@ using System.Globalization;
 namespace RCNet.Neural.Data
 {
     /// <summary>
-    /// Bundle of input vector and desired output vector pairs
+    /// Implements the bundle of the input and output vector pairs.
     /// </summary>
     [Serializable]
     public class VectorBundle
     {
         //Constants
         /// <summary>
-        /// Maximum ratio of one fold data
+        /// The maximum ratio of one data fold.
         /// </summary>
         public const double MaxRatioOfFoldData = 0.5d;
 
 
         //Attributes
         /// <summary>
-        /// Collection of input vectors
+        /// The collection of input vectors.
         /// </summary>
         public List<double[]> InputVectorCollection { get; }
 
         /// <summary>
-        /// Collection of output vectors (desired values)
+        /// The collection of output vectors.
         /// </summary>
         public List<double[]> OutputVectorCollection { get; }
 
@@ -44,10 +44,10 @@ namespace RCNet.Neural.Data
 
         //Constructors
         /// <summary>
-        /// Creates shallow copy of given lists
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="inputVectorCollection">Collection of input vectors</param>
-        /// <param name="outputVectorCollection">Collection of output vectors</param>
+        /// <param name="inputVectorCollection">The collection of input vectors.</param>
+        /// <param name="outputVectorCollection">The collection of output vectors.</param>
         public VectorBundle(IEnumerable<double[]> inputVectorCollection, IEnumerable<double[]> outputVectorCollection)
         {
             InputVectorCollection = new List<double[]>(inputVectorCollection);
@@ -56,9 +56,9 @@ namespace RCNet.Neural.Data
         }
 
         /// <summary>
-        /// Instantiates an empty bundle
+        /// Creates an uninitialized instance.
         /// </summary>
-        /// <param name="expectedNumOfPairs">Expected number of sample pairs</param>
+        /// <param name="expectedNumOfPairs">The expected number of vector pairs.</param>
         public VectorBundle(int expectedNumOfPairs)
         {
             InputVectorCollection = new List<double[]>(expectedNumOfPairs);
@@ -67,10 +67,10 @@ namespace RCNet.Neural.Data
         }
 
         /// <summary>
-        /// Adds sample data pair into the bundle
+        /// Adds the vector pair into the bundle.
         /// </summary>
-        /// <param name="inputVector">Input vector</param>
-        /// <param name="outputVector">Output vector (ideal)</param>
+        /// <param name="inputVector">The input vector.</param>
+        /// <param name="outputVector">The output vector.</param>
         public void AddPair(double[] inputVector, double[] outputVector)
         {
             InputVectorCollection.Add(inputVector);
@@ -79,9 +79,9 @@ namespace RCNet.Neural.Data
         }
 
         /// <summary>
-        /// Shuffles stored pairs
+        /// Shuffles the vector pairs.
         /// </summary>
-        /// <param name="rand">Random object</param>
+        /// <param name="rand">The random object to be used.</param>
         public void Shuffle(Random rand)
         {
             List<double[]> l1 = new List<double[]>(InputVectorCollection);
@@ -98,16 +98,22 @@ namespace RCNet.Neural.Data
             return;
         }
 
+        /// <summary>
+        /// Creates the shallow copy of this bundle.
+        /// </summary>
+        public VectorBundle CreateShallowCopy()
+        {
+            return new VectorBundle(new List<double[]>(InputVectorCollection), new List<double[]>(OutputVectorCollection));
+        }
+
         //Static methods
         /// <summary>
-        /// Loads the data and prepares VectorBundle for continuous feeding.
-        /// The first line of the csv file must contain field names. These field names must
-        /// match the names of the input and output fields.
+        /// Loads the vector bundle from the csv data (continuous input feeding).
         /// </summary>
-        /// <param name="csvData"> Data in csv format</param>
-        /// <param name="inputFieldNameCollection"> Input fields to be extracted from a file</param>
-        /// <param name="outputFieldNameCollection"> Output fields to be extracted from a file</param>
-        /// <param name="remainingInputVector"> Returned the last input vector unused in the bundle </param>
+        /// <param name="csvData">The csv data.</param>
+        /// <param name="inputFieldNameCollection">The names of input fields.</param>
+        /// <param name="outputFieldNameCollection">The names of output fields.</param>
+        /// <param name="remainingInputVector">The last unused input vector.</param>
         public static VectorBundle Load(CsvDataHolder csvData,
                                         List<string> inputFieldNameCollection,
                                         List<string> outputFieldNameCollection,
@@ -119,15 +125,20 @@ namespace RCNet.Neural.Data
             List<int> outputFieldIndexes = new List<int>();
             if (inputFieldNameCollection != null)
             {
-                //Check if the recognized data delimiter works properly
+                //Check the number of fields
                 if (csvData.ColNameCollection.NumOfStringValues < inputFieldNameCollection.Count)
                 {
-                    throw new FormatException("1st row of the file doesn't contain delimited column names or the value delimiter was not properly recognized.");
+                    throw new ArgumentException("The number of column names in csv data is less than the number of the input fields.", "csvData");
                 }
                 //Collect indexes of allowed input fields
                 foreach (string name in inputFieldNameCollection)
                 {
-                    inputFieldIndexes.Add(csvData.ColNameCollection.IndexOf(name));
+                    int fieldIdx = csvData.ColNameCollection.IndexOf(name);
+                    if (fieldIdx == -1)
+                    {
+                        throw new ArgumentException($"The input field name {name} was not found in the csv data column names.", "csvData");
+                    }
+                    inputFieldIndexes.Add(fieldIdx);
                 }
             }
             else
@@ -138,7 +149,12 @@ namespace RCNet.Neural.Data
             }
             for (int i = 0; i < outputFieldNameCollection.Count; i++)
             {
-                outputFieldIndexes.Add(csvData.ColNameCollection.IndexOf(outputFieldNameCollection[i]));
+                int fieldIdx = csvData.ColNameCollection.IndexOf(outputFieldNameCollection[i]);
+                if (fieldIdx == -1)
+                {
+                    throw new ArgumentException($"The output field name {outputFieldNameCollection[i]} was not found in the csv data column names.", "csvData");
+                }
+                outputFieldIndexes.Add(fieldIdx);
             }
             //Prepare input and output vectors
             List<double[]> inputVectorCollection = new List<double[]>(csvData.DataRowCollection.Count);
@@ -149,7 +165,7 @@ namespace RCNet.Neural.Data
                 double[] inputVector = new double[inputFieldIndexes.Count];
                 for (int j = 0; j < inputFieldIndexes.Count; j++)
                 {
-                    inputVector[j] = csvData.DataRowCollection[i].GetValue(inputFieldIndexes[j]).ParseDouble(true, $"Can't parse double value {csvData.DataRowCollection[i].GetValue(inputFieldIndexes[j])}.");
+                    inputVector[j] = csvData.DataRowCollection[i].GetValueAt(inputFieldIndexes[j]).ParseDouble(true, $"Can't parse double value {csvData.DataRowCollection[i].GetValueAt(inputFieldIndexes[j])}.");
                 }
                 if (i < csvData.DataRowCollection.Count - 1)
                 {
@@ -167,7 +183,7 @@ namespace RCNet.Neural.Data
                     double[] outputVector = new double[outputFieldIndexes.Count];
                     for (int j = 0; j < outputFieldIndexes.Count; j++)
                     {
-                        outputVector[j] = csvData.DataRowCollection[i].GetValue(outputFieldIndexes[j]).ParseDouble(true, $"Can't parse double value {csvData.DataRowCollection[i].GetValue(outputFieldIndexes[j])}.");
+                        outputVector[j] = csvData.DataRowCollection[i].GetValueAt(outputFieldIndexes[j]).ParseDouble(true, $"Can't parse double value {csvData.DataRowCollection[i].GetValueAt(outputFieldIndexes[j])}.");
                     }
                     outputVectorCollection.Add(outputVector);
                 }
@@ -177,34 +193,32 @@ namespace RCNet.Neural.Data
         }
 
         /// <summary>
-        /// Loads the data and prepares VectorBundle for patterned feeding.
-        /// The data row must begin with at least one complete set of values for defined repetitive variables.
-        /// The data row must end with values of defined output variables.
+        /// Loads the vector bundle from the csv data (patterned input feeding).
         /// </summary>
-        /// <param name="csvData"> Data in csv format</param>
-        /// <param name="numOfOutputVariables"> Num of output variables (fields)</param>
-        public static VectorBundle Load(CsvDataHolder csvData, int numOfOutputVariables)
+        /// <param name="csvData">The csv data.</param>
+        /// <param name="numOfOutputFields">The number of output fields.</param>
+        public static VectorBundle Load(CsvDataHolder csvData, int numOfOutputFields)
         {
             VectorBundle bundle = new VectorBundle();
             foreach (DelimitedStringValues dataRow in csvData.DataRowCollection)
             {
-                int numOfInputValues = dataRow.NumOfStringValues - numOfOutputVariables;
+                int numOfInputValues = dataRow.NumOfStringValues - numOfOutputFields;
                 //Check data length
                 if (numOfInputValues <= 0)
                 {
-                    throw new FormatException("Incorrect length of data row.");
+                    throw new ArgumentException("Incorrect length of data row.", "csvData");
                 }
                 //Input data
                 double[] inputData = new double[numOfInputValues];
                 for (int i = 0; i < numOfInputValues; i++)
                 {
-                    inputData[i] = dataRow.GetValue(i).ParseDouble(true, $"Can't parse double data value {dataRow.GetValue(i)}.");
+                    inputData[i] = dataRow.GetValueAt(i).ParseDouble(true, $"Can't parse double data value {dataRow.GetValueAt(i)}.");
                 }
                 //Output data
-                double[] outputData = new double[numOfOutputVariables];
-                for (int i = 0; i < numOfOutputVariables; i++)
+                double[] outputData = new double[numOfOutputFields];
+                for (int i = 0; i < numOfOutputFields; i++)
                 {
-                    outputData[i] = dataRow.GetValue(numOfInputValues + i).ParseDouble(true, $"Can't parse double data value {dataRow.GetValue(numOfInputValues + i)}.");
+                    outputData[i] = dataRow.GetValueAt(numOfInputValues + i).ParseDouble(true, $"Can't parse double data value {dataRow.GetValueAt(numOfInputValues + i)}.");
                 }
                 bundle.AddPair(inputData, outputData);
             }
@@ -212,9 +226,9 @@ namespace RCNet.Neural.Data
         }
 
         /// <summary>
-        /// Adds data from given bundle into this bundle
+        /// Adds all the vector pairs from another vector bundle.
         /// </summary>
-        /// <param name="data">Data to be added</param>
+        /// <param name="data">Another vector bundle.</param>
         public void Add(VectorBundle data)
         {
             InputVectorCollection.AddRange(data.InputVectorCollection);
@@ -225,13 +239,10 @@ namespace RCNet.Neural.Data
         //Methods
         /// <summary>
         /// Splits this bundle to a collection of smaller folds (sub-bundles) suitable for the cross-validation.
-        /// When the binBorder is specified then all output features are considered as binary
-        /// within the "one takes all" group and function then keeps balanced ratios of 0 and 1
-        /// for every output feature and fold.
         /// </summary>
-        /// <param name="foldDataRatio">Requested ratio of the samples constituting one fold (sub-bundle).</param>
-        /// <param name="binBorder">When specified then method keeps balanced ratios of 0 and 1 values in each fold sub-bundle.</param>
-        /// <returns>Collection of created folds.</returns>
+        /// <param name="foldDataRatio">The requested ratio of the samples constituting the single fold (sub-bundle).</param>
+        /// <param name="binBorder">When the binBorder is specified then all the output features are considered as binary features within the one-takes-all group and function then keeps balanced ratios of 0 and 1 for every output feature and the fold.</param>
+        /// <returns>A collection of the created folds.</returns>
         public List<VectorBundle> Folderize(double foldDataRatio, double binBorder = double.NaN)
         {
             if (OutputVectorCollection.Count < 2)
@@ -247,7 +258,7 @@ namespace RCNet.Neural.Data
             //Prelimitary fold size estimation
             int foldSize = Math.Max(1, (int)Math.Round(OutputVectorCollection.Count * foldDataRatio, 0));
             //Prelimitary number of folds
-            int numOfFolds = OutputVectorCollection.Count / foldSize;
+            int numOfFolds = (int)Math.Round((double)OutputVectorCollection.Count / foldSize);
             //Folds creation
             if (double.IsNaN(binBorder))
             {
@@ -276,7 +287,7 @@ namespace RCNet.Neural.Data
             {
                 //Binary outputs -> keep balanced ratios of outputs
                 int numOfOutputs = OutputVectorCollection[0].Length;
-                if(numOfOutputs == 1)
+                if (numOfOutputs == 1)
                 {
                     //Special case there is only one binary output
                     //Investigation of the output data metrics
@@ -361,13 +372,13 @@ namespace RCNet.Neural.Data
                         int numOf1 = 0;
                         for (int outFeatureIdx = 0; outFeatureIdx < numOfOutputs; outFeatureIdx++)
                         {
-                            if(OutputVectorCollection[sampleIdx][outFeatureIdx] >= binBorder)
+                            if (OutputVectorCollection[sampleIdx][outFeatureIdx] >= binBorder)
                             {
                                 outBin1SampleIdxs[outFeatureIdx].Add(sampleIdx);
                                 ++numOf1;
                             }
                         }
-                        if(numOf1 != 1)
+                        if (numOf1 != 1)
                         {
                             throw new ArgumentException($"Data are inconsistent on data index {sampleIdx.ToString(CultureInfo.InvariantCulture)}. Output vector has {numOf1.ToString(CultureInfo.InvariantCulture)} feature(s) having bin value 1.", "binBorder");
                         }
@@ -380,19 +391,19 @@ namespace RCNet.Neural.Data
                         maxNumOfFolds = Math.Min(outFeatureMaxFolds, maxNumOfFolds);
                     }
                     //Correct the number of folds to be created
-                    if(numOfFolds > maxNumOfFolds)
+                    if (numOfFolds > maxNumOfFolds)
                     {
                         numOfFolds = maxNumOfFolds;
                     }
                     //Create the folds
-                    for(int foldIdx = 0; foldIdx < numOfFolds; foldIdx++)
+                    for (int foldIdx = 0; foldIdx < numOfFolds; foldIdx++)
                     {
                         foldCollection.Add(new VectorBundle());
                     }
                     //Samples distribution
                     for (int outFeatureIdx = 0; outFeatureIdx < numOfOutputs; outFeatureIdx++)
                     {
-                        for(int bin1SampleRefIdx = 0; bin1SampleRefIdx < outBin1SampleIdxs[outFeatureIdx].Count; bin1SampleRefIdx++)
+                        for (int bin1SampleRefIdx = 0; bin1SampleRefIdx < outBin1SampleIdxs[outFeatureIdx].Count; bin1SampleRefIdx++)
                         {
                             int foldIdx = bin1SampleRefIdx % foldCollection.Count;
                             int dataIdx = outBin1SampleIdxs[outFeatureIdx][bin1SampleRefIdx];

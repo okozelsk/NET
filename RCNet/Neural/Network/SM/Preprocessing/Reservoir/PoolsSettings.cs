@@ -7,26 +7,26 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 {
     /// <summary>
-    /// Collection of the pools configurations
+    /// Configuration of the pool configurations.
     /// </summary>
     [Serializable]
     public class PoolsSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "ResStructPoolsType";
 
         //Attribute properties
         /// <summary>
-        /// Collection of pools settings
+        /// The collection of the pool configurations.
         /// </summary>
         public List<PoolSettings> PoolCfgCollection { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         private PoolsSettings()
         {
@@ -35,9 +35,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="poolCfgCollection">Pool settings collection</param>
+        /// <param name="poolCfgCollection">The collection of the pool configurations.</param>
         public PoolsSettings(IEnumerable<PoolSettings> poolCfgCollection)
             : this()
         {
@@ -47,9 +47,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="poolCfgCollection">Pool settings collection</param>
+        /// <param name="poolCfgCollection">The pool configurations.</param>
         public PoolsSettings(params PoolSettings[] poolCfgCollection)
             : this()
         {
@@ -59,9 +59,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public PoolsSettings(PoolsSettings source)
             : this()
         {
@@ -72,7 +72,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings.</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public PoolsSettings(XElement elem)
         {
             //Validation
@@ -89,7 +89,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 
         //Properties
         /// <summary>
-        /// Total number of hidden neurons within the pools
+        /// Gets the total number of hidden neurons within all pools.
         /// </summary>
         public int TotalSize
         {
@@ -130,9 +130,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// Adds cloned pool configurations from given collection into the internal collection
+        /// Adds pool configurations from the specified collection into the internal collection.
         /// </summary>
-        /// <param name="poolCfgCollection"></param>
+        /// <param name="poolCfgCollection">The collection of the pool configurations.</param>
         private void AddPools(IEnumerable<PoolSettings> poolCfgCollection)
         {
             foreach (PoolSettings poolCfg in poolCfgCollection)
@@ -143,9 +143,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// Returns ID (index) of the given pool
+        /// Gets an identifier (index) of the specified pool.
         /// </summary>
-        /// <param name="poolName">Pool name</param>
+        /// <param name="poolName">The name of the pool.</param>
         public int GetPoolID(string poolName)
         {
             for (int i = 0; i < PoolCfgCollection.Count; i++)
@@ -159,9 +159,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// Returns configuration of the given pool
+        /// Gets a configuration of the specified pool.
         /// </summary>
-        /// <param name="poolName">Pool name</param>
+        /// <param name="poolName">The name of the pool.</param>
         public PoolSettings GetPoolCfg(string poolName)
         {
             return PoolCfgCollection[GetPoolID(poolName)];

@@ -1,43 +1,43 @@
-﻿using System;
-using RCNet.MathTools.Differential;
+﻿using RCNet.MathTools.Differential;
 using RCNet.MathTools.VectorMath;
+using System;
 
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Ancestor for activation functions using spiking neuron models with ODE (Ordinary Differential Equation(s)).
+    /// Implements a common ancestor of activation functions that use spiking neuron models with ODE (Ordinary Differential Equation(s)).
     /// </summary>
     [Serializable]
     public abstract class AFSpikingODE : AFSpikingBase
     {
         //Attributes
         /// <summary>
-        /// ODE numerical solver method
+        /// The ODE numerical solver method.
         /// </summary>
         protected ODENumSolver.Method _solvingMethod;
         /// <summary>
-        /// Computation step time scale
+        /// The ODE computation step time scale.
         /// </summary>
         protected double _stepTimeScale;
         /// <summary>
-        /// Time sub-steps within the computation step
+        /// The number of computation sub-steps of the ODE numerical solver.
         /// </summary>
         protected int _subSteps;
 
         /// <summary>
-        /// Constructs an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="restV">Membrane rest potential</param>
-        /// <param name="resetV">Membrane reset potential</param>
-        /// <param name="firingThresholdV">Firing threshold</param>
-        /// <param name="refractoryPeriods">Refractory periods</param>
-        /// <param name="solvingMethod">ODE numerical solver method</param>
-        /// <param name="stepTimeScale">Computation step time scale</param>
-        /// <param name="subSteps">Computation sub-steps</param>
-        /// <param name="numOfEvolvingVars">Number of evolving variables</param>
-        /// <param name="inputCurrentCoeff">Coefficient of the current</param>
-        /// <param name="membranePotentialCoeff">Coefficient of the membrane potential</param>
-        /// <param name="initialVRatio">Initial membrane potential in form of the ratio between 0 and 1 where 0 corresponds to a Min(resetV, restV) potential and 1 corresponds to a firingThreshold.</param>
+        /// <param name="restV">The membrane rest potential.</param>
+        /// <param name="resetV">The membrane reset potential.</param>
+        /// <param name="firingThresholdV">The firing threshold.</param>
+        /// <param name="refractoryPeriods">The number of refractory periods.</param>
+        /// <param name="solvingMethod">The ODE numerical solver method to be used.</param>
+        /// <param name="stepTimeScale">The ODE computation step time scale.</param>
+        /// <param name="subSteps">The number of computation sub-steps of the ODE numerical solver.</param>
+        /// <param name="numOfEvolvingVars">The number of inner evolving variables.</param>
+        /// <param name="inputCurrentCoeff">The coefficient of the input current.</param>
+        /// <param name="membranePotentialCoeff">The coefficient of the membrane potential.</param>
+        /// <param name="initialVRatio">The membrane initial potential in form of a ratio between 0 and 1, where 0 corresponds to a Min(resetV, restV) potential and 1 corresponds to a firingThreshold.</param>
         protected AFSpikingODE(double restV,
                                double resetV,
                                double firingThresholdV,
@@ -68,10 +68,10 @@ namespace RCNet.Neural.Activation
         }
 
         /// <summary>
-        /// Ordinary differential equation(s) evolving membrane potential
+        /// Computes the Ordinary Differential Equation(s) evolving the inner variables.
         /// </summary>
-        /// <param name="t">Time</param>
-        /// <param name="v">Vector of membrane variables</param>
+        /// <param name="t">The time.</param>
+        /// <param name="v">The vector of inner evolving variables.</param>
         /// <returns>dvdt</returns>
         protected abstract Vector MembraneDiffEq(double t, Vector v);
 
@@ -87,7 +87,7 @@ namespace RCNet.Neural.Activation
                     _evolVars[VarMembraneVIdx] = _firingThresholdV;
                     return true;
                 }
-                else if(_evolVars[VarMembraneVIdx] < _minV)
+                else if (_evolVars[VarMembraneVIdx] < _minV)
                 {
                     //Keep minimum voltage
                     _evolVars[VarMembraneVIdx] = _minV;

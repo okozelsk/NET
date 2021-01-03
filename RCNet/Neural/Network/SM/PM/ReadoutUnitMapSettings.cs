@@ -6,46 +6,46 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.PM
 {
     /// <summary>
-    /// Configuration of the predictors mapper's readout unit allowed predictors map
+    /// Configuration of the predictors mapper's readout unit mapping.
     /// </summary>
     [Serializable]
     public class ReadoutUnitMapSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "SMMapperReadoutUnitMapType";
 
         //Attribute properties
         /// <summary>
-        /// Name of the input field
+        /// The name of the readout unit.
         /// </summary>
         public string ReadoutUnitName { get; }
 
         /// <summary>
-        /// Allowed predictors
+        /// The configuration of the allowed predictors.
         /// </summary>
         public AllowedPredictorsSettings AllowedPredictorsCfg { get; }
 
         /// <summary>
-        /// Allowed pools
+        /// The configuration of the allowed pools.
         /// </summary>
         public AllowedPoolsSettings AllowedPoolsCfg { get; }
 
         /// <summary>
-        /// Allowed input fields
+        /// The configuration of the allowed input fields.
         /// </summary>
         public AllowedInputFieldsSettings AllowedInputFieldsCfg { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="readoutUnitName">Name of the readout unit</param>
-        /// <param name="allowedPredictorsCfg">Allowed predictors</param>
-        /// <param name="allowedPoolsCfg">Allowed pools</param>
-        /// <param name="allowedInputFieldsCfg">Allowed input fields</param>
+        /// <param name="readoutUnitName">The name of the readout unit.</param>
+        /// <param name="allowedPredictorsCfg">The configuration of the allowed predictors.</param>
+        /// <param name="allowedPoolsCfg">The configuration of the allowed pools.</param>
+        /// <param name="allowedInputFieldsCfg">The configuration of the allowed input fields.</param>
         public ReadoutUnitMapSettings(string readoutUnitName,
                                       AllowedPredictorsSettings allowedPredictorsCfg,
                                       AllowedPoolsSettings allowedPoolsCfg,
@@ -60,9 +60,9 @@ namespace RCNet.Neural.Network.SM.PM
         }
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public ReadoutUnitMapSettings(ReadoutUnitMapSettings source)
             : this(source.ReadoutUnitName, source.AllowedPredictorsCfg, source.AllowedPoolsCfg, source.AllowedInputFieldsCfg)
         {
@@ -72,7 +72,7 @@ namespace RCNet.Neural.Network.SM.PM
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public ReadoutUnitMapSettings(XElement elem)
         {
             //Validation
@@ -102,13 +102,13 @@ namespace RCNet.Neural.Network.SM.PM
 
         //Methods
         /// <summary>
-        /// Determines whether the predictor's origin is allowed
+        /// Tests whether the predictor's origin is allowed.
         /// </summary>
-        /// <param name="resName">Reservoir instance name</param>
-        /// <param name="poolName">Pool name</param>
+        /// <param name="resName">The name of the reservoir instance.</param>
+        /// <param name="poolName">The name of the pool.</param>
         private bool IsAllowedPredictorOrigin(string resName, string poolName)
         {
-            if(AllowedPoolsCfg != null)
+            if (AllowedPoolsCfg != null)
             {
                 return AllowedPoolsCfg.IsAllowed(resName, poolName);
             }
@@ -116,12 +116,12 @@ namespace RCNet.Neural.Network.SM.PM
         }
 
         /// <summary>
-        /// Determines whether Predictor is allowed
+        /// Tests whether the predictor is allowed.
         /// </summary>
-        /// <param name="predictorID">Predictor identificator</param>
+        /// <param name="predictorID">An identifier of the predictor.</param>
         private bool IsAllowedPredictorID(PredictorsProvider.PredictorID predictorID)
         {
-            if(AllowedPredictorsCfg != null)
+            if (AllowedPredictorsCfg != null)
             {
                 return AllowedPredictorsCfg.IsAllowed(predictorID);
             }
@@ -129,14 +129,14 @@ namespace RCNet.Neural.Network.SM.PM
         }
 
         /// <summary>
-        /// Determines whether the Predictor's origin and Predictor are both allowed
+        /// Tests whether the predictor's origin and predictor identifier are both allowed.
         /// </summary>
-        /// <param name="resName">Reservoir instance name</param>
-        /// <param name="poolName">Pool name</param>
-        /// <param name="predictorID">Predictor identificator</param>
+        /// <param name="resName">The name of the reservoir instance.</param>
+        /// <param name="poolName">The name of the pool.</param>
+        /// <param name="predictorID">An identifier of the predictor.</param>
         public bool IsAllowedPredictor(string resName, string poolName, PredictorsProvider.PredictorID predictorID)
         {
-            if(IsAllowedPredictorOrigin(resName, poolName))
+            if (IsAllowedPredictorOrigin(resName, poolName))
             {
                 return IsAllowedPredictorID(predictorID);
             }
@@ -144,12 +144,12 @@ namespace RCNet.Neural.Network.SM.PM
         }
 
         /// <summary>
-        /// Determines whether given input field is allowed
+        /// Tests whether the input field is allowed.
         /// </summary>
-        /// <param name="inputFieldName">Name of the input field</param>
+        /// <param name="inputFieldName">The name of the input field.</param>
         public bool IsAllowedInputField(string inputFieldName)
         {
-            if(AllowedInputFieldsCfg != null)
+            if (AllowedInputFieldsCfg != null)
             {
                 return AllowedInputFieldsCfg.IsAllowed(inputFieldName);
             }

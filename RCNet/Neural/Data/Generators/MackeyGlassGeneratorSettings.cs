@@ -5,27 +5,27 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Data.Generators
 {
     /// <summary>
-    /// Configuration of the Mackey-Glass signal generator
+    /// Configuration of the MackeyGlassGenerator.
     /// </summary>
     [Serializable]
     public class MackeyGlassGeneratorSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "MackeyGlassGeneratorType";
         //Default values
         /// <summary>
-        /// Default value of tau argument
+        /// The default value of the tau parameter.
         /// </summary>
         public const int DefaultTau = 18;
         /// <summary>
-        /// Default value of b argument
+        /// The default value of the b coefficient.
         /// </summary>
         public const double DefaultB = 0.1d;
         /// <summary>
-        /// Default value of c argument
+        /// The default value of the c coefficient.
         /// </summary>
         public const double DefaultC = 0.2d;
 
@@ -33,28 +33,28 @@ namespace RCNet.Neural.Data.Generators
 
         //Attribute properties
         /// <summary>
-        /// Tau (backward deepness 2->18)
+        /// The tau (the backward deepness 2..18).
         /// </summary>
         public int Tau { get; }
 
         /// <summary>
-        /// b coefficient
+        /// The b coefficient.
         /// </summary>
         public double B { get; }
 
         /// <summary>
-        /// c coefficient
+        /// The c coefficient.
         /// </summary>
         public double C { get; }
 
 
         //Constructors
         /// <summary>
-        /// Constructs an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="tau">Tau (backward deepness 2-18)</param>
-        /// <param name="b">b coefficient</param>
-        /// <param name="c">c coefficient</param>
+        /// <param name="tau">The tau (the backward deepness 2..18).</param>
+        /// <param name="b">The b coefficient.</param>
+        /// <param name="c">The c coefficient.</param>
         public MackeyGlassGeneratorSettings(int tau = DefaultTau,
                                             double b = DefaultB,
                                             double c = DefaultC
@@ -68,11 +68,11 @@ namespace RCNet.Neural.Data.Generators
         }
 
         /// <summary>
-        /// Deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public MackeyGlassGeneratorSettings(MackeyGlassGeneratorSettings source)
-            :this(source.Tau, source.B, source.C)
+            : this(source.Tau, source.B, source.C)
         {
             return;
         }
@@ -80,7 +80,7 @@ namespace RCNet.Neural.Data.Generators
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public MackeyGlassGeneratorSettings(XElement elem)
         {
             //Validation
@@ -95,17 +95,17 @@ namespace RCNet.Neural.Data.Generators
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultTau { get { return (Tau == DefaultTau); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultB { get { return (B == DefaultB); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultC { get { return (C == DefaultC); } }
 

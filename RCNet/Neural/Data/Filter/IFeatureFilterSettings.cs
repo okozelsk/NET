@@ -3,23 +3,17 @@
 namespace RCNet.Neural.Data.Filter
 {
     /// <summary>
-    /// Common interface of setting classes of feature filters
+    /// The common interface of the feature filter configurations.
     /// </summary>
     public interface IFeatureFilterSettings
     {
         /// <inheritdoc cref="FeatureFilterBase.FeatureType"/>
         FeatureFilterBase.FeatureType Type { get; }
 
-        /// <summary>
-        /// Creates the deep copy instance of this instance
-        /// </summary>
+        /// <inheritdoc cref="RCNetBaseSettings.DeepClone"/>
         RCNetBaseSettings DeepClone();
 
-        /// <summary>
-        /// Generates default named xml element containing the settings.
-        /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc cref="RCNetBaseSettings.GetXml(bool)"/>
         XElement GetXml(bool suppressDefaults);
 
     }//IFeatureFilterSettings

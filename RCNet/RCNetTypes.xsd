@@ -5,154 +5,318 @@
            xmlns="RCNetTypes"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            >
-  <!-- Xml is a standard way to initialize RCNet components and this xsd contains definition of all necessary types -->
+  <!-- Defines the RCNet types. -->
 
   <!-- Simple types -->
   <!-- Enumerations -->
-  <!-- Enumeration of random distribution -->
+  <!-- The type of random distribution -->
   <xs:simpleType name="RandomDistributionType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="Uniform"/>
-      <xs:enumeration value="Gaussian"/>
-      <xs:enumeration value="Exponential"/>
-      <xs:enumeration value="Gamma"/>
+      <xs:enumeration value="Uniform">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The uniform distribution.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Gaussian">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The gaussian distribution.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Exponential">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The exponential distribution.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Gamma">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The gamma distribution.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
     </xs:restriction>
   </xs:simpleType>
 
-  <!-- Enumeration of the mode of Pulse generator -->
-  <xs:simpleType name="PulseGeneratorModeType">
+  <!-- The pulse timing mode -->
+  <xs:simpleType name="PulseGeneratorTimingMode">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="Constant"/>
-      <xs:enumeration value="Uniform"/>
-      <xs:enumeration value="Gaussian"/>
-      <xs:enumeration value="Poisson"/>
+      <xs:enumeration value="Constant">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The period of the pulses is constant.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Uniform">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The period of the pulses follows the Uniform distribution.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Gaussian">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The period of the pulses follows the Gaussian distribution.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Poisson">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The period of the pulses follows the Poisson (Exponential) distribution.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
     </xs:restriction>
   </xs:simpleType>
 
-  <!-- Enumeration of the bidir mode of neural preprocessor-->
+  <!-- The way of bidirectional processing of input pattern -->
   <xs:simpleType name="NPBidirProcessing">
     <xs:restriction base="xs:string">
       <xs:enumeration value="Continuous">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Bi-directional processing without hidden neurons' reset when input data time direction to be turned.</xs:documentation>
+          <xs:documentation xml:lang="en">Enabled bi-directional processing without reservoir reset when the direction to be turned.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="WithReset">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Bi-directional processing with hidden neurons' reset when input data time direction to be turned.</xs:documentation>
+          <xs:documentation xml:lang="en">Enabled bi-directional processing with reservoir reset when the direction to be turned.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="Forbidden">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Bi-directional processing is forbidden.</xs:documentation>
+          <xs:documentation xml:lang="en">The bi-directional processing is forbidden.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
     </xs:restriction>
   </xs:simpleType>
 
-  <!-- Enumeration of the available statistical features -->
-  <xs:simpleType name="StatFeatureType">
+  <!-- The statistical figure -->
+  <xs:simpleType name="StatFigure">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="Sum"/>
-      <xs:enumeration value="NegSum"/>
-      <xs:enumeration value="PosSum"/>
-      <xs:enumeration value="SumOfSquares"/>
-      <xs:enumeration value="Min"/>
-      <xs:enumeration value="Max"/>
-      <xs:enumeration value="Mid"/>
-      <xs:enumeration value="Span"/>
-      <xs:enumeration value="ArithAvg"/>
-      <xs:enumeration value="MeanSquare"/>
-      <xs:enumeration value="RootMeanSquare"/>
-      <xs:enumeration value="Variance"/>
-      <xs:enumeration value="StdDev"/>
-      <xs:enumeration value="SpanDev"/>
+      <xs:enumeration value="Sum">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The sum of all samples.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="NegSum">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The sum of negative samples.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="PosSum">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The sum of positive samples.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="SumOfSquares">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The sum of squared samples.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Min">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The min sample.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Max">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The max sample.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Mid">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The center value between the Min and Max.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Span">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The span of the Min and Max (Max - Min).</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="ArithAvg">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The arithmetic average.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="MeanSquare">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The mean of the squared samples.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="RootMeanSquare">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The root of the mean of the squared samples.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Variance">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The variance of the samples.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="StdDev">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The standard deviation of the samples.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="SpanDev">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The span multiplied by the standard deviation of the samples.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
     </xs:restriction>
   </xs:simpleType>
 
-  <!-- Enumeration of patterned data organization -->
-  <xs:simpleType name="VariablesSchemaType">
+  <!-- Schema of variables organization in an input pattern -->
+  <xs:simpleType name="PatternVariablesSchema">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="Groupped"/>
-      <xs:enumeration value="Sequential"/>
+      <xs:enumeration value="Groupped">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">[v1(t1),v2(t1),v1(t2),v2(t2),v1(t3),v2(t3)] where "v" means variable and "t" means time point.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Sequential">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">[v1(t1),v1(t2),v1(t3),v2(t1),v2(t2),v2(t3)] where "v" means variable and "t" means time point.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
     </xs:restriction>
   </xs:simpleType>
 
-  <!-- Enumeration of synaptic delay method -->
-  <xs:simpleType name="SynapticDelayMethodType">
+  <!-- The synaptic delay method -->
+  <xs:simpleType name="SynapticDelayMethod">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="Random"/>
-      <xs:enumeration value="Distance"/>
+      <xs:enumeration value="Random">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The synaptic delay is decided randomly.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Distance">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The synaptic delay depends on an Euclidean distance.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
     </xs:restriction>
   </xs:simpleType>
 
-  <!-- Enumeration of synapse's role -->
-  <xs:simpleType name="SynapseRoleType">
+  <!-- The synapse's role -->
+  <xs:simpleType name="SynapseRole">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="Input"/>
-      <xs:enumeration value="Excitatory"/>
-      <xs:enumeration value="Inhibitory"/>
-      <xs:enumeration value="Indifferent"/>
+      <xs:enumeration value="Input">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">An input synapse.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Excitatory">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">An excitatory synapse.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Inhibitory">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">An inhibitory synapse.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Indifferent">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">An indifferent synapse.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
     </xs:restriction>
   </xs:simpleType>
 
-  <!-- Enumeration of neuron's activation type -->
+  <!-- The type of an activation function -->
   <xs:simpleType name="ActivationType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="Analog"/>
-      <xs:enumeration value="Spiking"/>
-    </xs:restriction>
-  </xs:simpleType>
-
-  <!-- Enumeration of available predictors -->
-  <xs:simpleType name="PredictorIDType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="Activation"/>
-      <xs:enumeration value="ActivationSquare"/>
-      <xs:enumeration value="ActivationStatFeature"/>
-      <xs:enumeration value="ActivationDiffStatFeature"/>
-      <xs:enumeration value="FiringTrace"/>
-    </xs:restriction>
-  </xs:simpleType>
-
-  <!-- Enumeration of ODE numerical solver methods -->
-  <xs:simpleType name="ODENumSolverMethodType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="Euler"/>
-      <xs:enumeration value="RK4"/>
-    </xs:restriction>
-  </xs:simpleType>
-
-  <!-- Enumeration of neural task type -->
-  <xs:simpleType name="NeuralTaskType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="Forecast"/>
-      <xs:enumeration value="Classification"/>
-    </xs:restriction>
-  </xs:simpleType>
-
-  <!-- Enumeration of network cluster 2nd level computation modes  -->
-  <xs:simpleType name="ClusterSecondLevelCompModeType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="SecondLevelOutputOnly">
+      <xs:enumeration value="Spiking">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Used is only output based on 2nd level networks.</xs:documentation>
+          <xs:documentation xml:lang="en">A spiking activation function. Attempts to simulate the behavior of a biological neuron that accumulates (integrates) input stimulation on its membrane potential and when the critical threshold is exceeded, fires a short pulse (spike), resets membrane and the cycle starts from the beginning. In other words, the function implements one of the so-called Integrate and Fire neuron models.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="AveragedOutputs">
+      <xs:enumeration value="Analog">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Used is average value of the first level output and the second level output.</xs:documentation>
+          <xs:documentation xml:lang="en">An analog activation function. It has no similarity to behavior of the biological neuron. It is always stateless, which means that the output value (signal) does not depend on the previous inputs but only on current input at the time T and particular transformation equation (usually non-linear).</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
     </xs:restriction>
   </xs:simpleType>
 
-  <!-- Enumeration of spiking input encoding regimes -->
-  <xs:simpleType name="SpikingInputEncodingRegimeType">
+  <!-- An identifier of the predictor -->
+  <xs:simpleType name="PredictorID">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="Forbidden"/>
-      <xs:enumeration value="Horizontal"/>
-      <xs:enumeration value="Vertical"/>
+      <xs:enumeration value="Activation">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The result of the activation function.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="ActivationPower">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The powered absolute value of the result of the activation function.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="ActivationStatFigure">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The statistical figure computed from the activation function results.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="ActivationRescaledRange">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The rescaled range computed from the activation function results.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="ActivationLinWAvg">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The linearly weighted average computed from the activation function results.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="ActivationDiffStatFigure">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The statistical figure computed from the differences of the activation function results (A[T] - A[T-1]).</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="ActivationDiffRescaledRange">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The rescaled range computed from the differences of the activation function results (A[T] - A[T-1]).</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="ActivationDiffLinWAvg">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The linearly weighted average computed from the differences of the activation function results (A[T] - A[T-1]).</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="FiringTrace">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The traced neuron's firing.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- The ODE solving method -->
+  <xs:simpleType name="ODENumSolverMethod">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Euler">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The Euler 1st order method.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="RK4">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The Runge-Kutta 4th order method.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- The way of input spikes coding -->
+  <xs:simpleType name="InputSpikesCoding">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Horizontal">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The horizontal coding.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Vertical">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The vertical coding.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Forbidden">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The coding of input spikes is not allowed.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
     </xs:restriction>
   </xs:simpleType>
 
@@ -390,26 +554,38 @@
   <xs:complexType name="CoordinatesType">
     <xs:attribute type="xs:int" name="x" use="optional" default="0">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0</xs:documentation>
+        <xs:documentation xml:lang="en">The X coordinate. Default value is 0.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:int" name="y" use="optional" default="0">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0</xs:documentation>
+        <xs:documentation xml:lang="en">The Y coordinate. Default value is 0.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:int" name="z" use="optional" default="0">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0</xs:documentation>
+        <xs:documentation xml:lang="en">The Z coordinate. Default value is 0.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
   <!-- Proportions -->
   <xs:complexType name="ProportionsType">
-    <xs:attribute type="UIntGT0Type" name="dimX" use="required" />
-    <xs:attribute type="UIntGT0Type" name="dimY" use="required" />
-    <xs:attribute type="UIntGT0Type" name="dimZ" use="required" />
+    <xs:attribute type="UIntGT0Type" name="dimX" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The X dimension.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UIntGT0Type" name="dimY" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The Y dimension.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UIntGT0Type" name="dimZ" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The Z dimension.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
 
@@ -422,25 +598,37 @@
   <xs:complexType name="GaussianDistrType">
     <xs:attribute type="xs:double" name="mean" use="optional" default="0">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0</xs:documentation>
+        <xs:documentation xml:lang="en">The mean. Default value is 0.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleGT0Type" name="stdDev" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+        <xs:documentation xml:lang="en">The standard deviation. Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
   <!-- Exponential distribution -->
   <xs:complexType name="ExponentialDistrType">
-    <xs:attribute type="DoubleNotEq0Type" name="mean" use="required"/>
+    <xs:attribute type="DoubleNotEq0Type" name="mean" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The mean.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Gamma distribution -->
   <xs:complexType name="GammaDistrType">
-    <xs:attribute type="UDoubleGT0Type" name="alpha" use="required"/>
-    <xs:attribute type="UDoubleGT0Type" name="beta" use="required"/>
+    <xs:attribute type="UDoubleGT0Type" name="alpha" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The alpha (shape parameter).</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleGT0Type" name="beta" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The beta (rate parameter).</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Random value -->
@@ -451,11 +639,19 @@
       <xs:element type="ExponentialDistrType" name="exponentialDistr" minOccurs="1" maxOccurs="1"/>
       <xs:element type="GammaDistrType" name="gammaDistr" minOccurs="1" maxOccurs="1"/>
     </xs:choice>
-    <xs:attribute type="xs:double" name="min" use="required"/>
-    <xs:attribute type="xs:double" name="max" use="required"/>
+    <xs:attribute type="xs:double" name="min" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The min value (inclusive).</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:double" name="max" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The max value (exclusive).</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute type="xs:boolean" name="randomSign" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is false</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies whether to randomize the value sign. Default value is false.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -464,19 +660,23 @@
   <xs:complexType name="UGaussianDistrType">
     <xs:attribute type="UDoubleGT0Type" name="mean" use="optional" default="0.5">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.5</xs:documentation>
+        <xs:documentation xml:lang="en">The mean. Default value is 0.5.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleGT0Type" name="stdDev" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+        <xs:documentation xml:lang="en">The standard deviation. Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
   <!-- Unsigned Exponential distribution -->
   <xs:complexType name="UExponentialDistrType">
-    <xs:attribute type="UDoubleGT0Type" name="mean" use="required"/>
+    <xs:attribute type="UDoubleGT0Type" name="mean" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The mean.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Unsigned random value -->
@@ -487,34 +687,49 @@
       <xs:element type="UExponentialDistrType" name="exponentialDistr" minOccurs="1" maxOccurs="1"/>
       <xs:element type="GammaDistrType" name="gammaDistr" minOccurs="1" maxOccurs="1"/>
     </xs:choice>
-    <xs:attribute type="UDoubleType" name="min" use="required"/>
-    <xs:attribute type="UDoubleGT0Type" name="max" use="required"/>
+    <xs:attribute type="UDoubleType" name="min" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The min value (inclusive).</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleGT0Type" name="max" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The max value (exclusive).</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
-  <!-- Parameter value seeker -->
-  <xs:complexType name="ParamSeekerType">
-    <xs:attribute type="xs:double" name="min" use="required"/>
-    <xs:attribute type="xs:double" name="max" use="required"/>
+  <!-- Parameter optimal value finder -->
+  <xs:complexType name="ParamValFinderType">
+    <xs:attribute type="xs:double" name="min" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The min value of the parameter.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:double" name="max" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The max value of the parameter.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute type="UIntGT0AutoOptionType" name="subIntervals" use="optional" default="Auto">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is Auto</xs:documentation>
+        <xs:documentation xml:lang="en">The number of sub-intervals of the currently focused interval. Default value is Auto.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
 
-  <!-- Coders -->
-  <!-- Methods to code an analog signal as spikes -->
+  <!-- A2S Coders -->
   <!-- Gaussian receptive fields coder -->
   <xs:complexType name="A2SCoderGaussianReceptorsType">
     <xs:attribute type="UIntGE1LE32Type" name="receptors" use="optional" default="8">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 8</xs:documentation>
+        <xs:documentation xml:lang="en">The number of receptors. Default value is 8.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UIntGE2LE32Type" name="timePoints" use="optional" default="8">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 8</xs:documentation>
+        <xs:documentation xml:lang="en">The number of code time points per receptor. Default value is 8.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -523,7 +738,7 @@
   <xs:complexType name="A2SCoderSignalStrengthType">
     <xs:attribute type="UIntGE2LE32Type" name="timePoints" use="optional" default="8">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 8</xs:documentation>
+        <xs:documentation xml:lang="en">The number of code time-points. Default value is 8.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -532,12 +747,12 @@
   <xs:complexType name="A2SCoderDirArrowsType">
     <xs:attribute type="UIntGE1LE32Type" name="receptors" use="optional" default="8">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 8</xs:documentation>
+        <xs:documentation xml:lang="en">The number of receptors. Default value is 8.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UIntGE1LE32Type" name="timePoints" use="optional" default="8">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 8</xs:documentation>
+        <xs:documentation xml:lang="en">The number of code time points per receptor. Default value is 8.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -545,26 +760,38 @@
   <!-- Input generators -->
   <!-- Pulse generator -->
   <xs:complexType name="PulseGeneratorType">
-    <xs:attribute type="xs:double" name="signal" use="required"/>
-    <xs:attribute type="UDoubleGE1Type" name="avgPeriod" use="required"/>
-    <xs:attribute type="PulseGeneratorModeType" name="mode" use="required"/>
+    <xs:attribute type="xs:double" name="signal" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The pulse signal value.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleGE1Type" name="avgPeriod" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The pulse average leak.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="PulseGeneratorTimingMode" name="mode" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The pulse timing mode.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Sinusoidal generator -->
   <xs:complexType name="SinusoidalGeneratorType">
     <xs:attribute type="xs:double" name="phase" use="optional" default="0">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0</xs:documentation>
+        <xs:documentation xml:lang="en">The phase shift. Default value is 0.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:double" name="freq" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+        <xs:documentation xml:lang="en">The frequency. Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:double" name="ampl" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+        <xs:documentation xml:lang="en">The amplitude. Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -573,17 +800,17 @@
   <xs:complexType name="MackeyGlassGeneratorType">
     <xs:attribute type="UIntGE2LE18Type" name="tau" use="optional" default="18">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 18</xs:documentation>
+        <xs:documentation xml:lang="en">The tau (the backward deepness 2..18). Default value is 18.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:double" name="b" use="optional" default="0.1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.1</xs:documentation>
+        <xs:documentation xml:lang="en">The b coefficient. Default value is 0.1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:double" name="c" use="optional" default="0.2">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.2</xs:documentation>
+        <xs:documentation xml:lang="en">The c coefficient. Default value is 0.2.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -591,22 +818,34 @@
   <!-- Input transformers -->
   <!-- Single field transformer base -->
   <xs:complexType name="SingleFieldTransformerBaseType">
-    <xs:attribute type="xs:string" name="fieldName" use="required"/>
+    <xs:attribute type="xs:string" name="fieldName" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The name of the input field to be transformed.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Two fields transformer base configuration element -->
   <xs:complexType name="TwoFieldsTransformerBaseType">
-    <xs:attribute type="xs:string" name="xFieldName" use="required"/>
-    <xs:attribute type="xs:string" name="yFieldName" use="required"/>
+    <xs:attribute type="xs:string" name="xFieldName" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The name of the first (X) input field.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:string" name="yFieldName" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The name of the second (Y) input field.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Difference transformer -->
   <xs:complexType name="DiffTransformerType">
     <xs:complexContent>
       <xs:extension base="SingleFieldTransformerBaseType">
-        <xs:attribute type="UIntGT0Type" name="interval" use="optional" default="1">
+        <xs:attribute type="UIntGT0Type" name="pastInterval" use="optional" default="1">
           <xs:annotation>
-            <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+            <xs:documentation xml:lang="en">Specifies the interval between the current and the past value. Default value is 1.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
       </xs:extension>
@@ -619,7 +858,7 @@
       <xs:extension base="SingleFieldTransformerBaseType">
         <xs:attribute type="xs:double" name="c" use="optional" default="1">
           <xs:annotation>
-            <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+            <xs:documentation xml:lang="en">The constant numerator. Default value is 1.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
       </xs:extension>
@@ -632,7 +871,7 @@
       <xs:extension base="SingleFieldTransformerBaseType">
         <xs:attribute type="UDoubleGT0Type" name="base" use="optional" default="2.7182818284590451">
           <xs:annotation>
-            <xs:documentation xml:lang="en">Default value is (e) 2.7182818284590451</xs:documentation>
+            <xs:documentation xml:lang="en">The base. Default value is (e) 2.7182818284590451.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
       </xs:extension>
@@ -645,7 +884,7 @@
       <xs:extension base="SingleFieldTransformerBaseType">
         <xs:attribute type="UDoubleGT0Type" name="base" use="optional" default="2.7182818284590451">
           <xs:annotation>
-            <xs:documentation xml:lang="en">Default value is (e) 2.7182818284590451</xs:documentation>
+            <xs:documentation xml:lang="en">The base. Default value is (e) 2.7182818284590451.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
       </xs:extension>
@@ -658,12 +897,12 @@
       <xs:extension base="SingleFieldTransformerBaseType">
         <xs:attribute type="UDoubleGT0Type" name="exponent" use="optional" default="0.5">
           <xs:annotation>
-            <xs:documentation xml:lang="en">Default value is 0.5</xs:documentation>
+            <xs:documentation xml:lang="en">The exponent. Default value is 0.5.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute type="xs:boolean" name="keepSign" use="optional" default="true">
           <xs:annotation>
-            <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+            <xs:documentation xml:lang="en">Specifies whether to keep the original value sign. Default value is true.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
       </xs:extension>
@@ -674,7 +913,11 @@
   <xs:complexType name="YeoJohnsonTransformerType">
     <xs:complexContent>
       <xs:extension base="SingleFieldTransformerBaseType">
-        <xs:attribute type="xs:double" name="lambda" use="required"/>
+        <xs:attribute type="xs:double" name="lambda" use="required">
+          <xs:annotation>
+            <xs:documentation xml:lang="en">The lambda exponent.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -683,8 +926,16 @@
   <xs:complexType name="MWStatTransformerType">
     <xs:complexContent>
       <xs:extension base="SingleFieldTransformerBaseType">
-        <xs:attribute type="UIntGT1Type" name="window" use="required"/>
-        <xs:attribute type="StatFeatureType" name="output" use="required"/>
+        <xs:attribute type="UIntGT1Type" name="window" use="required">
+          <xs:annotation>
+            <xs:documentation xml:lang="en">The recent history window size.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="StatFigure" name="output" use="required">
+          <xs:annotation>
+            <xs:documentation xml:lang="en">The output statistical figure.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -709,12 +960,12 @@
       <xs:extension base="TwoFieldsTransformerBaseType">
         <xs:attribute type="xs:double" name="a" use="optional" default="1">
           <xs:annotation>
-            <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+            <xs:documentation xml:lang="en">The A coefficient. Default value is 1.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute type="xs:double" name="b" use="optional" default="1">
           <xs:annotation>
-            <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+            <xs:documentation xml:lang="en">The B coefficient. Default value is 1.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
       </xs:extension>
@@ -727,28 +978,28 @@
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="resistance" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is 15</xs:documentation>
+          <xs:documentation xml:lang="en">The membrane resistance (Mohm). Typical value is 15.</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element type="URandomValueType" name="decayRate" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is 0.05</xs:documentation>
+          <xs:documentation xml:lang="en">The membrane potential decay rate. Typical value is 0.05.</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element type="URandomValueType" name="resetV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is 5</xs:documentation>
+          <xs:documentation xml:lang="en">The membrane reset potential (mV). Typical value is 5.</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element type="URandomValueType" name="firingThresholdV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is 7.5</xs:documentation>
+          <xs:documentation xml:lang="en">The membrane firing threshold (mV). Typical value is 7.5.</xs:documentation>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
     <xs:attribute type="xs:unsignedInt" name="refractoryPeriods" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+        <xs:documentation xml:lang="en">The number of after-spike computation cycles while an input stimuli to be ignored (cycles). Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -758,48 +1009,48 @@
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="timeScale" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is 8</xs:documentation>
+          <xs:documentation xml:lang="en">The membrane time scale (ms). Typical value is 8.</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element type="URandomValueType" name="resistance" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is 20</xs:documentation>
+          <xs:documentation xml:lang="en">The membrane resistance (Mohm). Typical value is 20.</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element type="RandomValueType" name="restV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is -70</xs:documentation>
+          <xs:documentation xml:lang="en">The membrane rest potential (mV). Typical value is -70.</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element type="RandomValueType" name="resetV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is -65</xs:documentation>
+          <xs:documentation xml:lang="en">The membrane reset potential (mV). Typical value is -65.</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element type="RandomValueType" name="firingThresholdV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is -50</xs:documentation>
+          <xs:documentation xml:lang="en">The membrane firing threshold (mV). Typical value is -50.</xs:documentation>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
     <xs:attribute type="xs:unsignedInt" name="refractoryPeriods" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+        <xs:documentation xml:lang="en">The number of after-spike computation cycles while an input stimuli to be ignored (cycles). Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="ODENumSolverMethodType" name="solverMethod" use="optional" default="Euler">
+    <xs:attribute type="ODENumSolverMethod" name="solverMethod" use="optional" default="Euler">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is Euler</xs:documentation>
+        <xs:documentation xml:lang="en">The ODE numerical solver method. Default value is Euler.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UIntGT0Type" name="solverCompSteps" use="optional" default="2">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 2</xs:documentation>
+        <xs:documentation xml:lang="en">The number of computation sub-steps of the ODE numerical solver. Default value is 2.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleGT0Type" name="stimuliDuration" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1 (ms)</xs:documentation>
+        <xs:documentation xml:lang="en">The duration of the membrane stimulation (ms). Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -809,58 +1060,58 @@
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="timeScale" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is 12</xs:documentation>
+          <xs:documentation xml:lang="en">The membrane time scale (ms). Typical value is 12.</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element type="URandomValueType" name="resistance" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is 20</xs:documentation>
+          <xs:documentation xml:lang="en">The membrane resistance (Mohm). Typical value is 20.</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element type="RandomValueType" name="restV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is -65</xs:documentation>
+          <xs:documentation xml:lang="en">The membrane rest potential (mV). Typical value is -65.</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element type="RandomValueType" name="resetV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is -60</xs:documentation>
+          <xs:documentation xml:lang="en">The membrane reset potential (mV). Typical value is -60.</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element type="RandomValueType" name="rheobaseV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is -55</xs:documentation>
+          <xs:documentation xml:lang="en">The membrane rheobase threshold (mV). Typical value is -55.</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element type="RandomValueType" name="firingThresholdV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is -30</xs:documentation>
+          <xs:documentation xml:lang="en">The membrane firing threshold (mV). Typical value is -30.</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element type="URandomValueType" name="sharpnessDeltaT" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is 2</xs:documentation>
+          <xs:documentation xml:lang="en">The sharpness of membrane potential change (mV). Typical value is 2.</xs:documentation>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
     <xs:attribute type="xs:unsignedInt" name="refractoryPeriods" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+        <xs:documentation xml:lang="en">The number of after-spike computation cycles while an input stimuli to be ignored (cycles). Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="ODENumSolverMethodType" name="solverMethod" use="optional" default="Euler">
+    <xs:attribute type="ODENumSolverMethod" name="solverMethod" use="optional" default="Euler">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is Euler</xs:documentation>
+        <xs:documentation xml:lang="en">The ODE numerical solver method. Default value is Euler.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UIntGT0Type" name="solverCompSteps" use="optional" default="2">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 2</xs:documentation>
+        <xs:documentation xml:lang="en">The number of computation sub-steps of the ODE numerical solver. Default value is 2.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleGT0Type" name="stimuliDuration" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1 (ms)</xs:documentation>
+        <xs:documentation xml:lang="en">The duration of the membrane stimulation (ms). Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -870,68 +1121,68 @@
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="timeScale" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is 5</xs:documentation>
+          <xs:documentation xml:lang="en">The membrane time scale (ms). Typical value is 5.</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element type="URandomValueType" name="resistance" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is 500</xs:documentation>
+          <xs:documentation xml:lang="en">The membrane resistance (Mohm). Typical value is 500.</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element type="RandomValueType" name="restV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is -70</xs:documentation>
+          <xs:documentation xml:lang="en">The membrane rest potential (mV). Typical value is -70.</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element type="RandomValueType" name="resetV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is -51</xs:documentation>
+          <xs:documentation xml:lang="en">The membrane reset potential (mV). Typical value is -51.</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element type="RandomValueType" name="rheobaseV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is -50</xs:documentation>
+          <xs:documentation xml:lang="en">The membrane rheobase threshold (mV). Typical value is -50.</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element type="RandomValueType" name="firingThresholdV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is -30</xs:documentation>
+          <xs:documentation xml:lang="en">The membrane firing threshold (mV). Typical value is -30.</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element type="URandomValueType" name="sharpnessDeltaT" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is 2</xs:documentation>
+          <xs:documentation xml:lang="en">The sharpness of membrane potential change (mV). Typical value is 2.</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element type="URandomValueType" name="adaptationVoltageCoupling" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is 0.5</xs:documentation>
+          <xs:documentation xml:lang="en">The adaptation voltage coupling (nS). Typical value is 0.5.</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element type="URandomValueType" name="adaptationTimeConstant" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is 100</xs:documentation>
+          <xs:documentation xml:lang="en">The adaptation time constant (ms). Typical value is 100.</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element type="URandomValueType" name="adaptationSpikeTriggeredIncrement" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is 7</xs:documentation>
+          <xs:documentation xml:lang="en">The spike triggered adaptation increment (pA). Typical value is 7.</xs:documentation>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
-    <xs:attribute type="ODENumSolverMethodType" name="solverMethod" use="optional" default="Euler">
+    <xs:attribute type="ODENumSolverMethod" name="solverMethod" use="optional" default="Euler">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is Euler</xs:documentation>
+        <xs:documentation xml:lang="en">The ODE numerical solver method. Default value is Euler.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UIntGT0Type" name="solverCompSteps" use="optional" default="2">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 2</xs:documentation>
+        <xs:documentation xml:lang="en">The number of computation sub-steps of the ODE numerical solver. Default value is 2.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleGT0Type" name="stimuliDuration" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1 (ms)</xs:documentation>
+        <xs:documentation xml:lang="en">The duration of the membrane stimulation (ms). Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -941,53 +1192,53 @@
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="recoveryTimeScale" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is 0.02</xs:documentation>
+          <xs:documentation xml:lang="en">The dimensionless parameter "a" in the original Izhikevich model. Describes the time scale of the recovery variable. Smaller values result in slower recovery. Typical value is 0.02.</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element type="URandomValueType" name="recoverySensitivity" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is 0.2</xs:documentation>
+          <xs:documentation xml:lang="en">The dimensionless parameter "b" in the original Izhikevich model. Describes the sensitivity of the recovery variable to the subthreshold fluctuations of the membrane potential. Typical value is 0.2.</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element type="URandomValueType" name="recoveryReset" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is 2</xs:documentation>
+          <xs:documentation xml:lang="en">The dimensionless parameter "d" in the original Izhikevich model. Describes after-spike reset of the recovery variable. Typical value is 2.</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element type="RandomValueType" name="restV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is -70</xs:documentation>
+          <xs:documentation xml:lang="en">The membrane rest potential (mV). Typical value is -70.</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element type="RandomValueType" name="resetV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is -65</xs:documentation>
+          <xs:documentation xml:lang="en">The membrane reset potential (mV). The parameter "c" in the original Izhikevich model. Typical value is -65.</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element type="RandomValueType" name="firingThresholdV" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is 30</xs:documentation>
+          <xs:documentation xml:lang="en">The membrane firing threshold (mV). Typical value is 30.</xs:documentation>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
     <xs:attribute type="xs:unsignedInt" name="refractoryPeriods" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+        <xs:documentation xml:lang="en">The number of after-spike computation cycles while an input stimuli to be ignored (cycles). Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="ODENumSolverMethodType" name="solverMethod" use="optional" default="Euler">
+    <xs:attribute type="ODENumSolverMethod" name="solverMethod" use="optional" default="Euler">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is Euler</xs:documentation>
+        <xs:documentation xml:lang="en">The ODE numerical solver method. Default value is Euler.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UIntGT0Type" name="solverCompSteps" use="optional" default="2">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 2</xs:documentation>
+        <xs:documentation xml:lang="en">The number of computation sub-steps of the ODE numerical solver. Default value is 2.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleGT0Type" name="stimuliDuration" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1 (ms)</xs:documentation>
+        <xs:documentation xml:lang="en">The duration of the membrane stimulation (ms). Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -996,22 +1247,22 @@
   <xs:complexType name="ActivationAutoIzhikevichIFType">
     <xs:attribute type="xs:unsignedInt" name="refractoryPeriods" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+        <xs:documentation xml:lang="en">The number of after-spike computation cycles while an input stimuli to be ignored (cycles). Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="ODENumSolverMethodType" name="solverMethod" use="optional" default="Euler">
+    <xs:attribute type="ODENumSolverMethod" name="solverMethod" use="optional" default="Euler">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is Euler</xs:documentation>
+        <xs:documentation xml:lang="en">The ODE numerical solver method. Default value is Euler.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UIntGT0Type" name="solverCompSteps" use="optional" default="2">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 2</xs:documentation>
+        <xs:documentation xml:lang="en">The number of computation sub-steps of the ODE numerical solver. Default value is 2.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleGT0Type" name="stimuliDuration" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1 (ms)</xs:documentation>
+        <xs:documentation xml:lang="en">The duration of the membrane stimulation (ms). Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1030,7 +1281,7 @@
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="slope" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is 1</xs:documentation>
+          <xs:documentation xml:lang="en">The slope of the curve. Typical value is 1.</xs:documentation>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
@@ -1049,7 +1300,7 @@
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="alpha" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is 1</xs:documentation>
+          <xs:documentation xml:lang="en">The Alpha. Typical value is 1.</xs:documentation>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
@@ -1060,7 +1311,7 @@
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="negSlope" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is 0.05</xs:documentation>
+          <xs:documentation xml:lang="en">The negative slope. Typical value is 0.05.</xs:documentation>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
@@ -1083,7 +1334,7 @@
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:element type="URandomValueType" name="alpha" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">Typical value is 1</xs:documentation>
+          <xs:documentation xml:lang="en">The Alpha. Typical value is 1.</xs:documentation>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
@@ -1120,7 +1371,11 @@
       <xs:element type="ActivationSoftPlusType" name="activationSoftPlus" minOccurs="1" maxOccurs="1"/>
       <xs:element type="ActivationTanHType" name="activationTanH" minOccurs="1" maxOccurs="1"/>
     </xs:choice>
-    <xs:attribute type="UIntGT0Type" name="neurons" use="required"/>
+    <xs:attribute type="UIntGT0Type" name="neurons" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The number of layer neurons.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Hidden layers -->
@@ -1134,17 +1389,25 @@
   <!-- QRD regression trainer -->
   <xs:complexType name="FFNetQRDRegrTrainerType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="ParamSeekerType" name="noise" minOccurs="0" maxOccurs="1">
+      <xs:element type="ParamValFinderType" name="noise" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">The usual values are: min=0, max=0.1, steps=10</xs:documentation>
+          <xs:documentation xml:lang="en">The noise parameter. Typical finder parameters are: min=0, max=0.1, subIntervals=10.</xs:documentation>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
-    <xs:attribute type="UIntGT0Type" name="attempts" use="required"/>
-    <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required"/>
+    <xs:attribute type="UIntGT0Type" name="attempts" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The number of attempts.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The number of attempt epochs.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute type="UDoubleLT1Type" name="noiseZeroMargin" use="optional" default="0.75">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.75</xs:documentation>
+        <xs:documentation xml:lang="en">The zero-margin of the noise. Default value is 0.75.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1152,62 +1415,78 @@
   <!-- Ridge regression trainer -->
   <xs:complexType name="FFNetRidgeRegrTrainerType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="ParamSeekerType" name="lambda" minOccurs="0" maxOccurs="1">
+      <xs:element type="ParamValFinderType" name="lambda" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation xml:lang="en">The usual values are: min=0, max=0.5, steps=10</xs:documentation>
+          <xs:documentation xml:lang="en">The lambda parameter. Typical finder parameters are: min=0, max=0.5, subIntervals=10.</xs:documentation>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
-    <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required"/>
+    <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The number of attempt epochs.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Elastic net trainer -->
   <xs:complexType name="FFNetElasticRegrTrainerType">
-    <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required"/>
+    <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The number of attempt epochs.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute type="UDoubleType" name="lambda" use="optional" default="1e-6">
       <xs:annotation>
-        <xs:documentation xml:lang="en">The penalty to be applied. Default value is 1e-6</xs:documentation>
+        <xs:documentation xml:lang="en">The ridge lambda hyperparameter. Default value is 1e-6.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleLE1Type" name="alpha" use="optional" default="0.5">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Ratio between Ridge and Lasso approach. Values between 0 and 1 inclusive, where 0 leads to full Ridge and 1 leads to full Lasso. Default value is 0.5</xs:documentation>
+        <xs:documentation xml:lang="en">The trade-off ratio between the Ridge (0) and the Lasso (1) approach. Default value is 0.5.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
   <!-- Resilient back propagation trainer -->
   <xs:complexType name="FFNetRPropTrainerType">
-    <xs:attribute type="UIntGT0Type" name="attempts" use="required"/>
-    <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required"/>
+    <xs:attribute type="UIntGT0Type" name="attempts" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The number of attempts.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The number of attempt epochs.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute type="UDoubleLT1Type" name="zeroTolerance" use="optional" default="1E-17">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1E-17</xs:documentation>
+        <xs:documentation xml:lang="en">An absolute value that is still considered as zero. Default value is 1E-17.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleGT1Type" name="positiveEta" use="optional" default="1.2">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1.2</xs:documentation>
+        <xs:documentation xml:lang="en">The positive Eta. Default value is 1.2.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleLT1Type" name="negativeEta" use="optional" default="0.5">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.5</xs:documentation>
+        <xs:documentation xml:lang="en">The negative Eta.Default value is 0.5.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleType" name="iniDelta" use="optional" default="0.1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.1</xs:documentation>
+        <xs:documentation xml:lang="en">The initial Delta. Default value is 0.1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleType" name="minDelta" use="optional" default="1E-6">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1E-6</xs:documentation>
+        <xs:documentation xml:lang="en">The minimum Delta. Default value is 1E-6.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleType" name="maxDelta" use="optional" default="50">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 50</xs:documentation>
+        <xs:documentation xml:lang="en">The maximum Delta. Default value is 50.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1243,8 +1522,8 @@
     </xs:sequence>
   </xs:complexType>
 
-  <!-- Feed forward network -->
-  <xs:complexType name="FFNetOneTakesAllType">
+  <!-- Probabilistic feed forward network -->
+  <xs:complexType name="FFNetProbabilisticType">
     <xs:sequence minOccurs="0" maxOccurs="1">
       <xs:sequence minOccurs="1" maxOccurs="1">
         <xs:choice minOccurs="1" maxOccurs="1">
@@ -1258,65 +1537,41 @@
     </xs:sequence>
   </xs:complexType>
 
-  <!-- Crossvalidation configuration -->
-  <xs:complexType name="CrossvalidationType">
-    <xs:attribute type="UDoubleGT0LE05Type" name="foldDataRatio" use="optional" default="0.1">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Required ratio of samples constituting one fold. Default value is 0.1.</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UIntGT0AutoOptionType" name="folds" use="optional" default="Auto">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Number of folds to be used. Default value is Auto (all available folds).</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute type="UIntGT0Type" name="repetitions" use="optional" default="1">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Defines how many times the generation of whole folds on shuffled data to be repeated. This parameter multiplies the number of networks in the cluster. Default value is 1.</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-
-  <!-- Network cluster 2nd level computation configuration -->
-  <xs:complexType name="NetworkClusterSecondLevelCompType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="CrossvalidationType" name="crossvalidation" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="FFNetType" name="ff" minOccurs="1" maxOccurs="1"/>
-    </xs:sequence>
-    <xs:attribute type="ClusterSecondLevelCompModeType" name ="mode" use="optional" default="AveragedOutputs">
-      <xs:annotation>
-        <xs:documentation xml:lang="en">Computation mode of the cluster. Default value is AveragedOutputs.</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-
   <!-- P-Delta rule trainer -->
   <xs:complexType name="PPNetPDeltaRuleTrainerType">
-    <xs:attribute type="UIntGT0Type" name="attempts" use="required"/>
-    <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required"/>
+    <xs:attribute type="UIntGT0Type" name="attempts" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The number of attempts.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UIntGT0Type" name="attemptEpochs" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The number of attempt epochs.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute type="UDoubleLT1Type" name="iniLR" use="optional" default="0.01">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.01</xs:documentation>
+        <xs:documentation xml:lang="en">The initial learning rate. Default value is 0.01.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleGT1Type" name="incLR" use="optional" default="1.1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1.1</xs:documentation>
+        <xs:documentation xml:lang="en">The learning rate increment. Default value is 1.1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleLT1Type" name="decLR" use="optional" default="0.5">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.5</xs:documentation>
+        <xs:documentation xml:lang="en">The learning rate decrement. Default value is 0.5.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleLT1Type" name="minLR" use="optional" default="1E-4">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1E-4</xs:documentation>
+        <xs:documentation xml:lang="en">The min learning rate. Default value is 1E-4.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleLT1Type" name="maxLR" use="optional" default="0.1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.1</xs:documentation>
+        <xs:documentation xml:lang="en">The max learning rate. Default value is 0.1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1328,47 +1583,252 @@
     </xs:sequence>
     <xs:attribute type="UIntGT0Type" name="gates" use="optional" default="3">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 3</xs:documentation>
+        <xs:documentation xml:lang="en">The number of the threshold gates. Default value is 3.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UIntGT0Type" name="resolution" use="optional" default="2">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 2 (binary resolution)</xs:documentation>
+        <xs:documentation xml:lang="en">The output resolution. Default value is 2 (binary resolution).</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
+
+
+  <!-- Crossvalidation configuration -->
+  <xs:complexType name="CrossvalidationType">
+    <xs:attribute type="UDoubleGT0LE05Type" name="foldDataRatio" use="optional" default="0.1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies the ratio of samples constituting one fold. Default value is 0.1.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UIntGT0AutoOptionType" name="folds" use="optional" default="Auto">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies the number of folds to be used. Default value is Auto (all available folds).</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UIntGT0Type" name="repetitions" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Defines how many times the generation of whole folds on shuffled data to be repeated. This parameter multiplies the number of networks in the cluster. Default value is 1.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Cluster - Probabilistic output - networks -->
+  <xs:complexType name="ProbabilisticTNetClusterNetworksType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="FFNetProbabilisticType" name="ff" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Cluster - Probabilistic output - macro weights -->
+  <xs:complexType name="ProbabilisticTNetClusterWeightsType">
+    <xs:attribute type="UDoubleType" name ="trainingGroupWeight" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies the weight of the group of metrics related to training. Default value is 1.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name ="testingGroupWeight" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies the weight of the group of metrics related to testing. Default value is 1.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name ="samplesWeight" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies the weight of the number of samples metric. Default value is 1.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name ="numericalPrecisionWeight" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies the weight of the numerical precision metric. Default value is 1.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name ="misrecognizedFalseWeight" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies the weight of the misrecognized false metric. Default value is 1.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name ="unrecognizedTrueWeight" use="optional" default="0">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies the weight of the unrecognized true metric. Default value is 0.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Cluster - Probabilistic output -->
+  <xs:complexType name="ProbabilisticTNetClusterType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="ProbabilisticTNetClusterNetworksType" name="networks" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ProbabilisticTNetClusterWeightsType" name="weights" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Clusters - Probabilistic output -->
+  <xs:complexType name="ProbabilisticTNetClustersType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="ProbabilisticTNetClusterType" name="cluster" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Cluster Chain - Probabilistic output -->
+  <xs:complexType name="ProbabilisticTNetClusterChainType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="CrossvalidationType" name="crossvalidation" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ProbabilisticTNetClustersType" name="clusters" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!-- Cluster - real output - networks -->
+  <xs:complexType name="RealTNetClusterNetworksType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="FFNetType" name="ff" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Cluster - Real output - Macro weights -->
+  <xs:complexType name="RealTNetClusterWeightsType">
+    <xs:attribute type="UDoubleType" name ="trainingGroupWeight" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies the weight of the group of metrics related to training. Default value is 1.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name ="testingGroupWeight" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies the weight of the group of metrics related to testing. Default value is 1.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name ="samplesWeight" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies the weight of the number of samples metric. Default value is 1.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name ="numericalPrecisionWeight" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies the weight of the numerical precision metric. Default value is 1.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Cluster - Real output -->
+  <xs:complexType name="RealTNetClusterType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="RealTNetClusterNetworksType" name="networks" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RealTNetClusterWeightsType" name="weights" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!-- Clusters - Real output -->
+  <xs:complexType name="RealTNetClustersType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="RealTNetClusterType" name="cluster" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Cluster Chain - Real output -->
+  <xs:complexType name="RealTNetClusterChainType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="CrossvalidationType" name="crossvalidation" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="RealTNetClustersType" name="clusters" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!-- Cluster - Single boolean output - networks -->
+  <xs:complexType name="SingleBoolTNetClusterNetworksType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:choice minOccurs="1" maxOccurs="unbounded">
+        <xs:element type="FFNetType" name="ff" minOccurs="0" maxOccurs="1"/>
+        <xs:element type="PPNetType" name="pp" minOccurs="0" maxOccurs="1"/>
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Cluster - Single boolean output - Macro weights -->
+  <xs:complexType name="SingleBoolTNetClusterWeightsType">
+    <xs:attribute type="UDoubleType" name ="trainingGroupWeight" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies the weight of the group of metrics related to training. Default value is 1.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name ="testingGroupWeight" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies the weight of the group of metrics related to testing. Default value is 1.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name ="samplesWeight" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies the weight of the number of samples metric. Default value is 1.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name ="numericalPrecisionWeight" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies the weight of the numerical precision metric. Default value is 1.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name ="misrecognizedFalseWeight" use="optional" default="1">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies the weight of the misrecognized false metric. Default value is 1.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name ="unrecognizedTrueWeight" use="optional" default="0">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies the weight of the unrecognized true metric. Default value is 0.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Cluster - Single boolean output -->
+  <xs:complexType name="SingleBoolTNetClusterType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="SingleBoolTNetClusterNetworksType" name="networks" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="SingleBoolTNetClusterWeightsType" name="weights" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!-- Clusters - Single boolean output -->
+  <xs:complexType name="SingleBoolTNetClustersType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="SingleBoolTNetClusterType" name="cluster" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Cluster Chain - Single boolean output -->
+  <xs:complexType name="SingleBoolTNetClusterChainType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="CrossvalidationType" name="crossvalidation" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="SingleBoolTNetClustersType" name="clusters" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
 
   <!-- Feature filters -->
   <!-- Binary feature filter -->
   <xs:complexType name="BinFeatureFilterType">
   </xs:complexType>
 
-  <!-- Enumeration feature filter -->
-  <xs:complexType name="EnumFeatureFilterType">
-    <xs:attribute type="UIntGT0Type" name="numOfElements" use="required"/>
-  </xs:complexType>
-
   <!-- Real number feature filter -->
   <xs:complexType name="RealFeatureFilterType">
     <xs:attribute type="xs:boolean" name="standardize" use="optional" default="true">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies whether to apply the data standardization. Default value is true.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:boolean" name="keepReserve" use="optional" default="true">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies whether to keep the range reserve for possible unseen data. Default value is true.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Plasticity of synapses transmitting spiking signal -->
+  <!-- Synapse -->
   <!-- Constant dynamics -->
   <!-- Input to hidden spiking -->
   <xs:complexType name="SynapseConstantDynamicsSTInputType">
     <xs:attribute type="UDoubleLE1Type" name="efficacy" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+        <xs:documentation xml:lang="en">The synapse's constant efficacy. Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1377,7 +1837,7 @@
   <xs:complexType name="SynapseConstantDynamicsSTExcitatoryType">
     <xs:attribute type="UDoubleLE1Type" name="efficacy" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+        <xs:documentation xml:lang="en">The synapse's constant efficacy. Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1386,7 +1846,7 @@
   <xs:complexType name="SynapseConstantDynamicsSTInhibitoryType">
     <xs:attribute type="UDoubleLE1Type" name="efficacy" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+        <xs:documentation xml:lang="en">The synapse's constant efficacy. Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1395,7 +1855,7 @@
   <xs:complexType name="SynapseConstantDynamicsATInputType">
     <xs:attribute type="UDoubleLE1Type" name="efficacy" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+        <xs:documentation xml:lang="en">The synapse's constant efficacy. Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1404,7 +1864,7 @@
   <xs:complexType name="SynapseConstantDynamicsATIndifferentType">
     <xs:attribute type="UDoubleLE1Type" name="efficacy" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+        <xs:documentation xml:lang="en">The synapse's constant efficacy. Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1414,17 +1874,17 @@
   <xs:complexType name="SynapseLinearDynamicsSTInputType">
     <xs:attribute type="UDoubleLE1Type" name="alpha" use="optional" default="0.007">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.007 (the alpha argument in the linear expression efficacy = alpha * (spike - beta))</xs:documentation>
+        <xs:documentation xml:lang="en">The value of the alpha argument in the linear expression: efficacy = alpha * (spike - beta). Default value is 0.007.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleLE1Type" name="beta" use="optional" default="0.739">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.739 (the beta argument in the linear expression efficacy = alpha * (spike - beta))</xs:documentation>
+        <xs:documentation xml:lang="en">The value of the beta argument in the linear expression: efficacy = alpha * (spike - beta). Default value is 0.739.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleLE1Type" name="initialEfficacy" use="optional" default="0.75">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.75</xs:documentation>
+        <xs:documentation xml:lang="en">The value of the synapse's initial efficacy. Default value is 0.75.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1433,17 +1893,17 @@
   <xs:complexType name="SynapseLinearDynamicsSTExcitatoryType">
     <xs:attribute type="UDoubleLE1Type" name="alpha" use="optional" default="0.007">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.007 (the alpha argument in the linear expression efficacy = alpha * (spike - beta))</xs:documentation>
+        <xs:documentation xml:lang="en">The value of the alpha argument in the linear expression: efficacy = alpha * (spike - beta). Default value is 0.007.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleLE1Type" name="beta" use="optional" default="0.739">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.739 (the beta argument in the linear expression efficacy = alpha * (spike - beta))</xs:documentation>
+        <xs:documentation xml:lang="en">The value of the beta argument in the linear expression: efficacy = alpha * (spike - beta). Default value is 0.739.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleLE1Type" name="initialEfficacy" use="optional" default="0.75">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.75</xs:documentation>
+        <xs:documentation xml:lang="en">The value of the synapse's initial efficacy. Default value is 0.75.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1452,17 +1912,17 @@
   <xs:complexType name="SynapseLinearDynamicsSTInhibitoryType">
     <xs:attribute type="UDoubleLE1Type" name="alpha" use="optional" default="0.007">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.007 (the alpha argument in the linear expression efficacy = alpha * (spike - beta))</xs:documentation>
+        <xs:documentation xml:lang="en">The value of the alpha argument in the linear expression: efficacy = alpha * (spike - beta). Default value is 0.007.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleLE1Type" name="beta" use="optional" default="0.739">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.739 (the beta argument in the linear expression efficacy = alpha * (spike - beta))</xs:documentation>
+        <xs:documentation xml:lang="en">The value of the beta argument in the linear expression: efficacy = alpha * (spike - beta). Default value is 0.739.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleLE1Type" name="initialEfficacy" use="optional" default="0.75">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.75</xs:documentation>
+        <xs:documentation xml:lang="en">The value of the synapse's initial efficacy. Default value is 0.75.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1471,17 +1931,17 @@
   <xs:complexType name="SynapseLinearDynamicsATInputType">
     <xs:attribute type="UDoubleLE1Type" name="alpha" use="optional" default="0.007">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.007 (the alpha argument in the linear expression efficacy = alpha * (spike - beta))</xs:documentation>
+        <xs:documentation xml:lang="en">The value of the alpha argument in the linear expression: efficacy = alpha * (spike - beta). Default value is 0.007.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleLE1Type" name="beta" use="optional" default="0.739">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.739 (the beta argument in the linear expression efficacy = alpha * (spike - beta))</xs:documentation>
+        <xs:documentation xml:lang="en">The value of the beta argument in the linear expression: efficacy = alpha * (spike - beta). Default value is 0.739.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleLE1Type" name="initialEfficacy" use="optional" default="0.75">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.75</xs:documentation>
+        <xs:documentation xml:lang="en">The value of the synapse's initial efficacy. Default value is 0.75.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1490,17 +1950,17 @@
   <xs:complexType name="SynapseLinearDynamicsATIndifferentType">
     <xs:attribute type="UDoubleLE1Type" name="alpha" use="optional" default="0.007">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.007 (the alpha argument in the linear expression efficacy = alpha * (spike - beta))</xs:documentation>
+        <xs:documentation xml:lang="en">The value of the alpha argument in the linear expression: efficacy = alpha * (spike - beta). Default value is 0.007.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleLE1Type" name="beta" use="optional" default="0.739">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.739 (the beta argument in the linear expression efficacy = alpha * (spike - beta))</xs:documentation>
+        <xs:documentation xml:lang="en">The value of the beta argument in the linear expression: efficacy = alpha * (spike - beta). Default value is 0.739.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleLE1Type" name="initialEfficacy" use="optional" default="0.75">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.75</xs:documentation>
+        <xs:documentation xml:lang="en">The value of the synapse's initial efficacy. Default value is 0.75.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1511,17 +1971,17 @@
   <xs:complexType name="SynapseNonlinearDynamicsSTInputType">
     <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.99">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.99</xs:documentation>
+        <xs:documentation xml:lang="en">The value of the resting efficacy. Default value is 0.99.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleType" name="tauDepression" use="optional" default="3">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 3 ms</xs:documentation>
+        <xs:documentation xml:lang="en">The value of the tau depression (ms). Default value is 3.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleType" name="tauFacilitation" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1 ms</xs:documentation>
+        <xs:documentation xml:lang="en">The value of the tau facilitation (ms). Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1530,17 +1990,17 @@
   <xs:complexType name="SynapseNonlinearDynamicsSTExcitatoryType">
     <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.99">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.99</xs:documentation>
+        <xs:documentation xml:lang="en">The value of the resting efficacy. Default value is 0.99.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleType" name="tauDepression" use="optional" default="3">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 3 ms</xs:documentation>
+        <xs:documentation xml:lang="en">The value of the tau depression (ms). Default value is 3.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleType" name="tauFacilitation" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1 ms</xs:documentation>
+        <xs:documentation xml:lang="en">The value of the tau facilitation (ms). Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1549,17 +2009,17 @@
   <xs:complexType name="SynapseNonlinearDynamicsSTInhibitoryType">
     <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.99">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.99</xs:documentation>
+        <xs:documentation xml:lang="en">The value of the resting efficacy. Default value is 0.99.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleType" name="tauDepression" use="optional" default="3">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 3 ms</xs:documentation>
+        <xs:documentation xml:lang="en">The value of the tau depression (ms). Default value is 3.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleType" name="tauFacilitation" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1 ms</xs:documentation>
+        <xs:documentation xml:lang="en">The value of the tau facilitation (ms). Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1568,17 +2028,17 @@
   <xs:complexType name="SynapseNonlinearDynamicsATInputType">
     <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.99">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.99</xs:documentation>
+        <xs:documentation xml:lang="en">The value of the resting efficacy. Default value is 0.99.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleType" name="tauDepression" use="optional" default="3">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 3 ms</xs:documentation>
+        <xs:documentation xml:lang="en">The value of the tau depression (ms). Default value is 3.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleType" name="tauFacilitation" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1 ms</xs:documentation>
+        <xs:documentation xml:lang="en">The value of the tau facilitation (ms). Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1587,17 +2047,17 @@
   <xs:complexType name="SynapseNonlinearDynamicsATIndifferentType">
     <xs:attribute type="UDoubleLE1Type" name="restingEfficacy" use="optional" default="0.99">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.99</xs:documentation>
+        <xs:documentation xml:lang="en">The value of the resting efficacy. Default value is 0.99.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleType" name="tauDepression" use="optional" default="3">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 3 ms</xs:documentation>
+        <xs:documentation xml:lang="en">The value of the tau depression (ms). Default value is 3.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleType" name="tauFacilitation" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1 ms</xs:documentation>
+        <xs:documentation xml:lang="en">The value of the tau facilitation (ms). Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1704,14 +2164,14 @@
       <xs:element type="SynapseAnalogSourceType" name="analogSource" minOccurs="0" maxOccurs="1"/>
       <xs:element type="SynapseSpikingSourceSTInputType" name="spikingSource" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
-    <xs:attribute type="SynapticDelayMethodType" name="delayMethod" use="optional" default="Random">
+    <xs:attribute type="SynapticDelayMethod" name="delayMethod" use="optional" default="Random">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is Random</xs:documentation>
+        <xs:documentation xml:lang="en">The synaptic delay method. Default value is Random.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:unsignedInt" name="maxDelay" use="optional" default="0">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0. No delay.</xs:documentation>
+        <xs:documentation xml:lang="en">The maximum synaptic delay. Default value is 0 (no delay).</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1722,19 +2182,19 @@
       <xs:element type="SynapseAnalogSourceType" name="analogSource" minOccurs="0" maxOccurs="1"/>
       <xs:element type="SynapseSpikingSourceSTExcitatoryType" name="spikingSource" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
-    <xs:attribute type="SynapticDelayMethodType" name="delayMethod" use="optional" default="Random">
+    <xs:attribute type="SynapticDelayMethod" name="delayMethod" use="optional" default="Random">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is Random</xs:documentation>
+        <xs:documentation xml:lang="en">The synaptic delay method. Default value is Random.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:unsignedInt" name="maxDelay" use="optional" default="0">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0. No delay.</xs:documentation>
+        <xs:documentation xml:lang="en">The maximum synaptic delay. Default value is 0 (no delay).</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleGT0Type" name="relShare" use="optional" default="4">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 4</xs:documentation>
+        <xs:documentation xml:lang="en">The relative share. Default value is 4.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1745,19 +2205,19 @@
       <xs:element type="SynapseAnalogSourceType" name="analogSource" minOccurs="0" maxOccurs="1"/>
       <xs:element type="SynapseSpikingSourceSTInhibitoryType" name="spikingSource" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
-    <xs:attribute type="SynapticDelayMethodType" name="delayMethod" use="optional" default="Random">
+    <xs:attribute type="SynapticDelayMethod" name="delayMethod" use="optional" default="Random">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is Random</xs:documentation>
+        <xs:documentation xml:lang="en">The synaptic delay method. Default value is Random.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:unsignedInt" name="maxDelay" use="optional" default="0">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0. No delay.</xs:documentation>
+        <xs:documentation xml:lang="en">The maximum synaptic delay. Default value is 0 (no delay).</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleGT0Type" name="relShare" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+        <xs:documentation xml:lang="en">The relative share. Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1769,14 +2229,14 @@
       <xs:element type="SynapseAnalogSourceType" name="analogSource" minOccurs="0" maxOccurs="1"/>
       <xs:element type="SynapseSpikingSourceATInputType" name="spikingSource" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
-    <xs:attribute type="SynapticDelayMethodType" name="delayMethod" use="optional" default="Random">
+    <xs:attribute type="SynapticDelayMethod" name="delayMethod" use="optional" default="Random">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is Random</xs:documentation>
+        <xs:documentation xml:lang="en">The synaptic delay method. Default value is Random.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:unsignedInt" name="maxDelay" use="optional" default="0">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0. No delay.</xs:documentation>
+        <xs:documentation xml:lang="en">The maximum synaptic delay. Default value is 0 (no delay).</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1787,14 +2247,14 @@
       <xs:element type="SynapseAnalogSourceType" name="analogSource" minOccurs="0" maxOccurs="1"/>
       <xs:element type="SynapseSpikingSourceATIndifferentType" name="spikingSource" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
-    <xs:attribute type="SynapticDelayMethodType" name="delayMethod" use="optional" default="Random">
+    <xs:attribute type="SynapticDelayMethod" name="delayMethod" use="optional" default="Random">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is Random</xs:documentation>
+        <xs:documentation xml:lang="en">The synaptic delay method. Default value is Random.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:unsignedInt" name="maxDelay" use="optional" default="0">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0. No delay.</xs:documentation>
+        <xs:documentation xml:lang="en">The maximum synaptic delay. Default value is 0 (no delay).</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1816,7 +2276,7 @@
     </xs:sequence>
     <xs:attribute type="UDoubleGT0NAOptionType" name="spectralRadius" use="optional" default="0.9999">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.9999. Use NA to disable spectral radius application.</xs:documentation>
+        <xs:documentation xml:lang="en">The spectral radius (use NA to disable spectral radius application). Default value is 0.9999.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1838,35 +2298,35 @@
   <xs:complexType name="PredictorActivationPowerType">
     <xs:attribute type="UDoubleGT0Type" name="exponent" use="optional" default="2">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 2.</xs:documentation>
+        <xs:documentation xml:lang="en">The exponent. Default value is 2.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:boolean" name="keepSign" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is true.</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies whether to keep the original sign of the activation value. Default value is true.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Activation stat feature predictor -->
-  <xs:complexType name="PredictorActivationStatFeatureType">
+  <!-- Activation stat figure predictor -->
+  <xs:complexType name="PredictorActivationStatFigureType">
     <xs:attribute type="UIntGE2LE1024NAOptionType" name="window" use="optional" default="NA">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Specifies whether a predictor is computed continuously (NA) or from the moving data window (size 2-1024). Default value is NA.</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies the data window size. Default value is NA.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="StatFeatureType" name="feature" use="required">
+    <xs:attribute type="StatFigure" name="figure" use="required">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Specifies requiered statistical feature to be used.</xs:documentation>
+        <xs:documentation xml:lang="en">The statistical figure.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Activation rescalled range predictor -->
-  <xs:complexType name="PredictorActivationRescalledRangeType">
+  <!-- Activation rescaled range predictor -->
+  <xs:complexType name="PredictorActivationRescaledRangeType">
     <xs:attribute type="UIntGE2LE1024Type" name="window" use="required">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Specifies moving data window size (2-1024).</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies the data window size.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1875,30 +2335,30 @@
   <xs:complexType name="PredictorActivationLinWAvgType">
     <xs:attribute type="UIntGE2LE1024NAOptionType" name="window" use="optional" default="NA">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Specifies whether a predictor is computed continuously (NA) or from the moving data window (size 2-1024). Default value is NA.</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies the data window size. Default value is NA.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Activation differences stat feature predictor -->
-  <xs:complexType name="PredictorActivationDiffStatFeatureType">
+  <!-- Activation differences stat figure predictor -->
+  <xs:complexType name="PredictorActivationDiffStatFigureType">
     <xs:attribute type="UIntGE2LE1024NAOptionType" name="window" use="optional" default="NA">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Specifies whether a predictor is computed continuously (NA) or from the moving data window (size 2-1024). Default value is NA.</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies the data window size. Default value is NA.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="StatFeatureType" name="feature" use="required">
+    <xs:attribute type="StatFigure" name="figure" use="required">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Specifies requiered statistical feature to be used.</xs:documentation>
+        <xs:documentation xml:lang="en">The statistical figure.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Activation differences rescalled range predictor -->
-  <xs:complexType name="PredictorActivationDiffRescalledRangeType">
+  <!-- Activation differences rescaled range predictor -->
+  <xs:complexType name="PredictorActivationDiffRescaledRangeType">
     <xs:attribute type="UIntGE2LE1024Type" name="window" use="required">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Specifies moving data window size (2-1024).</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies the data window size.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1907,7 +2367,7 @@
   <xs:complexType name="PredictorActivationDiffLinWAvgType">
     <xs:attribute type="UIntGE2LE1024NAOptionType" name="window" use="optional" default="NA">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Specifies whether a predictor is computed continuously (NA) or from the moving data window (size 2-1024). Default value is NA.</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies the data window size. Default value is NA.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1917,12 +2377,12 @@
   <xs:complexType name="PredictorFiringTraceType">
     <xs:attribute type="UIntGE2LE1024NAOptionType" name="window" use="optional" default="NA">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Specifies whether a predictor is computed continuously (NA) or from the moving data window (size 2-1024). Default value is NA.</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies the data window size. Default value is NA.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleLE1Type" name="fading" use="optional" default="0.005">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Trace fading strength (GE0..LE1). Default value is 0.005</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies the strength of trace fading. Default value is 0.005.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1933,47 +2393,47 @@
       <xs:choice minOccurs="0" maxOccurs="unbounded">
         <xs:element type="PredictorActivationType" name="activation" minOccurs="0" maxOccurs="1">
           <xs:annotation>
-            <xs:documentation xml:lang="en">Result of the activation function.</xs:documentation>
+            <xs:documentation xml:lang="en">The result of the activation function.</xs:documentation>
           </xs:annotation>
         </xs:element>
         <xs:element type="PredictorActivationPowerType" name="activationPower" minOccurs="0" maxOccurs="1">
           <xs:annotation>
-            <xs:documentation xml:lang="en">Powered absolute value of the result of the activation function.</xs:documentation>
+            <xs:documentation xml:lang="en">The powered absolute value of the result of the activation function.</xs:documentation>
           </xs:annotation>
         </xs:element>
-        <xs:element type="PredictorActivationStatFeatureType" name="activationStatFeature" minOccurs="0" maxOccurs="1">
+        <xs:element type="PredictorActivationStatFigureType" name="activationStatFigure" minOccurs="0" maxOccurs="1">
           <xs:annotation>
-            <xs:documentation xml:lang="en">Statistical feature computed from the activation function results.</xs:documentation>
+            <xs:documentation xml:lang="en">The statistical feature computed from the activation function results.</xs:documentation>
           </xs:annotation>
         </xs:element>
-        <xs:element type="PredictorActivationRescalledRangeType" name="activationRescalledRange" minOccurs="0" maxOccurs="1">
+        <xs:element type="PredictorActivationRescaledRangeType" name="activationRescaledRange" minOccurs="0" maxOccurs="1">
           <xs:annotation>
-            <xs:documentation xml:lang="en">Rescalled range computed from the activation function results.</xs:documentation>
+            <xs:documentation xml:lang="en">The rescaled range computed from the activation function results.</xs:documentation>
           </xs:annotation>
         </xs:element>
         <xs:element type="PredictorActivationLinWAvgType" name="activationLinWAvg" minOccurs="0" maxOccurs="1">
           <xs:annotation>
-            <xs:documentation xml:lang="en">Linearly weighted average computed from the activation function results.</xs:documentation>
+            <xs:documentation xml:lang="en">The linearly weighted average computed from the activation function results.</xs:documentation>
           </xs:annotation>
         </xs:element>
-        <xs:element type="PredictorActivationDiffStatFeatureType" name="activationDiffStatFeature" minOccurs="0" maxOccurs="1">
+        <xs:element type="PredictorActivationDiffStatFigureType" name="activationDiffStatFigure" minOccurs="0" maxOccurs="1">
           <xs:annotation>
-            <xs:documentation xml:lang="en">Statistical feature computed from the differences of the activation function results (A[T] - A[T-1]).</xs:documentation>
+            <xs:documentation xml:lang="en">The statistical figure computed from the differences of the activation function results (A[T] - A[T-1]).</xs:documentation>
           </xs:annotation>
         </xs:element>
-        <xs:element type="PredictorActivationDiffRescalledRangeType" name="activationDiffRescalledRange" minOccurs="0" maxOccurs="1">
+        <xs:element type="PredictorActivationDiffRescaledRangeType" name="activationDiffRescaledRange" minOccurs="0" maxOccurs="1">
           <xs:annotation>
-            <xs:documentation xml:lang="en">Rescalled range computed from the differences of the activation function results (A[T] - A[T-1]).</xs:documentation>
+            <xs:documentation xml:lang="en">The rescaled range computed from the differences of the activation function results (A[T] - A[T-1]).</xs:documentation>
           </xs:annotation>
         </xs:element>
         <xs:element type="PredictorActivationDiffLinWAvgType" name="activationDiffLinWAvg" minOccurs="0" maxOccurs="1">
           <xs:annotation>
-            <xs:documentation xml:lang="en">Linearly weighted average computed from the differences of the activation function results (A[T] - A[T-1]).</xs:documentation>
+            <xs:documentation xml:lang="en">The linearly weighted average computed from the differences of the activation function results (A[T] - A[T-1]).</xs:documentation>
           </xs:annotation>
         </xs:element>
         <xs:element type="PredictorFiringTraceType" name="firingTrace" minOccurs="0" maxOccurs="1">
           <xs:annotation>
-            <xs:documentation xml:lang="en">Traced neuron's firing.</xs:documentation>
+            <xs:documentation xml:lang="en">The traced neuron's firing.</xs:documentation>
           </xs:annotation>
         </xs:element>
       </xs:choice>
@@ -1989,32 +2449,32 @@
   <xs:complexType name="PoolInterconnectionRandomSchemaType">
     <xs:attribute type="UDoubleGT0LE1Type" name="density" use="optional" default="0.1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.1</xs:documentation>
+        <xs:documentation xml:lang="en">The density of interconnected neurons. Default value is 0.1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleGT0NAOptionType" name="avgDistance" use="optional" default="NA">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is NA</xs:documentation>
+        <xs:documentation xml:lang="en">The average distance of interconnected neurons (NA means the random distance). Default value is NA.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:boolean" name="allowSelfConnection" use="optional" default="true">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies whether to allow neurons to be self connected. Default value is true.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:boolean" name="constantNumOfConnections" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is false</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies whether to keep the constant number of synapses. Default value is false.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:boolean" name="replaceExistingConnections" use="optional" default="true">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies whether the connections of this schema will replace the existing connections. Default value is true.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UIntGT0Type" name="repetitions" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+        <xs:documentation xml:lang="en">The number of applications of this schema. Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -2023,22 +2483,22 @@
   <xs:complexType name="PoolInterconnectionChainSchemaType">
     <xs:attribute type="UDoubleGT0LE1Type" name="ratio" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+        <xs:documentation xml:lang="en">The ratio of involved neurons. Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:boolean" name="circle" use="optional" default="true">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies whether the chain will be closed to a circle. Default value is true.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:boolean" name="replaceExistingConnections" use="optional" default="true">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies whether the connections of this schema will replace the existing connections. Default value is true.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UIntGT0Type" name="repetitions" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+        <xs:documentation xml:lang="en">The number of applications of this schema. Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -2047,27 +2507,27 @@
   <xs:complexType name="PoolInterconnectionDoubleTwistedToroidSchemaType">
     <xs:attribute type="UDoubleGT0LE1Type" name="ratio" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+        <xs:documentation xml:lang="en">The ratio of involved neurons. Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:boolean" name="lDiagonalSelf" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is false</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies whether the left diagonal neurons to be self connected. Default value is false.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:boolean" name="rDiagonalSelf" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is false</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies whether the right diagonal neurons to be self connected. Default value is false.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:boolean" name="replaceExistingConnections" use="optional" default="true">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies whether the connections of this schema will replace the existing connections. Default value is true.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UIntGT0Type" name="repetitions" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+        <xs:documentation xml:lang="en">The number of applications of this schema. Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -2092,17 +2552,17 @@
   <xs:complexType name="HomogenousExcitabilityType">
     <xs:attribute type="UDoubleGT0Type" name="excitatoryStrength" use="optional" default="0.75">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.75</xs:documentation>
+        <xs:documentation xml:lang="en">The total excitatory strength. Default value is 0.75.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleLE1Type" name="inputRatio" use="optional" default="0.75">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.75</xs:documentation>
+        <xs:documentation xml:lang="en">The input strength ratio. Default value is 0.75.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleLE1Type" name="inhibitoryRatio" use="optional" default="0.25">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0.25</xs:documentation>
+        <xs:documentation xml:lang="en">The inhibitory strength ratio. Default value is 0.25.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -2123,8 +2583,16 @@
       <xs:element type="RandomValueType" name="bias" minOccurs="0" maxOccurs="1"/>
       <xs:element type="PredictorsType" name="predictors" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
-    <xs:attribute type="xs:string" name="name" use="required" />
-    <xs:attribute type="UDoubleType" name="relShare" use="required"/>
+    <xs:attribute type="xs:string" name="name" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The name of the neuron group.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="relShare" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies how big relative portion of pool's neurons is formed by this group of the neurons.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Analog neuron group -->
@@ -2133,7 +2601,11 @@
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:element type="URandomValueType" name="strength" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
-    <xs:attribute type="UDoubleLE1Type" name="density" use="required"/>
+    <xs:attribute type="UDoubleLE1Type" name="density" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies the ratio of the neurons having the Retainment property.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Analog neuron group configuration -->
@@ -2153,16 +2625,24 @@
       <xs:element type="RetainmentType" name="retainment" minOccurs="0" maxOccurs="1"/>
       <xs:element type="PredictorsType" name="predictors" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
-    <xs:attribute type="xs:string" name="name" use="required" />
-    <xs:attribute type="UDoubleType" name="relShare" use="required"/>
+    <xs:attribute type="xs:string" name="name" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The name of the neuron group.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleType" name="relShare" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies how big relative portion of pool's neurons is formed by this group of the neurons.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute type="UDoubleLE1Type" name="firingThreshold" use="optional" default="0.00125">
       <xs:annotation>
-        <xs:documentation xml:lang="en">A number between 0 and 1 (LT1). Every time the new normalized activation value is higher than the previous normalized activation value by at least the threshold, it is evaluated as a firing event. Default value is 0.00125.</xs:documentation>
+        <xs:documentation xml:lang="en">The firing threshold value. Every time the current normalized activation is higher than the normalized past reference activation by at least this threshold, it is evaluated as a firing event. Default value is 0.00125.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UIntGT0Type" name="thresholdMaxRefDeepness" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Maximum deepness of historical normalized activation value to be compared with current normalized activation value when evaluating firing event. Default value is 1.</xs:documentation>
+        <xs:documentation xml:lang="en">Maximum age of the past activation for the evaluation of the firing event. Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -2190,7 +2670,11 @@
       </xs:element>
       <xs:element type="PoolInterconnectionType" name="interconnection" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
-    <xs:attribute type="xs:string" name="name" use="required" />
+    <xs:attribute type="xs:string" name="name" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The name of the pool.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
 
@@ -2204,13 +2688,29 @@
 
   <!-- Inter-pool connection -->
   <xs:complexType name="ResStructInterPoolConnectionType">
-    <xs:attribute type="xs:string" name="targetPool" use="required"/>
-    <xs:attribute type="UDoubleLE1Type" name="targetConnDensity" use="required"/>
-    <xs:attribute type="xs:string" name="sourcePool" use="required"/>
-    <xs:attribute type="UDoubleLE1Type" name="sourceConnDensity" use="required"/>
+    <xs:attribute type="xs:string" name="targetPool" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The name of the target pool.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleLE1Type" name="targetConnDensity" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Determines how many neurons in the target pool get connected source pool neurons.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:string" name="sourcePool" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The name of the source pool.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="UDoubleLE1Type" name="sourceConnDensity" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Determines how many neurons from the source pool to be connected to one neuron from target pool.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute type="xs:boolean" name="constantNumOfConnections" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is false</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies whether to keep constant number of connections from source neurons to target neuron. Default value is false.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -2239,7 +2739,11 @@
         </xs:unique>
       </xs:element>
     </xs:sequence>
-    <xs:attribute type="xs:string" name="name" use="required" />
+    <xs:attribute type="xs:string" name="name" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The name of the reservoir structure configuration.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Neural preprocessor -->
@@ -2248,7 +2752,7 @@
   <xs:complexType name="NPInpFeedingContinuousType">
     <xs:attribute type="UIntGT0AutoOptionType" name="bootCycles" use="optional" default="Auto">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is Auto</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies the number of the boot cycles. Default value is Auto.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -2258,22 +2762,22 @@
   <xs:complexType name="NPResamplingType">
     <xs:attribute type="UDoubleLT1Type" name="signalBeginThreshold" use="optional" default="0">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Threshold of signal begin detection. Default value is 0 (maximum sensitivity)</xs:documentation>
+        <xs:documentation xml:lang="en">The threshold of the signal begin detection. Default value is 0 (maximum sensitivity).</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleLT1Type" name="signalEndThreshold" use="optional" default="0">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Threshold of signal end detection. Default value is 0 (maximum sensitivity)</xs:documentation>
+        <xs:documentation xml:lang="en">Threshold of signal end detection. Default value is 0 (maximum sensitivity).</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:boolean" name="uniformTimeScale" use="optional" default="true">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is true.</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies whether all the variables in the input pattern should have the same signal begin/end. Default value is true.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UIntGT1AutoOptionType" name="targetTimePoints" use="optional" default="Auto">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Number of time-points of the resampled pattern (resampled pattern length). Default value is Auto (keeps original time points)</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies whether the input pattern variable's data will be upsampled and/or downsampled to have specified fixed length (GT 0). Default value is Auto (keeps original time points).</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -2285,12 +2789,12 @@
     </xs:sequence>
     <xs:attribute type="xs:boolean" name="detrend" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is false.</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies whether to detrend the input pattern data. Default value is false.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:boolean" name="unifyAmplitude" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is false.</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies whether to unify an amplitude of the input pattern data. Default value is false.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -2300,7 +2804,7 @@
     <xs:attribute type="xs:string" name="name" use="required"/>
     <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="true">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies whether to route the steady input field to the readout layer. Default value is true.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -2320,17 +2824,17 @@
     </xs:sequence>
     <xs:attribute type="UIntGT0Type" name="slices" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Specifies how many times to collect predictors during pattern data preprocessing. Default value is 1</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies how many times to collect predictors during the pattern preprocessing. Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="NPBidirProcessing" name="bidir" use="optional" default="Forbidden">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Specifies whether and how to preprocess time series pattern in both time directions (doubles predictors in total). Default value is Forbidden</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies whether and how to preprocess pattern in both time directions. Default value is Forbidden.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="VariablesSchemaType" name="variablesSchema" use="optional" default="Groupped">
+    <xs:attribute type="PatternVariablesSchema" name="variablesSchema" use="optional" default="Groupped">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is Groupped.</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies the variables organization schema in the pattern. Default value is Groupped.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -2343,9 +2847,9 @@
       <xs:element type="A2SCoderDirArrowsType" name="upDirArrowsCoder" minOccurs="1" maxOccurs="1"/>
       <xs:element type="A2SCoderDirArrowsType" name="downDirArrowsCoder" minOccurs="1" maxOccurs="1"/>
     </xs:choice>
-    <xs:attribute type="SpikingInputEncodingRegimeType" name="regime" use="optional" default="Forbidden">
+    <xs:attribute type="InputSpikesCoding" name="regime" use="optional" default="Forbidden">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is Forbidden.</xs:documentation>
+        <xs:documentation xml:lang="en">The way of input spikes coding. Default value is Forbidden.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -2355,14 +2859,17 @@
     <xs:sequence minOccurs="1" maxOccurs="1">
       <xs:choice minOccurs="1" maxOccurs="1">
         <xs:element type="BinFeatureFilterType" name="binFeature" minOccurs="0" maxOccurs="1"/>
-        <xs:element type="EnumFeatureFilterType" name="enumFeature" minOccurs="0" maxOccurs="1"/>
         <xs:element type="RealFeatureFilterType" name="realFeature" minOccurs="0" maxOccurs="1"/>
       </xs:choice>
     </xs:sequence>
-    <xs:attribute type="xs:string" name="name" use="required"/>
+    <xs:attribute type="xs:string" name="name" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The name of the input field.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="true">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies whether to route the input field to the readout layer. Default value is true.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -2391,10 +2898,14 @@
       </xs:choice>
       <xs:element type="RealFeatureFilterType" name="realFeature" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
-    <xs:attribute type="xs:string" name="name" use="required"/>
+    <xs:attribute type="xs:string" name="name" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The name of the transformed input field.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="true">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is true</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies whether to route the transformed input field to the readout layer. Default value is true.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -2417,10 +2928,14 @@
       </xs:choice>
       <xs:element type="RealFeatureFilterType" name="realFeature" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
-    <xs:attribute type="xs:string" name="name" use="required"/>
+    <xs:attribute type="xs:string" name="name" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The name of the generated field.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is false</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies whether to route the generated field to the readout layer. Default value is false.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -2442,7 +2957,7 @@
     </xs:sequence>
     <xs:attribute type="xs:boolean" name="routeToReadout" use="optional" default="false">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is false</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies whether to route the varying input fields to the readout layer. Default value is false.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -2474,16 +2989,24 @@
   <!-- Reservoir instance -->
   <!-- Input connection -->
   <xs:complexType name="NPResInstanceInputConnectionType">
-    <xs:attribute type="xs:string" name="inputFieldName" use="required"/>
-    <xs:attribute type="xs:string" name="poolName" use="required"/>
+    <xs:attribute type="xs:string" name="inputFieldName" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The name of the input field.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:string" name="poolName" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The name of the target pool.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute type="UDoubleLE1Type" name="spikingTargetDensity" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+        <xs:documentation xml:lang="en">The density on the target spiking neurons. Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="UDoubleLE1Type" name="analogTargetDensity" use="optional" default="1">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 1</xs:documentation>
+        <xs:documentation xml:lang="en">The density on the target analog neurons. Default value is 1.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -2507,8 +3030,16 @@
       </xs:element>
       <xs:element type="SynapseType" name="synapse" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
-    <xs:attribute type="xs:string" name="name" use="required" />
-    <xs:attribute type="xs:string" name="reservoirStructure" use="required"/>
+    <xs:attribute type="xs:string" name="name" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The name of the reservoir instance.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:string" name="reservoirStructure" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The name of the reservoir structure configuration.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Reservoir instances -->
@@ -2547,126 +3078,133 @@
     </xs:attribute>
     <xs:attribute type="UDoubleGT0Type" name="predictorValueMinSpan" use="optional" default="1e-6">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Specifies minimum acceptable predictor's value-span. Default value is 1e-6.</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies the minimum acceptable predictor's value-span. Default value is 1e-6.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
   <!-- Readout layer -->
+
+  <xs:complexType name="ROutClassificationTaskDefaultsType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="SingleBoolTNetClusterChainType" name="clusterChain" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ROutForecastTaskDefaultsType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="RealTNetClusterChainType" name="clusterChain" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ROutTaskDefaultsType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="ROutClassificationTaskDefaultsType" name="classification" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="ROutForecastTaskDefaultsType" name="forecast" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
   <!-- Readout unit -->
-  <!-- Classification networks -->
-  <xs:complexType name="ROutLayerUnitClassificationNetworksType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:choice minOccurs="1" maxOccurs="unbounded">
-        <xs:element type="FFNetType" name="ff" minOccurs="0" maxOccurs="1"/>
-        <xs:element type="PPNetType" name="pp" minOccurs="0" maxOccurs="1"/>
-      </xs:choice>
-    </xs:sequence>
-  </xs:complexType>
 
-  <!-- Forecast networks -->
-  <xs:complexType name="ROutLayerUnitForecastNetworksType">
+  <xs:complexType name="ROutUnitClassificationTaskType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="FFNetType" name="ff" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element type="SingleBoolTNetClusterChainType" name="clusterChain" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
-  </xs:complexType>
-
-  <!-- Cluster default networks -->
-  <xs:complexType name="ROutLayerClusterDefaultNetworksType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="ROutLayerUnitClassificationNetworksType" name="classification" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="ROutLayerUnitForecastNetworksType" name="forecast" minOccurs="0" maxOccurs="1"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <!-- Forecast task configuration -->
-  <xs:complexType name="ROutLayerUnitForecastTaskType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:choice minOccurs="1" maxOccurs="1">
-        <xs:element type="BinFeatureFilterType" name="binFeature" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="EnumFeatureFilterType" name="enumFeature" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="RealFeatureFilterType" name="realFeature" minOccurs="1" maxOccurs="1"/>
-      </xs:choice>
-      <xs:element type="ROutLayerUnitForecastNetworksType" name="networks" minOccurs="0" maxOccurs="1"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <!-- Classification task configuration -->
-  <xs:complexType name="ROutLayerUnitClassificationTaskType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="ROutLayerUnitClassificationNetworksType" name="networks" minOccurs="0" maxOccurs="1"/>
-    </xs:sequence>
-    <xs:attribute type="xs:string" name="oneWinnerGroupName" use="optional" default="NA">
+    <xs:attribute type="xs:string" name="oneTakesAllGroupName" use="optional" default="NA">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Specifies the membership in a group of classes where only one can win. Default value is NA (not applicable, ie. stand-alone class).</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies the membership in "One Takes All" group of the specified name or no membership if NA keyword is used. Default value is NA.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
+  <xs:complexType name="ROutUnitForecastTaskType">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element type="RealTNetClusterChainType" name="clusterChain" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
 
   <!-- Readout unit configuration -->
-  <xs:complexType name="ROutLayerUnitType">
-    <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:choice minOccurs="1" maxOccurs="1">
-        <xs:element type="ROutLayerUnitForecastTaskType" name="forecast" minOccurs="1" maxOccurs="1"/>
-        <xs:element type="ROutLayerUnitClassificationTaskType" name="classification" minOccurs="1" maxOccurs="1"/>
-      </xs:choice>
-    </xs:sequence>
-    <xs:attribute type="xs:string" name="name" use="required"/>
+  <xs:complexType name="ROutUnitType">
+    <xs:choice minOccurs="1" maxOccurs="1">
+      <xs:element type="ROutUnitForecastTaskType" name="forecast" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ROutUnitClassificationTaskType" name="classification" minOccurs="1" maxOccurs="1"/>
+    </xs:choice>
+    <xs:attribute type="xs:string" name="name" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The name of the readout unit.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Readout units -->
-  <xs:complexType name="ROutLayerUnitsType">
+  <xs:complexType name="ROutUnitsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="ROutLayerUnitType" name="readoutUnit" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element type="ROutUnitType" name="readoutUnit" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
+  <!-- One takes all groups -->
+  <xs:complexType name="ROutOneTakesAllBasicDecisionType">
+  </xs:complexType>
   
-  
-  
-  <!-- One winner decision maker configuration -->
-  <xs:complexType name="ROutLayerOneWinnerDecisionMakerType">
+  <xs:complexType name="ROutOneTakesAllClusterChainDecisionType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="CrossvalidationType" name="crossvalidation" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="FFNetOneTakesAllType" name="ff" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ProbabilisticTNetClusterChainType" name="clusterChain" minOccurs="1" maxOccurs="1"/>
     </xs:sequence>
-    <xs:attribute type="xs:boolean" name ="considerAllSubPredictions" use="optional" default="true">
+    <xs:attribute type="xs:boolean" name="useReadoutUnitsFinalResult" use="optional" default="true">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Specifies how rich will be an input for the final probabilities network. True means to use all available sub-predictions from clusters members and False means to use only already aggregated predictions from clusters. Default value is true.</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies whether to use the group readout units final results as an input into the cluster. Default value is true.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="useReadoutUnitsSubResults" use="optional" default="true">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">Specifies whether to use the group readout units sub-results as an input into the cluster. Default value is true.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 
-  <!-- Readout layer unit cluster configuration -->
-  <xs:complexType name="ROutLayerClusterType">
+  <xs:complexType name="ROutOneTakesAllGroupType">
+    <xs:choice minOccurs="1" maxOccurs="1">
+      <xs:element type="ROutOneTakesAllBasicDecisionType" name="basicDecision" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ROutOneTakesAllClusterChainDecisionType" name="clusterChainDecision" minOccurs="1" maxOccurs="1"/>
+    </xs:choice>
+    <xs:attribute type="xs:string" name="name" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The name of the "One Takes All" group.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="ROutOneTakesAllGroupsType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="CrossvalidationType" name="crossvalidation" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ROutLayerClusterDefaultNetworksType" name="defaultNetworks" minOccurs="0" maxOccurs="1"/>
-      <xs:element type="NetworkClusterSecondLevelCompType" name ="secondLevelComputation" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="ROutOneTakesAllGroupType" name="group" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
+
 
   <!-- Readout layer configuration -->
   <xs:complexType name="ROutLayerType">
     <xs:sequence minOccurs="1" maxOccurs="1">
-      <xs:element type="ROutLayerClusterType" name="cluster" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="ROutLayerUnitsType" name="readoutUnits" minOccurs="1" maxOccurs="1">
+      <xs:element type="ROutTaskDefaultsType" name="taskDefaults" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="ROutUnitsType" name="readoutUnits" minOccurs="1" maxOccurs="1">
         <xs:unique name="rol_unique_readout_unit">
           <xs:selector xpath="./readoutUnit"/>
           <xs:field xpath="@name"/>
         </xs:unique>
       </xs:element>
-      <xs:element type="ROutLayerOneWinnerDecisionMakerType" name="oneWinnerDecisionMaker" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="ROutOneTakesAllGroupsType" name="oneTakesAllGroups" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
   </xs:complexType>
-
 
   <!-- State machine -->
   <!-- Mapper -->
   <!-- Allowed predictor -->
   <xs:complexType name="SMMapperAllowedPredictorType">
-    <xs:attribute type="PredictorIDType" name="name" use="required"/>
+    <xs:attribute type="PredictorID" name="name" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The name of the predictor.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Allowed predictors -->
@@ -2678,8 +3216,16 @@
 
   <!-- Allowed pool -->
   <xs:complexType name="SMMapperAllowedPoolType">
-    <xs:attribute type="xs:string" name="reservoirInstanceName" use="required"/>
-    <xs:attribute type="xs:string" name="poolName" use="required"/>
+    <xs:attribute type="xs:string" name="reservoirInstanceName" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The name of the reservoir instance.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:string" name="poolName" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The name of the pool.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
   
   <!-- Allowed pools -->
@@ -2691,7 +3237,11 @@
 
   <!-- Allowed input field -->
   <xs:complexType name="SMMapperAllowedInputFieldType">
-    <xs:attribute type="xs:string" name="name" use="required"/>
+    <xs:attribute type="xs:string" name="name" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The name of the input field.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Allowed input fields -->
@@ -2724,7 +3274,11 @@
         </xs:unique>
       </xs:element>
     </xs:sequence>
-    <xs:attribute type="xs:string" name="readoutUnitName" use="required"/>
+    <xs:attribute type="xs:string" name="readoutUnitName" use="required">
+      <xs:annotation>
+        <xs:documentation xml:lang="en">The name of the readout unit.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <!-- Mapper configuration -->
@@ -2765,7 +3319,7 @@
     </xs:sequence>
     <xs:attribute type="xs:int" name="randomizerSeek" use="optional" default="0">
       <xs:annotation>
-        <xs:documentation xml:lang="en">Default value is 0</xs:documentation>
+        <xs:documentation xml:lang="en">Specifies the random number generator initial seek. A value greater than or equal to 0 will always ensure the same initialization of the internal random number generator and therefore also the same internal configuration each time the state machine to be instantiated. A value less than 0 causes different internal configuration each time the state machine to be instantiated. Default value is 0.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

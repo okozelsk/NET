@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using RCNet.MathTools;
+﻿using RCNet.MathTools;
 using RCNet.Queue;
+using System;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 {
     /// <summary>
-    /// Linearly weighted average computed from the activation function results.
+    /// Implements the "ActivationLinWAvg" predictor computer.
     /// </summary>
+    /// <remarks>
+    /// The predictor value is a linearly weighted average computed from the activation function results.
+    /// </remarks>
     [Serializable]
     public class PredictorActivationLinWAvg : IPredictor
     {
@@ -22,9 +23,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="cfg">Configuration of the predictor</param>
+        /// <param name="cfg">The configuration of the predictor.</param>
         public PredictorActivationLinWAvg(PredictorActivationLinWAvgSettings cfg)
         {
             Cfg = cfg;
@@ -55,7 +56,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
             if (cfg.Window == PredictorActivationLinWAvgSettings.NAWindowNum)
             {
                 ++_continuousWeight;
-                _continuousAvg.AddSampleValue(activation, _continuousWeight);
+                _continuousAvg.AddSample(activation, _continuousWeight);
             }
             return;
         }
@@ -71,15 +72,15 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
                        )
         {
             PredictorActivationLinWAvgSettings cfg = (PredictorActivationLinWAvgSettings)Cfg;
-            if(cfg.Window == PredictorActivationLinWAvgSettings.NAWindowNum)
+            if (cfg.Window == PredictorActivationLinWAvgSettings.NAWindowNum)
             {
-                return _continuousAvg.Avg;
+                return _continuousAvg.Result;
             }
             else
             {
-                if (activationMDW.NumOfSamples >= cfg.Window)
+                if (activationMDW.UsedCapacity >= cfg.Window)
                 {
-                    return activationMDW.GetDataLinWeightedAvg(cfg.Window).Avg;
+                    return activationMDW.GetDataLinWeightedAvg(cfg.Window).Result;
                 }
                 else
                 {

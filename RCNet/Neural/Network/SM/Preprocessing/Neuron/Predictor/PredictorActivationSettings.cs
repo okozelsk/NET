@@ -1,18 +1,17 @@
 ﻿using System;
-using System.Globalization;
 using System.Xml.Linq;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 {
     /// <summary>
-    /// Configuration of the Activation predictor
+    /// Configuration of the Activation predictor computer.
     /// </summary>
     [Serializable]
     public class PredictorActivationSettings : RCNetBaseSettings, IPredictorSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "PredictorActivationType";
 
@@ -20,7 +19,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 
         //Constructors
         /// <summary>
-        /// Creates initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         public PredictorActivationSettings()
         {
@@ -29,9 +28,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         }
 
         /// <summary>
-        /// Copy constructor
+        /// The copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public PredictorActivationSettings(PredictorActivationSettings source)
             : this()
         {
@@ -39,9 +38,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         }
 
         /// <summary>
-        /// Creates initialized instance using xml element
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public PredictorActivationSettings(XElement elem)
         {
             //Validation

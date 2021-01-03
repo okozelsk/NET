@@ -1,20 +1,22 @@
-﻿using System;
-using System.Globalization;
-using RCNet.Neural.Activation;
+﻿using RCNet.Neural.Activation;
 using RCNet.Neural.Data;
 using RCNet.Neural.Network.NonRecurrent.FF;
+using System;
+using System.Globalization;
 
 namespace Demo.DemoConsoleApp.Examples
 {
     /// <summary>
-    /// This "Hello world" example shows how to use implemented FF network as the independent component.
-    /// It trains the multilayer Feed Forward network to solve AND, OR and XOR.
+    /// Trains a multilayer Feed Forward network to solve AND, OR and XOR.
     /// </summary>
+    /// <remarks>
+    /// This "Hello world" example shows how to use the feed forward network component independently.
+    /// </remarks>
     public class FFNetBoolAlg : ExampleBase
     {
         /// <summary>
-        /// Creates training data.
-        /// Input vector contains 0/1 combination and output vector contains appropriate results of the AND, OR and XOR operation
+        /// Creates the training data.
+        /// Input vector contains 0/1 combination and output vector contains appropriate results of the AND, OR and XOR operation.
         /// </summary>
         private VectorBundle CreateTrainingData()
         {
@@ -48,7 +50,7 @@ namespace Demo.DemoConsoleApp.Examples
             //Training
             _log.Write("Training");
             _log.Write("--------");
-            //Create trainer instance
+            //Create the trainer instance
             RPropTrainer trainer = new RPropTrainer(ffNet,
                                                     trainingData.InputVectorCollection,
                                                     trainingData.OutputVectorCollection,
@@ -63,7 +65,7 @@ namespace Demo.DemoConsoleApp.Examples
             _log.Write(string.Empty);
 
             //Training is done
-            //Display network computation results
+            //Display the network computation results
             _log.Write("Trained network computations:");
             _log.Write("-----------------------------");
             foreach (double[] input in trainingData.InputVectorCollection)

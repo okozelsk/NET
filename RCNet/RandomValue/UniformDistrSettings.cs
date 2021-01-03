@@ -4,20 +4,20 @@ using System.Xml.Linq;
 namespace RCNet.RandomValue
 {
     /// <summary>
-    /// Configuration of the Uniform random distribution
+    /// Configuration of the Uniform random distribution.
     /// </summary>
     [Serializable]
     public class UniformDistrSettings : RCNetBaseSettings, IDistrSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "UniformDistrType";
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         public UniformDistrSettings()
         {
@@ -26,18 +26,18 @@ namespace RCNet.RandomValue
         }
 
         /// <summary>
-        /// Copy constructor
+        /// The copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public UniformDistrSettings(UniformDistrSettings source)
         {
             return;
         }
 
         /// <summary>
-        /// Creates an instance and initializes it from given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem"> Xml element containing the initialization settings.</param>
+        /// <param name="elem"> A xml element containing the configuration data.</param>
         public UniformDistrSettings(XElement elem)
         {
             //Validation

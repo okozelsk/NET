@@ -3,23 +3,23 @@
 namespace RCNet.Neural.Data.Generators
 {
     /// <summary>
-    /// Implements the sinusoidal signal generator
+    /// Implements the sinusoidal signal generator.
     /// </summary>
     [Serializable]
     public class SinusoidalGenerator : IGenerator
     {
         //Attributes
         private double _step;
-        private readonly SinusoidalGeneratorSettings _settings;
+        private readonly SinusoidalGeneratorSettings _cfg;
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="settings">Configuration</param>
-        public SinusoidalGenerator(SinusoidalGeneratorSettings settings)
+        /// <param name="cfg">The configuration.</param>
+        public SinusoidalGenerator(SinusoidalGeneratorSettings cfg)
         {
-            _settings = (SinusoidalGeneratorSettings)settings.DeepClone();
+            _cfg = (SinusoidalGeneratorSettings)cfg.DeepClone();
             Reset();
             return;
         }
@@ -35,10 +35,11 @@ namespace RCNet.Neural.Data.Generators
         /// <inheritdoc />
         public double Next()
         {
-            double signal = _settings.Ampl * Math.Sin(Math.PI * ((_step * _settings.Freq + _settings.Phase) / 180d));
+            double signal = _cfg.Ampl * Math.Sin(Math.PI * ((_step * _cfg.Freq + _cfg.Phase) / 180d));
             ++_step;
             return signal;
         }
 
     }//SinusoidalGenerator
+
 }//Namespace

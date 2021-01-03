@@ -6,26 +6,26 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
     /// <summary>
-    /// The collection of the generated fields configurations
+    /// The configuration of the generated input fields.
     /// </summary>
     [Serializable]
     public class GeneratedFieldsSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "NPGeneratedInpFieldsType";
 
         //Attribute properties
         /// <summary>
-        /// Collection of generated input field settings
+        /// The collection of the generated input field configurations.
         /// </summary>
         public List<GeneratedFieldSettings> FieldCfgCollection { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         private GeneratedFieldsSettings()
         {
@@ -34,9 +34,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="fieldCfgCollection">Collection of generated field settings</param>
+        /// <param name="fieldCfgCollection">The collection of the generated input field configurations.</param>
         public GeneratedFieldsSettings(IEnumerable<GeneratedFieldSettings> fieldCfgCollection)
             : this()
         {
@@ -46,9 +46,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="fieldCfgCollection">Collection of generated field settings</param>
+        /// <param name="fieldCfgCollection">The generated input field configurations.</param>
         public GeneratedFieldsSettings(params GeneratedFieldSettings[] fieldCfgCollection)
             : this()
         {
@@ -60,7 +60,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// The deep copy constructor
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public GeneratedFieldsSettings(GeneratedFieldsSettings source)
             : this()
         {
@@ -71,7 +71,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings.</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public GeneratedFieldsSettings(XElement elem)
         {
             //Validation
@@ -113,9 +113,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Adds cloned settings from given collection into the internal collection
+        /// Adds the generated input field configurations from the specified collection into the internal collection.
         /// </summary>
-        /// <param name="fieldCfgCollection">Collection of generated field settings</param>
+        /// <param name="fieldCfgCollection">The collection of the generated input field configurations.</param>
         private void AddFields(IEnumerable<GeneratedFieldSettings> fieldCfgCollection)
         {
             foreach (GeneratedFieldSettings fieldCfg in fieldCfgCollection)
@@ -125,11 +125,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             return;
         }
 
+
         /// <summary>
-        /// Returns the zero-based index of the field or -1 if given name not found
+        /// Gets the zero-based index of the generated input field.
         /// </summary>
-        /// <param name="fieldName">Name of the field</param>
-        /// <param name="ex">Specifies whether to throw exception when not found</param>
+        /// <param name="fieldName">The name of the generated input field.</param>
+        /// <param name="ex">Specifies whether to throw an exception or return -1 in case the generated input field not found.</param>
         public int GetFieldID(string fieldName, bool ex = true)
         {
             for (int i = 0; i < FieldCfgCollection.Count; i++)
@@ -150,9 +151,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Returns configuration of the given field
+        /// Gets the configuration of the specified generated input field.
         /// </summary>
-        /// <param name="fieldName">Field name</param>
+        /// <param name="fieldName">The name of the generated input field.</param>
         public GeneratedFieldSettings GetFieldCfg(string fieldName)
         {
             return FieldCfgCollection[GetFieldID(fieldName)];

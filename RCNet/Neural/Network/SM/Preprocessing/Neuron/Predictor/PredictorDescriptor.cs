@@ -4,45 +4,45 @@ using System;
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 {
     /// <summary>
-    /// Describes predictor type and origin
+    /// Implements the descriptor of the predictor.
     /// </summary>
     [Serializable]
     public class PredictorDescriptor
     {
         //Constants
         /// <summary>
-        /// Value indicating non standard predictor - exact value of an input field
+        /// Indicates the routed input field value used as the predictor.
         /// </summary>
         public const int InputFieldValue = -1;
 
         //Attribute properties
         /// <summary>
-        /// Name of the associated input field. Empty string means no relationship with concrete input field (hidden neuron origin).
+        /// The name of the associated input field. An empty string means no relationship with the concrete input field.
         /// </summary>
         public string InputFieldName { get; }
 
         /// <summary>
-        /// Associated reservoir index or InputEncoder.ReservoirID when predictor is an input value.
+        /// An origin reservoir index.
         /// </summary>
         public int ReservoirID { get; }
 
         /// <summary>
-        /// Pool index within the reservoir or InputEncoder.PoolID when predictor predictor is an input value.
+        /// An origin pool index.
         /// </summary>
         public int PoolID { get; }
 
         /// <summary>
-        /// PredictorsProvider.PredictorID or -1 when it is an input value to be used as a predictor.
+        /// An identifier of the computed predictor or -1 when it is a routed input field value.
         /// </summary>
         public int PredictorID { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="reservoirID">Associated reservoir index.</param>
-        /// <param name="poolID">Pool index within the reservoir.</param>
-        /// <param name="predictorID">ID of the predictor (PredictorsProvider.PredictorID).</param>
+        /// <param name="reservoirID">An origin reservoir index.</param>
+        /// <param name="poolID">An origin pool index.</param>
+        /// <param name="predictorID">An identifier of the computed predictor.</param>
         public PredictorDescriptor(int reservoirID,
                                    int poolID,
                                    PredictorsProvider.PredictorID predictorID
@@ -56,9 +56,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="inputFieldName">Name of the associated input field.</param>
+        /// <param name="inputFieldName">The name of the associated input field.</param>
         public PredictorDescriptor(string inputFieldName)
         {
             ReservoirID = InputEncoder.ReservoirID;
@@ -70,7 +70,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 
         //Properties
         /// <summary>
-        /// Indicates exact value of input field (not a hidden neuron's predictor)
+        /// Indicates the routed value of an input field.
         /// </summary>
         public bool IsInputValue { get { return PredictorID == InputFieldValue; } }
 

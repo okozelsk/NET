@@ -1,46 +1,45 @@
-﻿using RCNet.MathTools;
-using System;
+﻿using System;
 using System.Globalization;
 using System.Xml.Linq;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 {
     /// <summary>
-    /// Configuration of the ActivationDiffLinWAvg predictor
+    /// Configuration of the ActivationDiffLinWAvg predictor computer.
     /// </summary>
     [Serializable]
     public class PredictorActivationDiffLinWAvgSettings : RCNetBaseSettings, IPredictorSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "PredictorActivationDiffLinWAvgType";
         /// <summary>
-        /// Numeric value indicating no data window
+        /// The numeric code indicating no data window.
         /// </summary>
         public const int NAWindowNum = 0;
         /// <summary>
-        /// Code indicating no data window
+        /// The string code indicating no data window.
         /// </summary>
         public const string NAWindowCode = "NA";
         //Default values
         /// <summary>
-        /// Default value of the parameter specifying data window size
+        /// The default value of the parameter specifying the data window size.
         /// </summary>
         public const int DefaultWindow = NAWindowNum;
 
         //Attribute properties
         /// <summary>
-        /// Specifies data window size
+        /// Specifies the data window size.
         /// </summary>
         public int Window { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="window">Specifies data window size</param>
+        /// <param name="window">Specifies the data window size.</param>
         public PredictorActivationDiffLinWAvgSettings(int window = DefaultWindow)
         {
             Window = window;
@@ -49,9 +48,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         }
 
         /// <summary>
-        /// Copy constructor
+        /// The copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public PredictorActivationDiffLinWAvgSettings(PredictorActivationDiffLinWAvgSettings source)
             : this(source.Window)
         {
@@ -59,9 +58,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         }
 
         /// <summary>
-        /// Creates initialized instance using xml element
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public PredictorActivationDiffLinWAvgSettings(XElement elem)
         {
             //Validation
@@ -90,7 +89,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         public bool NeedsContinuousActivationDiffStat { get { return Window == NAWindowNum; } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultWindow { get { return (Window == DefaultWindow); } }
 

@@ -1,13 +1,15 @@
 ﻿using RCNet.Neural.Activation;
 using System;
-using System.Collections.Generic;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 {
     /// <summary>
-    /// Spiking input neuron is the special type of a neuron with no assosiated activation function. Its purpose is only to mediate
-    /// external input spike value for a synapse.
+    /// Implements the input spiking neuron.
     /// </summary>
+    /// <remarks>
+    /// The input spiking neuron is a special case of the neuron without an activation function.
+    /// Its purpose is to provide a spiking input for the reservoir's synapses.
+    /// </remarks>
     [Serializable]
     public class SpikingInputNeuron : INeuron
     {
@@ -26,7 +28,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         /// <param name="location">Neuron's location</param>
         public SpikingInputNeuron(NeuronLocation location)
@@ -40,7 +42,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 
         //Properties
         /// <inheritdoc/>
-        public NeuronCommon.NeuronType Type { get { return NeuronCommon.NeuronType.Input; } }
+        public NeuronType Type { get { return NeuronType.Input; } }
 
         /// <inheritdoc/>
         public ActivationType TypeOfActivation { get { return ActivationType.Spiking; } }

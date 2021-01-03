@@ -5,32 +5,32 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {
     /// <summary>
-    /// Configuration of the synapse nonlinear short-term plasticity dynamics
+    /// Configuration of the synapse's nonlinear efficacy dynamics.
     /// </summary>
     [Serializable]
     public abstract class NonlinearDynamicsSettings : RCNetBaseSettings, IDynamicsSettings
     {
         //Attribute properties
         /// <summary>
-        /// Synapse's resting efficacy (average probability of neurotransmitter release)
+        /// The value of the resting efficacy.
         /// </summary>
         public double RestingEfficacy { get; }
         /// <summary>
-        /// Synapse's efficacy depression model time constant (ms)
+        /// The value of the tau depression (ms).
         /// </summary>
         public double TauDepression { get; }
         /// <summary>
-        /// Synapse's efficacy facilitation model time constant (ms)
+        /// The value of the tau facilitation (ms).
         /// </summary>
         public double TauFacilitation { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="restingEfficacy">Synapse's resting efficacy (average probability of neurotransmitter release)</param>
-        /// <param name="tauDepression">Synapse's efficacy depression model time constant (ms)</param>
-        /// <param name="tauFacilitation">Synapse's efficacy facilitation model time constant (ms)</param>
+        /// <param name="restingEfficacy">The value of the resting efficacy.</param>
+        /// <param name="tauDepression">The value of the tau depression (ms).</param>
+        /// <param name="tauFacilitation">The value of the tau facilitation (ms).</param>
         public NonlinearDynamicsSettings(double restingEfficacy,
                                          double tauDepression,
                                          double tauFacilitation
@@ -44,9 +44,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         }
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public NonlinearDynamicsSettings(NonlinearDynamicsSettings source)
             : this(source.RestingEfficacy, source.TauDepression, source.TauFacilitation)
         {
@@ -56,7 +56,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         /// <param name="xsdTypeName">Name of the associated type defined in xsd</param>
         public NonlinearDynamicsSettings(XElement elem, string xsdTypeName)
         {

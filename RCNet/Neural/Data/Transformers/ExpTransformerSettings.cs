@@ -5,40 +5,40 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Configuration of the ExpTransformer
+    /// Configuration of the ExpTransformer.
     /// </summary>
     [Serializable]
     public class ExpTransformerSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "ExpTransformerType";
         //Default values
         /// <summary>
-        /// Default base
+        /// The default base.
         /// </summary>
         public const double DefaultBase = Math.E;
 
         //Attribute properties
         /// <summary>
-        /// Name of the input field to be transformed
+        /// The name of the input field to be transformed.
         /// </summary>
         public string InputFieldName { get; }
 
         /// <summary>
-        /// Base
+        /// The base.
         /// </summary>
         public double Base { get; }
 
 
         //Constructors
         /// <summary>
-        /// Constructs an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="inputFieldName">Name of the input field to be transformed</param>
-        /// <param name="b">Base</param>
+        /// <param name="inputFieldName">The name of the input field to be transformed.</param>
+        /// <param name="b">The base.</param>
         public ExpTransformerSettings(string inputFieldName, double b = DefaultBase)
         {
             Base = b;
@@ -48,9 +48,9 @@ namespace RCNet.Neural.Data.Transformers
         }
 
         /// <summary>
-        /// Deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public ExpTransformerSettings(ExpTransformerSettings source)
             : this(source.InputFieldName, source.Base)
         {
@@ -60,7 +60,7 @@ namespace RCNet.Neural.Data.Transformers
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public ExpTransformerSettings(XElement elem)
         {
             //Validation
@@ -74,7 +74,7 @@ namespace RCNet.Neural.Data.Transformers
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultBase { get { return Base == DefaultBase; } }
 

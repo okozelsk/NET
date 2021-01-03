@@ -1,14 +1,8 @@
-﻿using System;
-using RCNet.Neural.Activation;
-using RCNet.Neural.Data.Coders.AnalogToSpiking;
-using RCNet.Neural.Data.Filter;
+﻿using RCNet.Neural.Activation;
 using RCNet.Neural.Network.NonRecurrent;
 using RCNet.Neural.Network.SM;
-using RCNet.Neural.Network.SM.Preprocessing;
-using RCNet.Neural.Network.SM.Preprocessing.Input;
-using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
-using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup;
 using RCNet.Neural.Network.SM.Readout;
+using System;
 
 namespace Demo.DemoConsoleApp.Examples
 {
@@ -39,12 +33,9 @@ namespace Demo.DemoConsoleApp.Examples
             //Create StateMachine configuration
             //Simplified readout layer configuration using FF-network having 2 hidden layers as the classifier
             ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateClassificationReadoutCfg(new CrossvalidationSettings(0.0825d, 0, 1),
-                                                                                                  StateMachineDesigner.CreateMultiLayerRegrNet(10, new AFAnalogLeakyReLUSettings(), 2, 5, 400),
+                                                                                                  StateMachineDesigner.CreateMultiLayerFFNetCfg(10, new AFAnalogLeakyReLUSettings(), 2, 5, 400),
+                                                                                                  2,
                                                                                                   "Hand movement",
-                                                                                                  new NetworkClusterSecondLevelCompSettings(new CrossvalidationSettings(0.25d, CrossvalidationSettings.AutoFolds, 2),
-                                                                                                                                            StateMachineDesigner.CreateMultiLayerRegrNet(10, new AFAnalogLeakyReLUSettings(), 1, 5, 400),
-                                                                                                                                            TrainedNetworkCluster.SecondLevelCompMode.SecondLevelOutputOnly
-                                                                                                                                            ),
                                                                                                   "curved swing",
                                                                                                   "horizontal swing",
                                                                                                   "vertical swing",
@@ -64,7 +55,7 @@ namespace Demo.DemoConsoleApp.Examples
             //Create designer instance
             StateMachineDesigner smd = new StateMachineDesigner(readoutCfg);
             //Create StateMachine configuration without preprocessing
-            StateMachineSettings stateMachineCfg = smd.CreateBypassedCfg();
+            StateMachineSettings stateMachineCfg = smd.CreateBypassedPreprocessingCfg();
 
             //Display StateMachine xml configuration
             string xmlConfig = stateMachineCfg.GetXml(true).ToString();

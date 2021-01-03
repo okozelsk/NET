@@ -1,24 +1,23 @@
-﻿using System;
-using RCNet.Extensions;
-using RCNet.MathTools;
+﻿using RCNet.MathTools;
+using System;
 
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Base class of analog activation functions
+    /// Implements the base class of all analog activation functions.
     /// </summary>
     [Serializable]
     public abstract class AFAnalogBase : IActivation
     {
         //Attributes
         /// <summary>
-        /// Output range of the activation function
+        /// Output range of the activation function.
         /// </summary>
         protected Interval _outputRange;
 
         //Constructor
         /// <summary>
-        /// Base constructor
+        /// The base constructor.
         /// </summary>
         protected AFAnalogBase(Interval outputRange)
         {
@@ -34,14 +33,17 @@ namespace RCNet.Neural.Activation
         public Interval OutputRange { get { return _outputRange; } }
 
         /// <summary>
-        /// Indicates whether the activation function supports derivative calculation
+        /// Indicates whether the activation function supports the derivative calculation.
         /// </summary>
         public virtual bool SupportsDerivative { get { return true; } }
 
         /// <summary>
-        /// Indicates whether the activation function requires multiple inputs for the Compute method
+        /// Indicates whether the activation function requires to works in tandem with its surroundings.
         /// </summary>
-        public virtual bool RequiresMultipleInput { get { return false; } }
+        /// <remarks>
+        /// The typical case of the surroundings dependent activation function is the SoftMax activation function.
+        /// </remarks>
+        public virtual bool DependsOnSorround { get { return false; } }
 
         //Methods
         /// <inheritdoc/>
@@ -50,12 +52,12 @@ namespace RCNet.Neural.Activation
         /// <summary>
         /// Computes the vector of activations.
         /// </summary>
-        /// <param name="xVector">Vector of activation inputs</param>
-        /// <param name="cVector">Vector of activations (computed values)</param>
+        /// <param name="xVector">The vector of inputs.</param>
+        /// <param name="cVector">The vector of corresponding computed activations.</param>
         public virtual void Compute(double[] xVector, double[] cVector)
         {
-            //Standard base implementation
-            for(int i = 0; i < xVector.Length; i++)
+            //The standard base implementation
+            for (int i = 0; i < xVector.Length; i++)
             {
                 cVector[i] = Compute(xVector[i]);
             }
@@ -63,22 +65,22 @@ namespace RCNet.Neural.Activation
         }
 
         /// <summary>
-        /// Computes the derivative
+        /// Computes the derivative.
         /// </summary>
-        /// <param name="c">The result of the activation (Compute method)</param>
-        /// <param name="x">Activation input (x argument of the Compute method resulting in c)</param>
+        /// <param name="c">The activation result (the result of the Compute method).</param>
+        /// <param name="x">The activation input (the x argument of the Compute method resulting in the c).</param>
         public abstract double ComputeDerivative(double c, double x);
 
         /// <summary>
         /// Computes the vector of derivatives.
         /// </summary>
-        /// <param name="cVector">Vector of the activations (already computed activations)</param>
-        /// <param name="xVector">Vector of the activation inputs</param>
-        /// <param name="dVector">Vector of derivatives (computed values)</param>
+        /// <param name="cVector">The vector of the activation results (already computed activations).</param>
+        /// <param name="xVector">The vector of the activation inputs.</param>
+        /// <param name="dVector">The computed vector of derivatives.</param>
         public virtual void ComputeDerivative(double[] cVector, double[] xVector, double[] dVector)
         {
             //Standard base implementation
-            if(!SupportsDerivative)
+            if (!SupportsDerivative)
             {
                 throw new InvalidOperationException($"Called ComputeDerivative method but activation {GetType().Name} does not support the derivative computation.");
             }

@@ -5,26 +5,26 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
 {
     /// <summary>
-    /// The collection of pool's neurons interconnection schemas configurations
+    /// Configuration of the interconnection of neurons within the pool.
     /// </summary>
     [Serializable]
     public class InterconnSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "PoolInterconnectionType";
 
         //Attribute properties
         /// <summary>
-        /// Collection of interconnection schemas to be applied
+        /// The collection of interconnection schemas.
         /// </summary>
         public List<IInterconnSchemaSettings> SchemaCfgCollection { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         private InterconnSettings()
         {
@@ -33,9 +33,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="schemaCfgCollection">Schema settings</param>
+        /// <param name="schemaCfgCollection">The collection of interconnection schemas.</param>
         public InterconnSettings(IEnumerable<IInterconnSchemaSettings> schemaCfgCollection)
             : this()
         {
@@ -45,9 +45,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="schemaCfgCollection">Schema settings</param>
+        /// <param name="schemaCfgCollection">The interconnection schemas.</param>
         public InterconnSettings(params IInterconnSchemaSettings[] schemaCfgCollection)
             : this()
         {
@@ -57,9 +57,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         }
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public InterconnSettings(InterconnSettings source)
             : this()
         {
@@ -70,7 +70,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings.</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public InterconnSettings(XElement elem)
         {
             //Validation
@@ -117,9 +117,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
             {
                 throw new InvalidOperationException($"At least one interconnection schema must be specified.");
             }
-            foreach(IInterconnSchemaSettings schema in SchemaCfgCollection)
+            foreach (IInterconnSchemaSettings schema in SchemaCfgCollection)
             {
-                if(schema.GetType() == typeof(EmptySchemaSettings) && SchemaCfgCollection.Count > 1)
+                if (schema.GetType() == typeof(EmptySchemaSettings) && SchemaCfgCollection.Count > 1)
                 {
                     throw new InvalidOperationException($"No other schema specification is allowed together with EmptySchema.");
                 }
@@ -128,9 +128,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         }
 
         /// <summary>
-        /// Adds cloned schemas from given collection into the internal collection
+        /// Adds the schema configurations from the specified collection into the internal collection.
         /// </summary>
-        /// <param name="schemaCfgCollection"></param>
+        /// <param name="schemaCfgCollection">The collection of interconnection schemas.</param>
         private void AddSchemas(IEnumerable<IInterconnSchemaSettings> schemaCfgCollection)
         {
             foreach (IInterconnSchemaSettings schemaCfg in schemaCfgCollection)

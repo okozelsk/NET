@@ -8,38 +8,38 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 {
     /// <summary>
-    /// Key statistics of the reservoir
+    /// Implements the holder of the reservoir instance key statistics.
     /// </summary>
     [Serializable]
     public class ReservoirStat
     {
         //Attributes
         /// <summary>
-        /// Name of the reservoir instance
+        /// The name of the reservoir instance.
         /// </summary>
         public string InstanceName { get; }
         /// <summary>
-        /// Name of the reservoir structure configuration
+        /// The name of the reservoir structure configuration.
         /// </summary>
         public string StructCfgName { get; }
         /// <summary>
-        /// Collection of resrvoir pools stats
+        /// The collection of pool statistics.
         /// </summary>
         public List<PoolStat> Pools { get; }
         /// <summary>
-        /// Total number of neurons within the reservoir
+        /// The total number of neurons within the reservoir.
         /// </summary>
         public int TotalNumOfNeurons { get; }
         /// <summary>
-        /// Total number of predictors
+        /// The total number of predictors.
         /// </summary>
         public int TotalNumOfPredictors { get; }
         /// <summary>
-        /// Statistics of synapses
+        /// The statistics of the synapses by the synapse role.
         /// </summary>
         public SynapsesByRoleStat Synapses { get; }
         /// <summary>
-        /// Neurons anomalies
+        /// The statistics of the anomalies on neurons.
         /// </summary>
         public NeuronsAnomaliesStat NeuronsAnomalies { get; }
 
@@ -48,10 +48,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <summary>
         /// Creates an unitialized instance
         /// </summary>
-        /// <param name="instanceName">Name of the reservoir instance</param>
-        /// <param name="structCfg">Reservoir structure configuration</param>
-        /// <param name="numOfNeurons">Total number of neurons</param>
-        /// <param name="numOfPredictors">Total number of predictors</param>
+        /// <param name="instanceName">The name of the reservoir instance.</param>
+        /// <param name="structCfg">The name of the reservoir structure configuration.</param>
+        /// <param name="numOfNeurons">The total number of neurons within the reservoir.</param>
+        /// <param name="numOfPredictors">The total number of predictors.</param>
         public ReservoirStat(string instanceName,
                              ReservoirStructureSettings structCfg,
                              int numOfNeurons,
@@ -73,11 +73,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// Updates statistics
+        /// Updates the statistics.
         /// </summary>
-        /// <param name="neuron">Hidden neuron</param>
-        /// <param name="inputSynapses">Input synaapses</param>
-        /// <param name="internalSynapses">Internal synapses</param>
+        /// <param name="neuron">The hidden neuron.</param>
+        /// <param name="inputSynapses">A collection of the input synapses.</param>
+        /// <param name="internalSynapses">A collection of the internal synapses.</param>
         public void Update(HiddenNeuron neuron, IList<Synapse> inputSynapses, IList<Synapse> internalSynapses)
         {
             Synapses.Update(inputSynapses);
@@ -89,37 +89,37 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 
         //Inner classes
         /// <summary>
-        /// Key statistics of the pool of neurons
+        /// Implements the key statistics of the pool of neurons.
         /// </summary>
         [Serializable]
         public class PoolStat
         {
             /// <summary>
-            /// Name of the pool
+            /// The name of the pool.
             /// </summary>
             public string PoolName { get; }
             /// <summary>
-            /// Number of neurons within the pool
+            /// The number of neurons within the pool.
             /// </summary>
             public int NumOfNeurons { get; private set; }
             /// <summary>
-            /// Collection of the neuron group statistics
+            /// The collection of the neuron group statistics.
             /// </summary>
             public NeuronGroupStat[] NeuronGroups { get; }
             /// <summary>
-            /// Statistics of synapses
+            /// The statistics of the synapses by the synapse role.
             /// </summary>
             public SynapsesByRoleStat Synapses { get; }
             /// <summary>
-            /// Neurons anomalies
+            /// The statistics of the anomalies on neurons.
             /// </summary>
             public NeuronsAnomaliesStat NeuronsAnomalies { get; }
 
             //Constructor
             /// <summary>
-            /// Creates an initialized instance
+            /// Creates an initialized instance.
             /// </summary>
-            /// <param name="poolCfg">Configuration of the pool of neurons</param>
+            /// <param name="poolCfg">The configuration of the pool of neurons.</param>
             public PoolStat(PoolSettings poolCfg)
             {
                 PoolName = poolCfg.Name;
@@ -135,11 +135,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             }
 
             /// <summary>
-            /// Updates statistics
+            /// Updates the statistics.
             /// </summary>
-            /// <param name="neuron">Hidden neuron</param>
-            /// <param name="inputSynapses">Neuron's input synapses</param>
-            /// <param name="internalSynapses">Neuron's reservoir synapses</param>
+            /// <param name="neuron">The hidden neuron.</param>
+            /// <param name="inputSynapses">A collection of the input synapses.</param>
+            /// <param name="internalSynapses">A collection of the internal synapses.</param>
             public void Update(HiddenNeuron neuron, IList<Synapse> inputSynapses, IList<Synapse> internalSynapses)
             {
                 ++NumOfNeurons;
@@ -152,45 +152,45 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 
             //Inner classes
             /// <summary>
-            /// Key statistics of the group of neurons
+            /// Implements the key statistics of the group of neurons.
             /// </summary>
             [Serializable]
             public class NeuronGroupStat
             {
                 /// <summary>
-                /// Name of the group
+                /// The name of the group.
                 /// </summary>
                 public string GroupName { get; }
                 /// <summary>
-                /// Number of neurons in the group
+                /// The number of neurons in the group.
                 /// </summary>
                 public int NumOfNeurons { get; set; }
                 /// <summary>
-                /// Stimulation statistics
+                /// The stimulation statistics.
                 /// </summary>
                 public StimuliStat Stimuli { get; }
                 /// <summary>
-                /// Activation statistics
+                /// The activation statistics.
                 /// </summary>
                 public StandardStatSet Activation { get; }
                 /// <summary>
-                /// Statistics of synapses
+                /// The statistics of the synapses by the synapse role.
                 /// </summary>
                 public SynapsesByRoleStat Synapses { get; }
                 /// <summary>
-                /// Statistics of the output signals
+                /// The statistics of the output signal.
                 /// </summary>
                 public SignalStat Signal { get; }
                 /// <summary>
-                /// Neuron anomalies
+                /// The statistics of the anomalies on neurons.
                 /// </summary>
                 public NeuronsAnomaliesStat NeuronsAnomalies { get; }
 
                 //Constructor
                 /// <summary>
-                /// Creates an unitialized instance
+                /// Creates an unitialized instance.
                 /// </summary>
-                /// <param name="groupName">Name of the neuron group</param>
+                /// <param name="groupName">The name of the group.</param>
                 public NeuronGroupStat(string groupName)
                 {
                     GroupName = groupName;
@@ -204,11 +204,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 }
 
                 /// <summary>
-                /// Updates statistics
+                /// Updates the statistics.
                 /// </summary>
-                /// <param name="neuron">Hidden neuron</param>
-                /// <param name="inputSynapses">Neuron's input synapses</param>
-                /// <param name="internalSynapses">Neuron's reservoir synapses</param>
+                /// <param name="neuron">The hidden neuron.</param>
+                /// <param name="inputSynapses">A collection of the input synapses.</param>
+                /// <param name="internalSynapses">A collection of the internal synapses.</param>
                 public void Update(HiddenNeuron neuron, IList<Synapse> inputSynapses, IList<Synapse> internalSynapses)
                 {
                     ++NumOfNeurons;
@@ -226,32 +226,32 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }//PoolStat
 
         /// <summary>
-        /// Standard set of statistics
+        /// Implements the standard set of statistics.
         /// </summary>
         [Serializable]
         public class StandardStatSet
         {
             //Attribute properties
             /// <summary>
-            /// Minimum values statistics
+            /// The statistics of the minimum value.
             /// </summary>
             public BasicStat MinStat { get; }
             /// <summary>
-            /// Maximum values statistics
+            /// The statistics of the maximum value.
             /// </summary>
             public BasicStat MaxStat { get; }
             /// <summary>
-            /// Average values statistics
+            /// The statistics of the average value.
             /// </summary>
             public BasicStat AvgStat { get; }
             /// <summary>
-            /// Min Max span statistics
+            /// The statistics of the span value.
             /// </summary>
             public BasicStat SpanStat { get; }
 
             //Constructor
             /// <summary>
-            /// Creates an initialized instance
+            /// Creates an initialized instance.
             /// </summary>
             public StandardStatSet()
             {
@@ -263,17 +263,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             }
 
             /// <summary>
-            /// Updates statistics
+            /// Updates the statistics.
             /// </summary>
-            /// <param name="stat">Basic stat</param>
+            /// <param name="stat">The sample statistics.</param>
             public void Update(BasicStat stat)
             {
                 if (stat.NumOfSamples > 0)
                 {
-                    MinStat.AddSampleValue(stat.Min);
-                    MaxStat.AddSampleValue(stat.Max);
-                    AvgStat.AddSampleValue(stat.ArithAvg);
-                    SpanStat.AddSampleValue(stat.Span);
+                    MinStat.AddSample(stat.Min);
+                    MaxStat.AddSample(stat.Max);
+                    AvgStat.AddSample(stat.ArithAvg);
+                    SpanStat.AddSample(stat.Span);
                 }
                 return;
             }
@@ -281,42 +281,42 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }//StandardStatSet
 
         /// <summary>
-        /// Synapse statistics
+        /// Implements the synapse statistics.
         /// </summary>
         [Serializable]
         public class SynapseStat
         {
             //Attribute properties
             /// <summary>
-            /// Role of the synapses
+            /// The role of the synapses.
             /// </summary>
             public Synapse.SynRole Role { get; }
             /// <summary>
-            /// Number of synapses
+            /// The number of synapses.
             /// </summary>
             public int Count { get; private set; }
             /// <summary>
-            /// Distance statistics
+            /// The distance statistics.
             /// </summary>
             public BasicStat Distance { get; }
             /// <summary>
-            /// Delay statistics
+            /// The delay statistics.
             /// </summary>
             public BasicStat Delay { get; }
             /// <summary>
-            /// Weight statistics
+            /// The weight statistics.
             /// </summary>
             public BasicStat Weight { get; }
             /// <summary>
-            /// Efficacy statistics
+            /// The efficacy statistics.
             /// </summary>
             public StandardStatSet Efficacy { get; }
 
             //Constructor
             /// <summary>
-            /// Creates an initialized instance
+            /// Creates an initialized instance.
             /// </summary>
-            /// <param name="role">Role of the synapses</param>
+            /// <param name="role">The role of the synapses.</param>
             public SynapseStat(Synapse.SynRole role)
             {
                 Role = role;
@@ -329,17 +329,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             }
 
             /// <summary>
-            /// Updates statistics
+            /// Updates the statistics.
             /// </summary>
-            /// <param name="synapse">Synapse</param>
+            /// <param name="synapse">The sample synapse.</param>
             public void Update(Synapse synapse)
             {
                 if (synapse.Role == Role)
                 {
                     ++Count;
-                    Distance.AddSampleValue(synapse.Distance);
-                    Delay.AddSampleValue(synapse.Delay);
-                    Weight.AddSampleValue(synapse.Weight);
+                    Distance.AddSample(synapse.Distance);
+                    Delay.AddSample(synapse.Delay);
+                    Weight.AddSample(synapse.Weight);
                     Efficacy.Update(synapse.EfficacyStat);
                 }
                 return;
@@ -347,22 +347,22 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }//SynapsesStat
 
         /// <summary>
-        /// Synapse statistics by synapse role
+        /// Implements the synapse statistics by synapse role.
         /// </summary>
         [Serializable]
         public class SynapsesByRoleStat
         {
             /// <summary>
-            /// Total number of synapses
+            /// The total number of synapses.
             /// </summary>
             public int Count { get; private set; }
             /// <summary>
-            /// Statistics of synapses
+            /// The collection of the synapses statistics.
             /// </summary>
             public SynapseStat[] SynapseRole { get; }
 
             /// <summary>
-            /// Creates an initialized instance
+            /// Creates an initialized instance.
             /// </summary>
             public SynapsesByRoleStat()
             {
@@ -376,9 +376,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             }
 
             /// <summary>
-            /// Updates statistics
+            /// Updates the statistics.
             /// </summary>
-            /// <param name="synapses">Collection of synapses</param>
+            /// <param name="synapses">The collection of sample synapses.</param>
             public void Update(IList<Synapse> synapses)
             {
                 foreach (Synapse synapse in synapses)
@@ -392,28 +392,28 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }//SynapsesByRoleStat
 
         /// <summary>
-        /// Stimulation statistics
+        /// Implements the stimulation statistics.
         /// </summary>
         [Serializable]
         public class StimuliStat
         {
             //Attribute properties
             /// <summary>
-            /// Statistics of stimuli from input synapses
+            /// The statistics of stimuli from input synapses.
             /// </summary>
             public StandardStatSet Input { get; }
             /// <summary>
-            /// Statistics of stimuli from reservoir synapses
+            /// The statistics of stimuli from internal synapses.
             /// </summary>
             public StandardStatSet Reservoir { get; }
             /// <summary>
-            /// Statistics of total stimuli
+            /// The statistics of total stimuli.
             /// </summary>
             public StandardStatSet Total { get; }
 
             //Constructor
             /// <summary>
-            /// Creates an initialized instance
+            /// Creates an initialized instance.
             /// </summary>
             public StimuliStat()
             {
@@ -424,9 +424,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             }
 
             /// <summary>
-            /// Updates statistics
+            /// Updates the statistics.
             /// </summary>
-            /// <param name="neuron">Hidden neuron</param>
+            /// <param name="neuron">The hidden neuron.</param>
             public void Update(HiddenNeuron neuron)
             {
                 Input.Update(neuron.Statistics.InputStimuliStat);
@@ -438,79 +438,79 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }//StimuliStat
 
         /// <summary>
-        /// Output signal statistics
+        /// Implements the output signal statistics.
         /// </summary>
         [Serializable]
         public class SignalStat
         {
             //Attribute properties
             /// <summary>
-            /// Statistics of analog output signal
+            /// The statistics of analog output signal.
             /// </summary>
             public StandardStatSet Analog { get; }
             /// <summary>
-            /// Statistics of firing signal
+            /// The statistics of spiking signal.
             /// </summary>
-            public StandardStatSet Firing { get; }
+            public StandardStatSet Spiking { get; }
 
             //Constructor
             /// <summary>
-            /// Creates an initialized instance
+            /// Creates an initialized instance.
             /// </summary>
             public SignalStat()
             {
                 Analog = new StandardStatSet();
-                Firing = new StandardStatSet();
+                Spiking = new StandardStatSet();
                 return;
             }
 
             /// <summary>
             /// Updates statistics
             /// </summary>
-            /// <param name="neuron">Hidden neuron</param>
+            /// <param name="neuron">The hidden neuron.</param>
             public void Update(HiddenNeuron neuron)
             {
                 Analog.Update(neuron.Statistics.AnalogSignalStat);
-                Firing.Update(neuron.Statistics.FiringStat);
+                Spiking.Update(neuron.Statistics.FiringStat);
                 return;
             }
 
         }//SignalStat
 
         /// <summary>
-        /// Encapsulates neurons behavioral anomalies
+        /// Implements the holder of the neurons' behavioral anomalies.
         /// </summary>
         [Serializable]
         public class NeuronsAnomaliesStat
         {
             /// <summary>
-            /// Number of neurons having no synapses from other reservoir neurons
+            /// The number of neurons having no synapses from other reservoir neurons.
             /// </summary>
             public int NoResSynapses { get; set; }
             /// <summary>
-            /// Number of neurons getting no stimulation from connected reservoir's neurons
+            /// The number of neurons getting no stimulation from connected reservoir neurons.
             /// </summary>
             public int NoResStimuli { get; set; }
             /// <summary>
-            /// Number of neurons emitting no output signal
+            /// The number of neurons emitting no output analog signal.
             /// </summary>
             public int NoAnalogOutput { get; set; }
             /// <summary>
-            /// Number of neurons emitting constant output signal
+            /// The number of neurons emitting the constant output analog signal.
             /// </summary>
             public int ConstAnalogOutput { get; set; }
             /// <summary>
-            /// Number of neurons emitting no output spikes
+            /// The number of neurons emitting no output spikes.
             /// </summary>
             public int NotFiring { get; set; }
             /// <summary>
-            /// Number of neurons emitting constant output spikes
+            /// The number of neurons emitting the constant output spikes.
             /// </summary>
             public int ConstFiring { get; set; }
 
             //Constructor
             /// <summary>
-            /// Creates an initialized instance
+            /// Creates an initialized instance.
             /// </summary>
             public NeuronsAnomaliesStat()
             {
@@ -524,10 +524,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             }
 
             /// <summary>
-            /// Updates anomalies
+            /// Updates the anomalies.
             /// </summary>
-            /// <param name="neuron">Hidden neuron</param>
-            /// <param name="numOfResSynapses">Number of reservoir synapses</param>
+            /// <param name="neuron">The hidden neuron.</param>
+            /// <param name="numOfResSynapses">The number of reservoir synapses.</param>
             public void Update(HiddenNeuron neuron, int numOfResSynapses)
             {
                 if (numOfResSynapses == 0)

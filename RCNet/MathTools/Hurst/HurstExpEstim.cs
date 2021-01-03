@@ -6,14 +6,17 @@ using System.Threading.Tasks;
 namespace RCNet.MathTools.Hurst
 {
     /// <summary>
-    /// Class implements calculation of the Hurst exponent estimation (rescalled range method)
+    /// Implements the Hurst Exponent estimator using the rescaled range analysis.
     /// </summary>
+    /// <remarks>
+    /// See the https://en.wikipedia.org/wiki/Hurst_exponent.
+    /// </remarks>
     [Serializable]
     public class HurstExpEstim
     {
         //Constants
         /// <summary>
-        /// The smallest interval length of RescalledRange
+        /// The smallest interval length of the rescaledRange.
         /// </summary>
         public const int MinSubIntervalLength = 2;
 
@@ -23,14 +26,14 @@ namespace RCNet.MathTools.Hurst
         private readonly List<WeightedAvg> _avgCollection;
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="timeSeries">Time series data</param>
-        /// <param name="subIntervalLengthCollection">Lengths of the rescalled range interval</param>
+        /// <param name="timeSeries">The time series data.</param>
+        /// <param name="subIntervalLengthCollection">The collection of the lengths of the rescaled range intervals.</param>
         public HurstExpEstim(IEnumerable<double> timeSeries, List<int> subIntervalLengthCollection)
         {
             _valueCollection = timeSeries.ToList();
-            //Check time series length
+            //Check the time series length
             if (_valueCollection.Count < MinSubIntervalLength + 1)
             {
                 throw new ArgumentException($"Time series is too short. Minimal length is {MinSubIntervalLength + 1}", "timeSeries");
@@ -56,15 +59,15 @@ namespace RCNet.MathTools.Hurst
             Parallel.For(0, _subIntervalLengthCollection.Count, _subIntervalIdx =>
             {
                 int intervalLength = _subIntervalLengthCollection[_subIntervalIdx];
-                RescalledRange rescalledRange = new RescalledRange(intervalLength);
+                RescaledRange rescaledRange = new RescaledRange(intervalLength);
                 for (int startIdx = 0; startIdx <= _valueCollection.Count - intervalLength; startIdx++)
                 {
-                    rescalledRange.Reset();
+                    rescaledRange.Reset();
                     for (int valueSubIdx = 0, timeSeriesIdx = startIdx; valueSubIdx < intervalLength; valueSubIdx++, timeSeriesIdx++)
                     {
-                        rescalledRange.AddValue(_valueCollection[timeSeriesIdx]);
+                        rescaledRange.AddValue(_valueCollection[timeSeriesIdx]);
                     }
-                    _avgCollection[_subIntervalIdx].AddSampleValue(rescalledRange.Compute());
+                    _avgCollection[_subIntervalIdx].AddSample(rescaledRange.Compute());
                 }
             });
             return;
@@ -72,9 +75,9 @@ namespace RCNet.MathTools.Hurst
 
         //Methods
         /// <summary>
-        /// Adds new value to stored time series
+        /// Adds the next value into the stored time series.
         /// </summary>
-        /// <param name="nextValue">Next time series value</param>
+        /// <param name="nextValue">The next value to be added.</param>
         public void AddNextValue(double nextValue)
         {
             //Add new value
@@ -83,28 +86,27 @@ namespace RCNet.MathTools.Hurst
             Parallel.For(0, _subIntervalLengthCollection.Count, _subIntervalIdx =>
             {
                 int intervalLength = _subIntervalLengthCollection[_subIntervalIdx];
-                RescalledRange intervalRescalledRange = new RescalledRange(intervalLength);
+                RescaledRange intervalRescaledRange = new RescaledRange(intervalLength);
                 for (int valueIdx = (_valueCollection.Count - intervalLength); valueIdx < _valueCollection.Count; valueIdx++)
                 {
-                    intervalRescalledRange.AddValue(_valueCollection[valueIdx]);
+                    intervalRescaledRange.AddValue(_valueCollection[valueIdx]);
                 }
-                _avgCollection[_subIntervalIdx].AddSampleValue(intervalRescalledRange.Compute());
+                _avgCollection[_subIntervalIdx].AddSample(intervalRescaledRange.Compute());
             });
             return;
         }
 
         /// <summary>
-        /// Computes Hurst exponent estimation
-        /// Function does not change the instance.
+        /// Estimates the Hurst Exponent.
         /// </summary>
-        /// <returns>Resulting linear fit object</returns>
+        /// <returns>The resulting linear fit object</returns>
         public LinearFit Compute()
         {
             LinearFit linFit = new LinearFit();
             for (int i = 0; i < _avgCollection.Count; i++)
             {
                 double x = Math.Log(_subIntervalLengthCollection[i]);
-                double avg = _avgCollection[i].Avg;
+                double avg = _avgCollection[i].Result;
                 double y = 0;
                 if (avg != 0)
                 {
@@ -116,24 +118,26 @@ namespace RCNet.MathTools.Hurst
         }
 
         /// <summary>
-        /// Computes Hurst exponent estimation for next hypothetical value in time series.
-        /// Function does not change the instance, it is a simulation only.
+        /// Estimates the Hurst Exponent, considering the specified hypothetical next value of the already stored time series.
         /// </summary>
-        /// <returns>Resulting linear fit object</returns>
+        /// <remarks>
+        /// Operation does not change the instance data.
+        /// </remarks>
+        /// <returns>The resulting linear fit object.</returns>
         public LinearFit ComputeNext(double simValue)
         {
-            //Affect new value to existing averages
+            //Affect the simulated next value into the existing averages
             double[] avgValues = new double[_avgCollection.Count];
             Parallel.For(0, _subIntervalLengthCollection.Count, _subIntervalIdx =>
             {
                 int intervalLength = _subIntervalLengthCollection[_subIntervalIdx];
-                RescalledRange intervalRescalledRange = new RescalledRange(intervalLength);
+                RescaledRange intervalRescaledRange = new RescaledRange(intervalLength);
                 for (int valueIdx = (_valueCollection.Count - intervalLength) + 1; valueIdx < _valueCollection.Count; valueIdx++)
                 {
-                    intervalRescalledRange.AddValue(_valueCollection[valueIdx]);
+                    intervalRescaledRange.AddValue(_valueCollection[valueIdx]);
                 }
-                intervalRescalledRange.AddValue(simValue);
-                avgValues[_subIntervalIdx] = _avgCollection[_subIntervalIdx].SimulateNext(intervalRescalledRange.Compute());
+                intervalRescaledRange.AddValue(simValue);
+                avgValues[_subIntervalIdx] = _avgCollection[_subIntervalIdx].SimulateNext(intervalRescaledRange.Compute());
             });
             //Add updated existing points
             LinearFit linFit = new LinearFit();

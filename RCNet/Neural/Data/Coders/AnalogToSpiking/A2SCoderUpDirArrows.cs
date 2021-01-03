@@ -1,14 +1,15 @@
 ﻿using RCNet.Extensions;
-using RCNet.MathTools;
 using RCNet.Queue;
 using System;
-using System.Collections.Generic;
 
 namespace RCNet.Neural.Data.Coders.AnalogToSpiking
 {
     /// <summary>
-    /// Implements a signal direction receptor, sensitive to upward direction against a historical value at time T-1..number of receptors.
+    /// Implements the upward signal direction receptor.
     /// </summary>
+    /// <remarks>
+    /// The receptor is sensitive to upward direction against a past value at the time T-1...T-number of receptors.
+    /// </remarks>
     [Serializable]
     public class A2SCoderUpDirArrows : A2SCoderBase
     {
@@ -21,9 +22,9 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="coderCfg">Coder configuration</param>
+        /// <param name="coderCfg">The coder configuration.</param>
         public A2SCoderUpDirArrows(A2SCoderUpDirArrowsSettings coderCfg)
             : base(coderCfg.NumOfTimePoints, coderCfg.NumOfReceptors)
         {
@@ -34,9 +35,7 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         }
 
         //Methods
-        /// <summary>
-        /// Resets coder
-        /// </summary>
+        /// <inheritdoc/>
         public override void Reset()
         {
             ResetHistValues();
@@ -50,26 +49,22 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
             return;
         }
 
-        /// <summary>
-        /// Codes an analog value to the spike-code
-        /// </summary>
-        /// <param name="normalizedValue">A normalized analog value between -1 and 1</param>
-        /// <returns>Resulting spike-code from all components as an array of arrays of 0/1 byte values</returns>
+        /// <inheritdoc/>
         public override byte[][] GetCode(double normalizedValue)
         {
             //Allocate and set all output to 0
             byte[][] buffer = new byte[NumOfComponents][];
-            for(int i = 0; i < NumOfComponents; i++)
+            for (int i = 0; i < NumOfComponents; i++)
             {
                 buffer[i] = new byte[BaseCodeLength];
                 buffer[i].Populate((byte)0);
             }
             double x = (normalizedValue + 1d) / 2d;
             //Code
-            for(int i = 0; i < _coderCfg.NumOfReceptors; i++)
+            for (int i = 0; i < _coderCfg.NumOfReceptors; i++)
             {
                 double histValue = _histValues.GetElementAt(i, true);
-                if(x > histValue)
+                if (x > histValue)
                 {
                     double diff = x - histValue;
                     GetStrengthCode(diff, BaseCodeLength).CopyTo(buffer[i], 0);

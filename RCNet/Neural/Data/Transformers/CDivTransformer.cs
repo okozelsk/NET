@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Implements the "constant divided by an input value" transformation
+    /// Implements the "constant divided by an input value" transformation.
     /// </summary>
     [Serializable]
     public class CDivTransformer : ITransformer
@@ -13,18 +13,18 @@ namespace RCNet.Neural.Data.Transformers
 
         //Attributes
         private readonly int _fieldIdx;
-        private readonly CDivTransformerSettings _settings;
+        private readonly CDivTransformerSettings _cfg;
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="availableFieldNames">Collection of names of all available input fields</param>
-        /// <param name="settings">Configuration</param>
-        public CDivTransformer(List<string> availableFieldNames, CDivTransformerSettings settings)
+        /// <param name="availableFieldNames">The collection of names of all available input fields.</param>
+        /// <param name="cfg">The configuration.</param>
+        public CDivTransformer(List<string> availableFieldNames, CDivTransformerSettings cfg)
         {
-            _settings = (CDivTransformerSettings)settings.DeepClone();
-            _fieldIdx = availableFieldNames.IndexOf(_settings.InputFieldName);
+            _cfg = (CDivTransformerSettings)cfg.DeepClone();
+            _fieldIdx = availableFieldNames.IndexOf(_cfg.InputFieldName);
             return;
         }
 
@@ -47,8 +47,9 @@ namespace RCNet.Neural.Data.Transformers
             {
                 arg = arg < 0 ? -1d * DoubleExtensions.ReasonableAbsMin : DoubleExtensions.ReasonableAbsMin;
             }
-            return (_settings.C / arg).Bound();
+            return (_cfg.C / arg).Bound();
         }
 
     }//CDivTransformer
+
 }//Namespace

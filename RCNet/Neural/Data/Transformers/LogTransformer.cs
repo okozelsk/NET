@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Implements transformation of the input field value to its logarithm of specified base
+    /// Implements transformation of the input field value to its logarithm of the specified base.
     /// </summary>
     [Serializable]
     public class LogTransformer : ITransformer
@@ -13,18 +13,18 @@ namespace RCNet.Neural.Data.Transformers
 
         //Attributes
         private readonly int _fieldIdx;
-        private readonly LogTransformerSettings _settings;
+        private readonly LogTransformerSettings _cfg;
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="availableFieldNames">Collection of names of all available input fields</param>
-        /// <param name="settings">Configuration</param>
-        public LogTransformer(List<string> availableFieldNames, LogTransformerSettings settings)
+        /// <param name="availableFieldNames">The collection of names of all available input fields.</param>
+        /// <param name="cfg">The configuration.</param>
+        public LogTransformer(List<string> availableFieldNames, LogTransformerSettings cfg)
         {
-            _settings = (LogTransformerSettings)settings.DeepClone();
-            _fieldIdx = availableFieldNames.IndexOf(_settings.InputFieldName);
+            _cfg = (LogTransformerSettings)cfg.DeepClone();
+            _fieldIdx = availableFieldNames.IndexOf(_cfg.InputFieldName);
             return;
         }
 
@@ -47,7 +47,7 @@ namespace RCNet.Neural.Data.Transformers
             {
                 arg = DoubleExtensions.ReasonableAbsMin;
             }
-            return Math.Log(arg, _settings.Base).Bound();
+            return Math.Log(arg, _cfg.Base).Bound();
         }
 
     }//LogTransformer

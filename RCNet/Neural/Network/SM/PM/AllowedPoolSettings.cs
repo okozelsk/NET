@@ -4,35 +4,35 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.PM
 {
     /// <summary>
-    /// Configuration of the predictors mapper's allowed pool
+    /// Configuration of the predictors mapper's allowed pool.
     /// </summary>
     [Serializable]
     public class AllowedPoolSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "SMMapperAllowedPoolType";
 
         //Attribute properties
         /// <summary>
-        /// Name of the reservoir instance
+        /// The name of the reservoir instance.
         /// </summary>
         public string ReservoirInstanceName { get; }
 
         /// <summary>
-        /// Name of the pool
+        /// The name of the pool.
         /// </summary>
         public string PoolName { get; }
 
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="reservoirInstanceName">Name of the reservoir instance</param>
-        /// <param name="poolName">Name of the pool</param>
+        /// <param name="reservoirInstanceName">The name of the reservoir instance.</param>
+        /// <param name="poolName">The name of the pool.</param>
         public AllowedPoolSettings(string reservoirInstanceName, string poolName)
         {
             ReservoirInstanceName = reservoirInstanceName;
@@ -44,7 +44,7 @@ namespace RCNet.Neural.Network.SM.PM
         /// <summary>
         /// The deep copy constructor
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public AllowedPoolSettings(AllowedPoolSettings source)
             : this(source.ReservoirInstanceName, source.PoolName)
         {
@@ -54,7 +54,7 @@ namespace RCNet.Neural.Network.SM.PM
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public AllowedPoolSettings(XElement elem)
         {
             //Validation

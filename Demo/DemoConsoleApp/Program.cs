@@ -90,7 +90,7 @@ namespace Demo.DemoConsoleApp
                     case "6":
                         try
                         {
-                            (new LibrasClassificationLSMDesigner()).Run(InputEncoder.SpikingInputEncodingRegime.Horizontal);
+                            (new LibrasClassificationLSMDesigner()).Run(InputEncoder.InputSpikesCoding.Horizontal);
                         }
                         catch (Exception e)
                         {
@@ -101,7 +101,7 @@ namespace Demo.DemoConsoleApp
                     case "7":
                         try
                         {
-                            (new LibrasClassificationLSMDesigner()).Run(InputEncoder.SpikingInputEncodingRegime.Vertical);
+                            (new LibrasClassificationLSMDesigner()).Run(InputEncoder.InputSpikesCoding.Vertical);
                         }
                         catch (Exception e)
                         {
@@ -112,7 +112,7 @@ namespace Demo.DemoConsoleApp
                     case "8":
                         try
                         {
-                            (new LibrasClassificationLSMDesigner()).Run(InputEncoder.SpikingInputEncodingRegime.Forbidden);
+                            (new LibrasClassificationLSMDesigner()).Run(InputEncoder.InputSpikesCoding.Forbidden);
                         }
                         catch (Exception e)
                         {

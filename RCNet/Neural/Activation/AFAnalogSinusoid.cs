@@ -5,14 +5,14 @@ using System;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Implements the Sinusoid activation function
+    /// Implements the Sinusoid activation function.
     /// </summary>
     [Serializable]
     public class AFAnalogSinusoid : AFAnalogBase
     {
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         public AFAnalogSinusoid()
             : base(Interval.IntN1P1)

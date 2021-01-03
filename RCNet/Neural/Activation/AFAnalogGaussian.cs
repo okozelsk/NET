@@ -1,18 +1,18 @@
-﻿using System;
-using RCNet.Extensions;
+﻿using RCNet.Extensions;
 using RCNet.MathTools;
+using System;
 
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Implements the Gaussian activation function
+    /// Implements the Gaussian activation function.
     /// </summary>
     [Serializable]
     public class AFAnalogGaussian : AFAnalogBase
     {
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         public AFAnalogGaussian()
             : base(Interval.IntZP1)

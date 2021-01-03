@@ -5,28 +5,28 @@ using System.Xml.Linq;
 namespace RCNet.RandomValue
 {
     /// <summary>
-    /// Configuration of the Exponential random distribution
+    /// Configuration of the Exponential random distribution.
     /// </summary>
     [Serializable]
     public class ExponentialDistrSettings : RCNetBaseSettings, IDistrSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "ExponentialDistrType";
 
         //Attributes
         /// <summary>
-        /// Mean
+        /// The mean.
         /// </summary>
         public double Mean { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="mean">Mean</param>
+        /// <param name="mean">The mean.</param>
         public ExponentialDistrSettings(double mean)
         {
             Mean = mean;
@@ -35,9 +35,9 @@ namespace RCNet.RandomValue
         }
 
         /// <summary>
-        /// Copy constructor
+        /// The copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public ExponentialDistrSettings(ExponentialDistrSettings source)
         {
             Mean = source.Mean;
@@ -45,9 +45,9 @@ namespace RCNet.RandomValue
         }
 
         /// <summary>
-        /// Creates an instance and initializes it from given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem"> Xml element containing the initialization settings.</param>
+        /// <param name="elem"> A xml element containing the configuration data.</param>
         public ExponentialDistrSettings(XElement elem)
         {
             //Validation

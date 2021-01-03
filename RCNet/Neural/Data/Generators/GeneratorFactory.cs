@@ -5,14 +5,14 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Data.Generators
 {
     /// <summary>
-    /// Provides proper load of settings and instantiation of data generators
+    /// Provides a proper instantiation of the generators and also proper loading of their configurations.
     /// </summary>
     public static class GeneratorFactory
     {
         /// <summary>
-        /// Based on element name loads proper type of generator settings
+        /// Based on the xml element name loads the proper type of generator configuration.
         /// </summary>
-        /// <param name="elem">Element containing settings</param>
+        /// <param name="elem">A xml element containing the configuration.</param>
         public static RCNetBaseSettings LoadSettings(XElement elem)
         {
             switch (elem.Name.LocalName)
@@ -27,27 +27,27 @@ namespace RCNet.Neural.Data.Generators
         }
 
         /// <summary>
-        /// Instantiates generator of proper type according to settings
+        /// Instantiates the appropriate generator.
         /// </summary>
-        /// <param name="settings">Generator configuration</param>
-        public static IGenerator Create(RCNetBaseSettings settings)
+        /// <param name="cfg">The generator configuration.</param>
+        public static IGenerator Create(RCNetBaseSettings cfg)
         {
-            Type cfgType = settings.GetType();
+            Type cfgType = cfg.GetType();
             if (cfgType == typeof(PulseGeneratorSettings))
             {
-                return new PulseGenerator((PulseGeneratorSettings)settings);
+                return new PulseGenerator((PulseGeneratorSettings)cfg);
             }
             else if (cfgType == typeof(RandomValueSettings))
             {
-                return new RandomGenerator((RandomValueSettings)settings);
+                return new RandomGenerator((RandomValueSettings)cfg);
             }
             else if (cfgType == typeof(SinusoidalGeneratorSettings))
             {
-                return new SinusoidalGenerator((SinusoidalGeneratorSettings)settings);
+                return new SinusoidalGenerator((SinusoidalGeneratorSettings)cfg);
             }
             else if (cfgType == typeof(MackeyGlassGeneratorSettings))
             {
-                return new MackeyGlassGenerator((MackeyGlassGeneratorSettings)settings);
+                return new MackeyGlassGenerator((MackeyGlassGeneratorSettings)cfg);
             }
             else
             {
@@ -56,5 +56,6 @@ namespace RCNet.Neural.Data.Generators
         }
 
     }//GeneratorFactory
+
 }//Namespace
 

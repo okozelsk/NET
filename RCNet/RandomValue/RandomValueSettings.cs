@@ -6,59 +6,59 @@ using System.Xml.Linq;
 namespace RCNet.RandomValue
 {
     /// <summary>
-    /// Configuration of the random value
+    /// Configuration of the random value.
     /// </summary>
     [Serializable]
     public class RandomValueSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "RandomValueType";
 
         //Default values
         /// <summary>
-        /// Default value of RandomSign
+        /// The default value of the parameter specifying whether to randomize the value sign.
         /// </summary>
-        public const bool DefaultRandomSignValue = false;
+        public const bool DefaultRandomSign = false;
         /// <summary>
-        /// Default type of distribution
+        /// The default type of random distribution.
         /// </summary>
         public const RandomCommon.DistributionType DefaultDistributionType = RandomCommon.DistributionType.Uniform;
 
         //Attribute properties
         /// <summary>
-        /// Min random value
+        /// The min value (inclusive).
         /// </summary>
         public double Min { get; }
 
         /// <summary>
-        /// Max random value
+        /// The max value (exclusive).
         /// </summary>
         public double Max { get; }
 
         /// <summary>
-        /// Specifies whether to randomize value sign
+        /// Specifies whether to randomize the value sign.
         /// </summary>
         public bool RandomSign { get; }
 
         /// <summary>
-        /// Distribution parameters
+        /// The configuration of the distribution.
         /// </summary>
         public IDistrSettings DistrCfg { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="min">Min random value</param>
-        /// <param name="max">Max random value</param>
-        /// <param name="randomSign">Specifies whether to randomize value sign</param>
-        /// <param name="distrCfg">Specific parameters of the distribution to be used</param>
+        /// <param name="min">The min value (inclusive).</param>
+        /// <param name="max">The max value (exclusive).</param>
+        /// <param name="randomSign">Specifies whether to randomize the value sign.</param>
+        /// <param name="distrCfg">The configuration of the distribution.</param>
         public RandomValueSettings(double min,
                                    double max,
-                                   bool randomSign = DefaultRandomSignValue,
+                                   bool randomSign = DefaultRandomSign,
                                    IDistrSettings distrCfg = null
                                    )
         {
@@ -75,9 +75,9 @@ namespace RCNet.RandomValue
         }
 
         /// <summary>
-        /// Copy constructor
+        /// The copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public RandomValueSettings(RandomValueSettings source)
         {
             Min = source.Min;
@@ -88,9 +88,9 @@ namespace RCNet.RandomValue
         }
 
         /// <summary>
-        /// Creates an instance and initializes it from given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml data containing RandomValueSettings settings.</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public RandomValueSettings(XElement elem)
         {
             //Validation
@@ -106,7 +106,7 @@ namespace RCNet.RandomValue
             }
             else
             {
-                DistrCfg = RandomCommon.CreateDistrSettings(distrParamsElem);
+                DistrCfg = RandomCommon.LoadDistrCfg(distrParamsElem);
             }
             Check();
             return;
@@ -114,7 +114,7 @@ namespace RCNet.RandomValue
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultDistrType { get { return DistrType == RandomCommon.DistributionType.Uniform; } }
 
@@ -129,10 +129,18 @@ namespace RCNet.RandomValue
         //Methods
         //Static methods
         /// <summary>
-        /// If exists descendant element within the root element then function creates instance of the RandomValueSettings using
-        /// descendant's xml settings. If not, function creates instance of the RandomValueSettings using specified default parameters.
+        /// Loads or creates the configuration of the random value.
         /// </summary>
-        public static RandomValueSettings LoadOrDefault(XElement rootElem, string descendant, double defaultMin, double defaultMax, bool randomSign = false)
+        /// <remarks>
+        /// Checks whether exists the specified descendant element under the root element and if so, loads the configuration.
+        /// If the specified descendant element does not exist, creates the configuration according to specified parameters.
+        /// </remarks>
+        /// <param name="rootElem">The root xml element.</param>
+        /// <param name="descendant">The name of descendant element containing the configuration data.</param>
+        /// <param name="min">The min value.</param>
+        /// <param name="max">The max value.</param>
+        /// <param name="randomSign">Specifies whether to randomize the value sign.</param>
+        public static RandomValueSettings LoadOrCreate(XElement rootElem, string descendant, double min, double max, bool randomSign = false)
         {
             XElement descendantElement = rootElem.Elements(descendant).FirstOrDefault();
             if (descendantElement != null)
@@ -141,27 +149,42 @@ namespace RCNet.RandomValue
             }
             else
             {
-                return new RandomValueSettings(defaultMin, defaultMax, randomSign);
+                return new RandomValueSettings(min, max, randomSign);
             }
         }
 
         /// <summary>
-        /// If exists descendant element within the root element then function creates instance of the RandomValueSettings using
-        /// descendant's xml settings. If not, function creates instance of the RandomValueSettings using specified default parameters.
+        /// Loads or creates the configuration of the random value.
         /// </summary>
-        public static RandomValueSettings LoadOrDefault(XElement rootElem, string descendant, double defaultConst, bool randomSign = false)
+        /// <remarks>
+        /// Checks whether exists the specified descendant element under the root element and if so, loads the configuration.
+        /// If the specified descendant element does not exist, creates the configuration according to specified parameters.
+        /// </remarks>
+        /// <param name="rootElem">The root xml element.</param>
+        /// <param name="descendant">The name of descendant element containing the configuration data.</param>
+        /// <param name="constValue">The constant value (the same min and max values).</param>
+        /// <param name="randomSign">Specifies whether to randomize the value sign.</param>
+        public static RandomValueSettings LoadOrCreate(XElement rootElem, string descendant, double constValue, bool randomSign = false)
         {
-            return LoadOrDefault(rootElem, descendant, defaultConst, defaultConst, randomSign);
+            return LoadOrCreate(rootElem, descendant, constValue, constValue, randomSign);
         }
 
         /// <summary>
-        /// If source is not null then function creates it's clone. If not, function creates instance of the RandomValueSettings using specified default parameters.
+        /// Clones the existing configuration or creates the new configuration of the random value.
         /// </summary>
-        public static RandomValueSettings CloneOrDefault(RandomValueSettings source, double defaultMin, double defaultMax, bool randomSign = false)
+        /// <remarks>
+        /// Checks whether the specified source configuration instance is not null and if so, creates its clone.
+        /// If the source configuration instance is null, creates the configuration according to specified parameters.
+        /// </remarks>
+        /// <param name="source">The source configuration instance.</param>
+        /// <param name="min">The min value.</param>
+        /// <param name="max">The max value.</param>
+        /// <param name="randomSign">Specifies whether to randomize the value sign.</param>
+        public static RandomValueSettings CloneOrCreate(RandomValueSettings source, double min, double max, bool randomSign = false)
         {
             if (source == null)
             {
-                return new RandomValueSettings(defaultMin, defaultMax, randomSign);
+                return new RandomValueSettings(min, max, randomSign);
             }
             else
             {
@@ -170,11 +193,18 @@ namespace RCNet.RandomValue
         }
 
         /// <summary>
-        /// If source is not null then function creates it's clone. If not, function creates instance of the RandomValueSettings using specified default parameters.
+        /// Clones the existing configuration or creates the new configuration of the random value.
         /// </summary>
-        public static RandomValueSettings CloneOrDefault(RandomValueSettings source, double defaultConst, bool randomSign = false)
+        /// <remarks>
+        /// Checks whether the specified source configuration instance is not null and if so, creates its clone.
+        /// If the source configuration instance is null, creates the configuration according to specified parameters.
+        /// </remarks>
+        /// <param name="source">The source configuration instance.</param>
+        /// <param name="constValue">The constant value (the same min and max values).</param>
+        /// <param name="randomSign">Specifies whether to randomize the value sign.</param>
+        public static RandomValueSettings CloneOrCreate(RandomValueSettings source, double constValue, bool randomSign = false)
         {
-            return CloneOrDefault(source, defaultConst, defaultConst, randomSign);
+            return CloneOrCreate(source, constValue, constValue, randomSign);
         }
 
         //Methods
@@ -199,7 +229,7 @@ namespace RCNet.RandomValue
         {
             XElement rootElem = new XElement(rootElemName, new XAttribute("min", Min.ToString(CultureInfo.InvariantCulture)),
                                                            new XAttribute("max", Max.ToString(CultureInfo.InvariantCulture)));
-            if (!suppressDefaults || RandomSign != DefaultRandomSignValue)
+            if (!suppressDefaults || RandomSign != DefaultRandomSign)
             {
                 rootElem.Add(new XAttribute("randomSign", RandomSign.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
             }

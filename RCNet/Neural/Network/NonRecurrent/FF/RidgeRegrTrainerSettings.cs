@@ -1,4 +1,4 @@
-﻿using RCNet.MathTools.PS;
+﻿using RCNet.MathTools;
 using System;
 using System.Globalization;
 using System.Linq;
@@ -7,75 +7,76 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.NonRecurrent.FF
 {
     /// <summary>
-    /// Configuration of the RidgeRegrTrainer
+    /// Configuration of the RidgeRegrTrainer.
     /// </summary>
     [Serializable]
     public class RidgeRegrTrainerSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "FFNetRidgeRegrTrainerType";
+        //Default values
         /// <summary>
-        /// Seeker's default min lambda
+        /// The default min lambda.
         /// </summary>
         public const double DefaultMinLambda = 0;
         /// <summary>
-        /// Seeker's default max lambda
+        /// The default max lambda.
         /// </summary>
         public const double DefaultMaxLambda = 0.5;
         /// <summary>
-        /// Seeker's default number of steps within the interval
+        /// The default number of steps within the interval.
         /// </summary>
         public const int DefaultSteps = 10;
 
         //Attribute properties
         /// <summary>
-        /// Number of attempt epochs
+        /// The number of attempt epochs.
         /// </summary>
         public int NumOfAttemptEpochs { get; }
         /// <summary>
-        /// Configuration of seeker of lambda hyperparameter value
+        /// The configuration of the lambda parameter finder.
         /// </summary>
-        public ParamSeekerSettings LambdaSeekerCfg { get; }
+        public ParamValFinderSettings LambdaFinderCfg { get; }
 
         //Constructors
         /// <summary>
-        /// Constructs an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="numOfAttemptEpochs">Number of attempt epochs</param>
-        /// <param name="lambdaSeekerCfg">Configuration of seeker of lambda hyperparameter value</param>
-        public RidgeRegrTrainerSettings(int numOfAttemptEpochs, ParamSeekerSettings lambdaSeekerCfg = null)
+        /// <param name="numOfAttemptEpochs">The number of attempt epochs.</param>
+        /// <param name="lambdaFinderCfg">The configuration of the lambda parameter finder.</param>
+        public RidgeRegrTrainerSettings(int numOfAttemptEpochs, ParamValFinderSettings lambdaFinderCfg = null)
         {
             NumOfAttemptEpochs = numOfAttemptEpochs;
-            if (lambdaSeekerCfg == null)
+            if (lambdaFinderCfg == null)
             {
-                LambdaSeekerCfg = new ParamSeekerSettings(DefaultMinLambda, DefaultMaxLambda, DefaultSteps);
+                LambdaFinderCfg = new ParamValFinderSettings(DefaultMinLambda, DefaultMaxLambda, DefaultSteps);
             }
             else
             {
-                LambdaSeekerCfg = (ParamSeekerSettings)lambdaSeekerCfg.DeepClone();
+                LambdaFinderCfg = (ParamValFinderSettings)lambdaFinderCfg.DeepClone();
             }
             Check();
             return;
         }
 
         /// <summary>
-        /// Deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public RidgeRegrTrainerSettings(RidgeRegrTrainerSettings source)
         {
             NumOfAttemptEpochs = source.NumOfAttemptEpochs;
-            LambdaSeekerCfg = (ParamSeekerSettings)source.LambdaSeekerCfg.DeepClone();
+            LambdaFinderCfg = (ParamValFinderSettings)source.LambdaFinderCfg.DeepClone();
             return;
         }
 
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml data containing linear regression trainer settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public RidgeRegrTrainerSettings(XElement elem)
         {
             //Validation
@@ -85,11 +86,11 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             XElement lambdaSeekerSettingsElem = settingsElem.Elements("lambda").FirstOrDefault();
             if (lambdaSeekerSettingsElem != null)
             {
-                LambdaSeekerCfg = new ParamSeekerSettings(lambdaSeekerSettingsElem);
+                LambdaFinderCfg = new ParamValFinderSettings(lambdaSeekerSettingsElem);
             }
             else
             {
-                LambdaSeekerCfg = new ParamSeekerSettings(DefaultMinLambda, DefaultMaxLambda, DefaultSteps);
+                LambdaFinderCfg = new ParamValFinderSettings(DefaultMinLambda, DefaultMaxLambda, DefaultSteps);
             }
             Check();
             return;
@@ -97,14 +98,14 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
 
         //Properties
         /// <summary>
-        /// Number of attempts. Always 1.
+        /// The number of attempts. Always 1.
         /// </summary>
         public int NumOfAttempts { get { return 1; } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
-        public bool IsDefaultLambdaSeeker { get { return (LambdaSeekerCfg.Min == DefaultMinLambda && LambdaSeekerCfg.Max == DefaultMaxLambda && LambdaSeekerCfg.NumOfSubIntervals == DefaultSteps); } }
+        public bool IsDefaultLambdaSeeker { get { return (LambdaFinderCfg.Min == DefaultMinLambda && LambdaFinderCfg.Max == DefaultMaxLambda && LambdaFinderCfg.NumOfSubIntervals == DefaultSteps); } }
 
         /// <inheritdoc/>
         public override bool ContainsOnlyDefaults { get { return false; } }
@@ -132,7 +133,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             XElement rootElem = new XElement(rootElemName, new XAttribute("attemptEpochs", NumOfAttemptEpochs.ToString(CultureInfo.InvariantCulture)));
             if (!suppressDefaults || !IsDefaultLambdaSeeker)
             {
-                rootElem.Add(LambdaSeekerCfg.GetXml("lambda", suppressDefaults));
+                rootElem.Add(LambdaFinderCfg.GetXml("lambda", suppressDefaults));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;

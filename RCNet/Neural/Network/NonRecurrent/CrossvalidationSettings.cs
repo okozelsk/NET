@@ -5,54 +5,54 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.NonRecurrent
 {
     /// <summary>
-    /// Configuration of the crossvalidation
+    /// Configuration of the crossvalidation.
     /// </summary>
     [Serializable]
     public class CrossvalidationSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "CrossvalidationType";
         /// <summary>
-        /// Maximum allowed fold data ratio
+        /// The maximum fold data ratio.
         /// </summary>
         public const double MaxFoldDataRatio = 0.5d;
         /// <summary>
-        /// Automatic number of folds (code)
+        /// The string code for the automatic number of folds.
         /// </summary>
         public const string AutoFoldsCode = "Auto";
         /// <summary>
-        /// Automatic number of folds (num)
+        /// The numeric code for the automatic number of folds.
         /// </summary>
         public const int AutoFolds = 0;
         //Default values
         /// <summary>
-        /// Default value of the parameter specifying required ratio of samples constituting one fold. Default value is 0.1.
+        /// The default value of the parameter specifying the ratio of samples constituting one fold. Default value is 1/10.
         /// </summary>
         public const double DefaultFoldDataRatio = 0.1d;
         /// <summary>
-        /// Default code value of the parameter specifying number of folds to be used. Default value is Auto (all available folds).
+        /// Default code value of the parameter specifying the number of folds to be used. Default value is "Auto" (all available folds).
         /// </summary>
         public const string DefaultFoldsString = AutoFoldsCode;
         /// <summary>
-        /// Default numeric value of the parameter specifying number of folds to be used. Default value is 0 (Auto - all available folds).
+        /// Default numeric value of the parameter specifying the number of folds to be used. Default value is 0 (all available folds).
         /// </summary>
         public const int DefaultFoldsNum = AutoFolds;
         /// <summary>
-        /// Default value of the parameter defining how many times the generation of whole folds on shuffled data to be repeated. This parameter multiplies the number of networks in the cluster. Default value is 1.
+        /// The default value of the parameter defining how many times the generation of whole folds on shuffled data to be repeated. This parameter multiplies the number of networks in the cluster. Default value is 1.
         /// </summary>
         public const int DefaultRepetitions = 1;
 
         //Attribute properties
         /// <summary>
-        /// Specifies required ratio of samples constituting one fold.
+        /// Specifies the ratio of samples constituting one fold.
         /// </summary>
         public double FoldDataRatio { get; }
 
         /// <summary>
-        /// Specifies number of folds to be used.
+        /// Specifies the number of folds to be used.
         /// </summary>
         public int Folds { get; }
 
@@ -65,8 +65,8 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// <summary>
         /// Creates an unitialized instance
         /// </summary>
-        /// <param name="foldDataRatio">Specifies required ratio of samples constituting one fold.</param>
-        /// <param name="folds">Specifies number of folds to be used.</param>
+        /// <param name="foldDataRatio">Specifies the ratio of samples constituting one fold.</param>
+        /// <param name="folds">Specifies the number of folds to be used.</param>
         /// <param name="repetitions">Defines how many times the generation of whole folds on shuffled data to be repeated. This parameter multiplies the number of networks in the cluster.</param>
         public CrossvalidationSettings(double foldDataRatio = DefaultFoldDataRatio,
                                        int folds = DefaultFoldsNum,
@@ -81,9 +81,9 @@ namespace RCNet.Neural.Network.NonRecurrent
         }
 
         /// <summary>
-        /// Copy constructor
+        /// The copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public CrossvalidationSettings(CrossvalidationSettings source)
             : this(source.FoldDataRatio, source.Folds, source.Repetitions)
         {
@@ -93,7 +93,7 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml data containing the settings.</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public CrossvalidationSettings(XElement elem)
         {
             //Validation
@@ -108,15 +108,15 @@ namespace RCNet.Neural.Network.NonRecurrent
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultFoldDataRatio { get { return (FoldDataRatio == DefaultFoldDataRatio); } }
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultFolds { get { return (Folds == DefaultFoldsNum); } }
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultRepetitions { get { return (Repetitions == DefaultRepetitions); } }
         /// <inheritdoc/>

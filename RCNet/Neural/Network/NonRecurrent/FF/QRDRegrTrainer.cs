@@ -1,6 +1,6 @@
 ﻿using RCNet.Extensions;
+using RCNet.MathTools;
 using RCNet.MathTools.MatrixMath;
-using RCNet.MathTools.PS;
 using RCNet.Neural.Activation;
 using System;
 using System.Collections.Generic;
@@ -9,13 +9,19 @@ using System.Globalization;
 namespace RCNet.Neural.Network.NonRecurrent.FF
 {
     /// <summary>
-    /// Implements the QRD regression trainer.
-    /// Principle is to add each iteration less and less piece of white-noise to predictors
-    /// and then perform the standard QR decomposition (regression).
-    /// This technique allows to find more stable (generalized) weight solution than just a QR decomposition
-    /// of pure predictors.
-    /// FF network has to have only output layer with the Identity activation.
+    /// Implements the QRD regression trainer of the feed forward network.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The feed forward network to be trained must have no hidden layers and the Identity output activation.
+    /// </para>
+    /// <para>
+    /// Principle is to add each iteration less and less piece of white-noise to input data
+    /// and then to perform the standard QR decomposition of the input data matrix (regression).
+    /// This technique allows to find more stable (generalized) weight solution than just a QR decomposition
+    /// on pure input data.
+    /// </para>
+    /// </remarks>
     [Serializable]
     public class QRDRegrTrainer : INonRecurrentNetworkTrainer
     {
@@ -43,21 +49,21 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         private readonly List<Matrix> _outputSingleColMatrixCollection;
         private readonly Random _rand;
         private double _currNoise;
-        private ParamSeeker _noiseSeeker;
+        private ParamValFinder _noiseSeeker;
 
         //Constructor
         /// <summary>
-        /// Constructs an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="net">FF network to be trained</param>
-        /// <param name="inputVectorCollection">Predictors (input)</param>
-        /// <param name="outputVectorCollection">Ideal outputs (the same number of rows as number of inputs)</param>
-        /// <param name="rand">Random object to be used for adding a white-noise to predictors</param>
-        /// <param name="settings">Startup parameters of the trainer</param>
+        /// <param name="net">The FF network to be trained.</param>
+        /// <param name="inputVectorCollection">The input vectors (input).</param>
+        /// <param name="outputVectorCollection">The output vectors (ideal).</param>
+        /// <param name="rand">The random object to be used as the white-noise generator.</param>
+        /// <param name="cfg">The configuration of the trainer.</param>
         public QRDRegrTrainer(FeedForwardNetwork net,
                               List<double[]> inputVectorCollection,
                               List<double[]> outputVectorCollection,
-                              QRDRegrTrainerSettings settings,
+                              QRDRegrTrainerSettings cfg,
                               Random rand
                               )
         {
@@ -77,7 +83,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
                 throw new InvalidOperationException($"Can´t create trainer. Insufficient number of training samples {inputVectorCollection.Count}. Minimum is {(inputVectorCollection[0].Length + 1)}.");
             }
             //Parameters
-            _settings = settings;
+            _settings = cfg;
             MaxAttempt = _settings.NumOfAttempts;
             MaxAttemptEpoch = _settings.NumOfAttemptEpochs;
             _net = net;
@@ -132,7 +138,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
                 //Next attempt is allowed
                 ++Attempt;
                 //Reset
-                _noiseSeeker = new ParamSeeker(_settings.NoiseSeekerCfg);
+                _noiseSeeker = new ParamValFinder(_settings.NoiseFinderCfg);
                 _currNoise = 1e6;
                 MSE = 0;
                 AttemptEpoch = 0;

@@ -1,53 +1,53 @@
 ﻿using RCNet.Neural.Data.Filter;
 using RCNet.Neural.Network.NonRecurrent;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
 namespace RCNet.Neural.Network.SM.Readout
 {
     /// <summary>
-    /// Configuration of the forecast task
+    /// Configuration of the readout unit's forecast task.
     /// </summary>
     [Serializable]
     public class ForecastTaskSettings : RCNetBaseSettings, ITaskSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
-        public const string XsdTypeName = "ROutLayerUnitForecastTaskType";
+        public const string XsdTypeName = "ROutUnitForecastTaskType";
+
+        //Static members
+        /// <summary>
+        /// The shared instance of RealFeatureFilterSettings.
+        /// </summary>
+        private static readonly IFeatureFilterSettings _sharedRealFeatureFilterCfg = new RealFeatureFilterSettings();
 
         //Attribute properties
-        /// <inheritdoc />
-        public IFeatureFilterSettings FeatureFilterCfg { get; }
         /// <summary>
-        /// Forecast networks settings
+        /// The cluster chain configuration.
         /// </summary>
-        public ForecastNetworksSettings NetworksCfg { get; }
+        public TNRNetClusterChainRealSettings ClusterChainCfg { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="featureFilterCfg">Output feature filter settings</param>
-        /// <param name="networksCfg">Forecasting networks settings</param>
-        public ForecastTaskSettings(IFeatureFilterSettings featureFilterCfg,
-                                    ForecastNetworksSettings networksCfg = null
-                                    )
+        /// <param name="clusterChainCfg">The cluster chain configuration.</param>
+        public ForecastTaskSettings(TNRNetClusterChainRealSettings clusterChainCfg = null)
         {
-            FeatureFilterCfg = (IFeatureFilterSettings)featureFilterCfg.DeepClone();
-            NetworksCfg = networksCfg == null ? new ForecastNetworksSettings() : (ForecastNetworksSettings)networksCfg.DeepClone();
+            ClusterChainCfg = clusterChainCfg == null ? null : (TNRNetClusterChainRealSettings)clusterChainCfg.DeepClone();
+            Check();
             return;
         }
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public ForecastTaskSettings(ForecastTaskSettings source)
-            : this(source.FeatureFilterCfg, source.NetworksCfg)
+            : this(source.ClusterChainCfg)
         {
             return;
         }
@@ -55,31 +55,16 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public ForecastTaskSettings(XElement elem)
         {
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            //Filter
-            XElement filterSettingsElem = settingsElem.Elements().First();
-            switch (filterSettingsElem.Name.LocalName)
-            {
-                case "binFeature":
-                    FeatureFilterCfg = new BinFeatureFilterSettings(filterSettingsElem);
-                    break;
-                case "enumFeature":
-                    FeatureFilterCfg = new EnumFeatureFilterSettings(filterSettingsElem);
-                    break;
-                case "realFeature":
-                    FeatureFilterCfg = new RealFeatureFilterSettings(filterSettingsElem);
-                    break;
-                default:
-                    throw new InvalidOperationException($"Feature filter element not found.");
-            }
-            //Networks
-            XElement forecastNetworksSettingsElem = settingsElem.Elements("networks").FirstOrDefault();
-            NetworksCfg = forecastNetworksSettingsElem == null ? new ForecastNetworksSettings() : new ForecastNetworksSettings(forecastNetworksSettingsElem);
+            //Result
+            XElement clusterChainElem = settingsElem.Elements("clusterChain").FirstOrDefault();
+            ClusterChainCfg = clusterChainElem == null ? null : new TNRNetClusterChainRealSettings(clusterChainElem);
+            Check();
             return;
         }
 
@@ -88,17 +73,16 @@ namespace RCNet.Neural.Network.SM.Readout
         public ReadoutUnit.TaskType Type { get { return ReadoutUnit.TaskType.Forecast; } }
 
         /// <inheritdoc />
-        public List<INonRecurrentNetworkSettings> NetworkCfgCollection { get { return NetworksCfg.NetworkCfgCollection; } }
+        public IFeatureFilterSettings FeatureFilterCfg { get { return _sharedRealFeatureFilterCfg; } }
 
         /// <inheritdoc />
         public override bool ContainsOnlyDefaults
         {
             get
             {
-                return false;
+                return ClusterChainCfg == null;
             }
         }
-
 
         //Methods
         /// <inheritdoc />
@@ -117,10 +101,9 @@ namespace RCNet.Neural.Network.SM.Readout
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName);
-            rootElem.Add(FeatureFilterCfg.GetXml(suppressDefaults));
-            if (!NetworksCfg.ContainsOnlyDefaults)
+            if (ClusterChainCfg != null && !ClusterChainCfg.ContainsOnlyDefaults)
             {
-                rootElem.Add(NetworksCfg.GetXml("networks", suppressDefaults));
+                rootElem.Add(ClusterChainCfg.GetXml(suppressDefaults));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;

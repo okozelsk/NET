@@ -10,54 +10,55 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM
 {
     /// <summary>
-    /// Configuration of the StateMachine
+    /// Configuration of the state machine.
     /// </summary>
     [Serializable]
     public class StateMachineSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "SMType";
         //Default values
         /// <summary>
-        /// Default value of random number generator's initial seek
+        /// The default value of random number generator initial seek.
         /// </summary>
         public const int DefaultRandomizerSeek = 0;
 
         //Attribute properties
         /// <summary>
-        /// Configuration of the neural preprocessor
+        /// The configuration of the neural preprocessor.
         /// </summary>
         public NeuralPreprocessorSettings NeuralPreprocessorCfg { get; }
 
         /// <summary>
-        /// Configuration of the readout layer
+        /// The configuration of the readout layer.
         /// </summary>
         public ReadoutLayerSettings ReadoutLayerCfg { get; }
 
         /// <summary>
-        /// Configuration of mapper of predictors to readout units
+        /// The configuration of mapper of specific predictors to readout units.
         /// </summary>
         public MapperSettings MapperCfg { get; }
 
         /// <summary>
-        /// Specifies random number generator's initial seek.
-        /// A value greater than or equal to 0 will always ensure the same initialization of the internal
-        /// random number generator and therefore also the same internal configuration each time the StateMachine to be instantiated.
-        /// A value less than 0 causes different internal configuration each time the StateMachine to be instantiated.
+        /// Specifies the random number generator initial seek.
         /// </summary>
+        /// <remarks>
+        /// A value greater than or equal to 0 will always ensure the same initialization of the internal random number generator and therefore also the same internal configuration each time the state machine to be instantiated.
+        /// A value less than 0 causes different internal configuration each time the state machine to be instantiated.
+        /// </remarks>
         public int RandomizerSeek { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="neuralPreprocessorCfg">Configuration of the neural preprocessor</param>
-        /// <param name="readoutLayerCfg">Configuration of the readout layer</param>
-        /// <param name="mapperCfg">Configuration of mapper of predictors to readout units</param>
-        /// <param name="randomizerSeek">Specifies random number generator's initial seek</param>
+        /// <param name="neuralPreprocessorCfg">The configuration of the neural preprocessor.</param>
+        /// <param name="readoutLayerCfg">The configuration of the readout layer.</param>
+        /// <param name="mapperCfg">The configuration of mapper of specific predictors to readout units.</param>
+        /// <param name="randomizerSeek">Specifies the random number generator initial seek.</param>
         public StateMachineSettings(NeuralPreprocessorSettings neuralPreprocessorCfg,
                                     ReadoutLayerSettings readoutLayerCfg,
                                     MapperSettings mapperCfg = null,
@@ -72,9 +73,9 @@ namespace RCNet.Neural.Network.SM
         }
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public StateMachineSettings(StateMachineSettings source)
             : this(source.NeuralPreprocessorCfg, source.ReadoutLayerCfg, source.MapperCfg, source.RandomizerSeek)
         {
@@ -84,7 +85,7 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public StateMachineSettings(XElement elem)
         {
             //Validation
@@ -105,7 +106,7 @@ namespace RCNet.Neural.Network.SM
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultRandomizerSeek { get { return RandomizerSeek == DefaultRandomizerSeek; } }
 

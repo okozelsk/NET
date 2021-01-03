@@ -5,54 +5,54 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 {
     /// <summary>
-    /// Configuration of the inter-pool connection
+    /// Configuration of the inter-pool connection.
     /// </summary>
     [Serializable]
     public class InterPoolConnSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "ResStructInterPoolConnectionType";
         //Default values
         /// <summary>
-        /// Default keep constant number of incoming synapses
+        /// The default value of the parameter specifying whether to keep constant number of connections from source neurons to target neuron.
         /// </summary>
         public const bool DefaultConstantNumOfConnections = false;
 
 
         //Attribute properties
         /// <summary>
-        /// Name of the target pool
+        /// The name of the target pool.
         /// </summary>
         public string TargetPoolName { get; }
         /// <summary>
-        /// Determines how many neurons in the target pool will get connected to neurons from source pool
+        /// Determines how many neurons in the target pool get connected source pool neurons.
         /// </summary>
         public double TargetConnectionDensity { get; }
         /// <summary>
-        /// Name of the source pool
+        /// The name of the source pool.
         /// </summary>
         public string SourcePoolName { get; }
         /// <summary>
-        /// Determines how many neurons from the source pool will be connected to one neuron from target pool
+        /// Determines how many neurons from the source pool to be connected to one neuron from target pool.
         /// </summary>
         public double SourceConnectionDensity { get; }
         /// <summary>
-        /// Specifies whether to keep for each neuron from source pool constant number of synapses
+        /// Specifies whether to keep constant number of connections from source neurons to target neuron.
         /// </summary>
         public bool ConstantNumOfConnections { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="targetPoolName">Name of the target pool</param>
-        /// <param name="targetConnectionDensity">Determines how many neurons in the target pool will get connected to neurons from source pool</param>
-        /// <param name="sourcePoolName">Name of the source pool</param>
-        /// <param name="sourceConnectionDensity">Determines how many neurons from the source pool will be connected to one neuron from target pool</param>
-        /// <param name="constantNumOfConnections">Specifies whether to keep constant number of synapses per target neuron</param>
+        /// <param name="targetPoolName">The name of the target pool.</param>
+        /// <param name="targetConnectionDensity">Determines how many neurons in the target pool get connected source pool neurons.</param>
+        /// <param name="sourcePoolName">The name of the source pool.</param>
+        /// <param name="sourceConnectionDensity">Determines how many neurons from the source pool to be connected to one neuron from target pool.</param>
+        /// <param name="constantNumOfConnections">Specifies whether to keep constant number of connections from source neurons to target neuron.</param>
         public InterPoolConnSettings(string targetPoolName,
                                      double targetConnectionDensity,
                                      string sourcePoolName,
@@ -70,9 +70,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public InterPoolConnSettings(InterPoolConnSettings source)
             : this(source.TargetPoolName, source.TargetConnectionDensity,
                   source.SourcePoolName, source.SourceConnectionDensity,
@@ -85,7 +85,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public InterPoolConnSettings(XElement elem)
         {
             //Validation
@@ -102,7 +102,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultConstantNumOfConnections { get { return (ConstantNumOfConnections == DefaultConstantNumOfConnections); } }
 

@@ -6,26 +6,26 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.PM
 {
     /// <summary>
-    /// The collection of predictors mapper's allowed pool configurations
+    /// Configuration of the predictors mapper's allowed pools.
     /// </summary>
     [Serializable]
     public class AllowedPoolsSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "SMMapperAllowedPoolsType";
 
         //Attribute properties
         /// <summary>
-        /// Collection of pools settings
+        /// The collection of the allowed pool configurations.
         /// </summary>
         public List<AllowedPoolSettings> AllowedPoolCfgCollection { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         private AllowedPoolsSettings()
         {
@@ -34,9 +34,9 @@ namespace RCNet.Neural.Network.SM.PM
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="allowedPoolCfgCollection">Allowed pool settings collection</param>
+        /// <param name="allowedPoolCfgCollection">The collection of the allowed pool configurations.</param>
         public AllowedPoolsSettings(IEnumerable<AllowedPoolSettings> allowedPoolCfgCollection)
             : this()
         {
@@ -46,9 +46,9 @@ namespace RCNet.Neural.Network.SM.PM
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="allowedPoolCfgCollection">Allowed pool settings collection</param>
+        /// <param name="allowedPoolCfgCollection">The allowed pool configurations.</param>
         public AllowedPoolsSettings(params AllowedPoolSettings[] allowedPoolCfgCollection)
             : this()
         {
@@ -58,9 +58,9 @@ namespace RCNet.Neural.Network.SM.PM
         }
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public AllowedPoolsSettings(AllowedPoolsSettings source)
             : this()
         {
@@ -71,7 +71,7 @@ namespace RCNet.Neural.Network.SM.PM
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings.</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public AllowedPoolsSettings(XElement elem)
         {
             //Validation
@@ -114,9 +114,9 @@ namespace RCNet.Neural.Network.SM.PM
         }
 
         /// <summary>
-        /// Adds cloned allowed pool configurations from given collection into the internal collection
+        /// Adds the allowed pool configurations from the specified collection into the internal collection.
         /// </summary>
-        /// <param name="allowedPoolCfgCollection">Allowed pool settings collection</param>
+        /// <param name="allowedPoolCfgCollection">The collection of the allowed pool configurations.</param>
         private void AddAllowedPools(IEnumerable<AllowedPoolSettings> allowedPoolCfgCollection)
         {
             foreach (AllowedPoolSettings allowedPoolCfg in allowedPoolCfgCollection)
@@ -127,10 +127,10 @@ namespace RCNet.Neural.Network.SM.PM
         }
 
         /// <summary>
-        /// Check if specified pool is allowed
+        /// Checks whether the specified pool is allowed.
         /// </summary>
-        /// <param name="reservoirInstanceName">Name of the reservoir instance</param>
-        /// <param name="poolName">Name of the pool</param>
+        /// <param name="reservoirInstanceName">The name of the reservoir instance.</param>
+        /// <param name="poolName">The name of the pool.</param>
         public bool IsAllowed(string reservoirInstanceName, string poolName)
         {
             foreach (AllowedPoolSettings poolCfg in AllowedPoolCfgCollection)

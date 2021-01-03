@@ -1,44 +1,43 @@
 ﻿using RCNet.MathTools;
 using RCNet.Neural.Data.Filter;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron;
-using RCNet.Neural.Data.Coders.AnalogToSpiking;
 using System;
 using System.Collections.Generic;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
     /// <summary>
-    /// Provides input data to be processed in the reservoirs. Supports analog and spike codings.
-    /// Used spike coding method is from the "population temporal coding" family.
+    /// Implements the input field and associated input neurons coding the input value.
     /// </summary>
+    /// <remarks>
+    /// An input field always has associated one analog input neuron and depending on the spikes coding mode it can also have associated none, one or more spiking input neurons.
+    /// </remarks>
     [Serializable]
     public class InputField
     {
-        //Constants
-
         //Attribute properties
         /// <summary>
-        /// Input field name
+        /// The name of the input field.
         /// </summary>
         public string Name { get; }
 
         /// <summary>
-        /// Input field index among all input fields
+        /// The zero-based index of the input field among other input fields.
         /// </summary>
         public int Idx { get; }
 
         /// <summary>
-        /// Specifies whether to route values as the additional predictors to readout
+        /// Specifies whether to route the input field values to readout layer.
         /// </summary>
         public bool RouteToReadout { get; }
 
         /// <summary>
-        /// Input neuron providing analog value
+        /// The input neuron providing the analog value.
         /// </summary>
         public AnalogInputNeuron AnalogNeuron { get; }
 
         /// <summary>
-        /// Collection of input neurons representing an analog value as a spike code 
+        /// The collection of input neurons providing the spike code representation of the analog value.
         /// </summary>
         public SpikingInputNeuron[] SpikingNeuronCollection { get; }
 
@@ -50,16 +49,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="name">Name of the input field</param>
-        /// <param name="idx">Index of the input field</param>
-        /// <param name="coordinates">Input coordinates (entry point)</param>
-        /// <param name="dataWorkingRange">Input data range</param>
-        /// <param name="featureFilterCfg">Feature filter configuration</param>
-        /// <param name="spikesEncodingCfg">Configuration of the analog value to spikes encoding</param>
-        /// <param name="routeToReadout">Specifies whether to route values as the additional predictors to readout</param>
-        /// <param name="inputNeuronsStartIdx">Index of the first input neuron of this field among all input neurons</param>
+        /// <param name="name">The name of the input field.</param>
+        /// <param name="idx">The zero-based index of the input field among other input fields.</param>
+        /// <param name="coordinates">The coordinates of input neurons in 3D space.</param>
+        /// <param name="dataWorkingRange">The output range of the input data.</param>
+        /// <param name="featureFilterCfg">The configuration of the feature filter.</param>
+        /// <param name="spikesEncodingCfg">The configuration of the spikes coder.</param>
+        /// <param name="routeToReadout">Specifies whether to route the input field values to readout layer.</param>
+        /// <param name="inputNeuronsStartIdx">The zero-based index of the first input neuron of this field among all other input neurons.</param>
         public InputField(string name,
                           int idx,
                           int[] coordinates,
@@ -79,17 +78,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             //Spikes encoder
             _spikesEncoder = new InputSpikesCoder(spikesEncodingCfg);
             //Analog neuron
-            int verticalCycles = _spikesEncoder.Regime == InputEncoder.SpikingInputEncodingRegime.Vertical ? _spikesEncoder.LargestComponentLength : 1;
+            int verticalCycles = _spikesEncoder.Regime == InputEncoder.InputSpikesCoding.Vertical ? _spikesEncoder.LargestComponentLength : 1;
             AnalogNeuron = new AnalogInputNeuron(new NeuronLocation(InputEncoder.ReservoirID, inputNeuronsStartIdx, InputEncoder.PoolID, inputNeuronsStartIdx, idx, coordinates[0], coordinates[1], coordinates[2]), verticalCycles);
             ++inputNeuronsStartIdx;
             //Spiking neurons
             int spikingPopulationSize;
-            if (_spikesEncoder.Regime == InputEncoder.SpikingInputEncodingRegime.Horizontal)
+            if (_spikesEncoder.Regime == InputEncoder.InputSpikesCoding.Horizontal)
             {
                 //Population encoding
                 spikingPopulationSize = _spikesEncoder.AllSpikesFlatCollection.Length;
             }
-            else if (_spikesEncoder.Regime == InputEncoder.SpikingInputEncodingRegime.Vertical)
+            else if (_spikesEncoder.Regime == InputEncoder.InputSpikesCoding.Vertical)
             {
                 //Spike-train encoding
                 spikingPopulationSize = _spikesEncoder.ComponentSpikesCollection.Length;
@@ -110,13 +109,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
 
         //Properties
         /// <summary>
-        /// Total number of input neurons
+        /// The total number of input neurons.
         /// </summary>
         public int NumOfInputNeurons { get { return (1 + SpikingNeuronCollection.Length); } }
 
         //Methods
         /// <summary>
-        /// Resets feature associated filter
+        /// Resets the feature filter.
         /// </summary>
         public void ResetFilter()
         {
@@ -124,9 +123,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             return;
         }
         /// <summary>
-        /// Updates feature filter
+        /// Updates the feature filter.
         /// </summary>
-        /// <param name="value">Sample value</param>
+        /// <param name="value">The sample value.</param>
         public void UpdateFilter(double value)
         {
             _featureFilter.Update(value);
@@ -134,9 +133,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Resets all associated input neurons to initial state
+        /// Resets all input neurons to their initial state.
         /// </summary>
-        /// <param name="statistics">Specifies whether to reset internal statistics of the associated neurons</param>
+        /// <param name="statistics">Specifies whether to reset internal statistics of the neurons.</param>
         public void ResetNeurons(bool statistics)
         {
             _spikesEncoder?.Reset();
@@ -149,9 +148,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Prepares input neurons to provide new incoming data.
+        /// Sets the input field's new data.
         /// </summary>
-        /// <param name="value">External natural input data</param>
+        /// <param name="value">The value.</param>
         public void SetNewData(double value)
         {
             _iAnalogStimuli = _featureFilter.ApplyFilter(value);
@@ -161,16 +160,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Fetches next piece of current data
+        /// Fetches the next piece of current data.
         /// </summary>
-        /// <param name="collectStatistics">Specifies whether to update internal statistics of associated input neurons</param>
+        /// <param name="collectStatistics">Specifies whether to update internal statistics of input neurons.</param>
         public bool Fetch(bool collectStatistics)
         {
-            if (_currentDataIdx == 0 || (_spikesEncoder.Regime == InputEncoder.SpikingInputEncodingRegime.Vertical && _currentDataIdx < _spikesEncoder.LargestComponentLength))
+            if (_currentDataIdx == 0 || (_spikesEncoder.Regime == InputEncoder.InputSpikesCoding.Vertical && _currentDataIdx < _spikesEncoder.LargestComponentLength))
             {
                 switch (_spikesEncoder.Regime)
                 {
-                    case InputEncoder.SpikingInputEncodingRegime.Horizontal:
+                    case InputEncoder.InputSpikesCoding.Horizontal:
                         {
                             //Analog neuron
                             AnalogNeuron.NewStimulation(_iAnalogStimuli, 0d);
@@ -184,7 +183,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                         }
                         break;
 
-                    case InputEncoder.SpikingInputEncodingRegime.Vertical:
+                    case InputEncoder.InputSpikesCoding.Vertical:
                         {
                             //Analog neuron
                             AnalogNeuron.NewStimulation(_iAnalogStimuli, 0d);
@@ -211,9 +210,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Prepares set of meaningful combinations of indexes of input spiking neurons to be connected to a target hidden neuron.
+        /// Prepares a set of meaningful combinations of indexes of input spiking neurons to be connected together to a hidden neuron.
         /// </summary>
-        /// <param name="numOfCombinations">Desired number of connections</param>
+        /// <param name="numOfCombinations">The desired number of combinations.</param>
         public List<int[]> GetSpikingInputCombinations(int numOfCombinations)
         {
             List<int[]> result = new List<int[]>(numOfCombinations);

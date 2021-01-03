@@ -8,94 +8,92 @@ using System;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {
     /// <summary>
-    /// Class covers the behavior of synapse.
-    /// Supports signal delay and short-term plasticity.
+    /// Implements the synapse.
     /// </summary>
+    /// <remarks>
+    /// Supports the signal delaying and the short-term plasticity.
+    /// </remarks>
     [Serializable]
     public class Synapse
     {
         /// <summary>
-        /// Method to decide synapse delay
+        /// The synaptic delay method.
         /// </summary>
         public enum SynapticDelayMethod
         {
             /// <summary>
-            /// Synapse delay is decided randomly
+            /// The synaptic delay is decided randomly.
             /// </summary>
             Random,
             /// <summary>
-            /// Synapse delay depends on Euclidean distance
+            /// The synaptic delay depends on an Euclidean distance.
             /// </summary>
             Distance
         }
 
         /// <summary>
-        /// Synapse role
+        /// The synapse's role.
         /// </summary>
         public enum SynRole
         {
             /// <summary>
-            /// Input synapse
+            /// An input synapse.
             /// </summary>
             Input,
             /// <summary>
-            /// Excitatory synapse
+            /// An excitatory synapse.
             /// </summary>
             Excitatory,
             /// <summary>
-            /// Inhibitory synapse
+            /// An inhibitory synapse.
             /// </summary>
             Inhibitory,
             /// <summary>
-            /// Indifferent synapse
+            /// An indifferent synapse.
             /// </summary>
             Indifferent
         }
 
         //Static attributes
         /// <summary>
-        /// Number of defined synapse roles
+        /// The number of the synapse roles.
         /// </summary>
         public static readonly int NumOfRoles = Enum.GetValues(typeof(SynRole)).Length;
 
         //Attribute properties
         /// <summary>
-        /// Presynaptic neuron
+        /// The presynaptic neuron.
         /// </summary>
         public INeuron PresynapticNeuron { get; }
 
         /// <summary>
-        /// Postsynaptic neuron
+        /// The postsynaptic neuron.
         /// </summary>
         public INeuron PostsynapticNeuron { get; }
 
         /// <summary>
-        /// Euclidean distance of presynaptic and postsynaptic neurons
+        /// An Euclidean distance of presynaptic and postsynaptic neurons.
         /// </summary>
         public double Distance { get; }
 
-        /// <summary>
-        /// Synapse role
-        /// </summary>
+        /// <inheritdoc cref="SynRole"/>
         public SynRole Role { get; }
 
         /// <summary>
-        /// Weight of the synapse (the maximum achievable weight)
+        /// The weight of the synapse (the maximum achievable weight).
         /// </summary>
         public double Weight { get; private set; }
 
         /// <summary>
-        /// Signal traveling delay (in computation cycles)
+        /// The signal delay (in computation cycles).
         /// </summary>
         public int Delay { get; private set; }
 
-        /// <summary>
-        /// Method to decide signal delaying
-        /// </summary>
+        /// <inheritdoc cref="SynapticDelayMethod"/>
         public SynapticDelayMethod DelayMethod { get; private set; }
 
         /// <summary>
-        /// Synapse's efficacy statistics
+        /// The synapse's efficacy statistics.
         /// </summary>
         public BasicStat EfficacyStat { get; }
 
@@ -109,13 +107,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 
         //Constructor
         /// <summary>
-        /// Creates initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="presynapticNeuron">Presynaptic neuron</param>
-        /// <param name="postsynapticNeuron">Postsynaptic neuron</param>
-        /// <param name="role">Synapse role</param>
-        /// <param name="synapseCfg">Synapse general configuration</param>
-        /// <param name="rand">Random object</param>
+        /// <param name="presynapticNeuron">The presynaptic neuron.</param>
+        /// <param name="postsynapticNeuron">The postsynaptic neuron.</param>
+        /// <param name="role">The synapse's role.</param>
+        /// <param name="synapseCfg">The configuration of the synapse.</param>
+        /// <param name="rand">The random object to be used.</param>
         public Synapse(INeuron presynapticNeuron,
                        INeuron postsynapticNeuron,
                        SynRole role,
@@ -252,7 +250,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <summary>
         /// Rescales the synapse weight.
         /// </summary>
-        /// <param name="factor">Scale factor</param>
+        /// <param name="factor">The scale factor.</param>
         public void Rescale(double factor)
         {
             Weight *= factor;
@@ -260,9 +258,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         }
 
         /// <summary>
-        /// Resets the synapse
+        /// Resets the synapse.
         /// </summary>
-        /// <param name="statistics">Specifies whether to reset also internal statistics</param>
+        /// <param name="statistics">Specifies whether to reset also the efficacy statistics.</param>
         public void Reset(bool statistics)
         {
             //Reset queue if it is instantiated
@@ -274,17 +272,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
                 if (_efficacyComputer == null)
                 {
                     //Efficacy will be always 1
-                    EfficacyStat.AddSampleValue(1d);
+                    EfficacyStat.AddSample(1d);
                 }
             }
             return;
         }
 
         /// <summary>
-        /// Setups signal delaying
+        /// Setups the signal delaying.
         /// </summary>
-        /// <param name="distancesStat">Distance statistics to be used when synaptic delay method is Distance</param>
-        /// <param name="rand">Random object to be used when synaptic delay method is Random</param>
+        /// <param name="distancesStat">The distance statistics to be used when the synaptic delaying depends on a distance.</param>
+        /// <param name="rand">The random object to be used when synaptic delaying is random.</param>
         public void SetupDelay(BasicStat distancesStat, Random rand)
         {
             if (_maxDelay > 0)
@@ -314,13 +312,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         }
 
         /// <summary>
-        /// Returns signal to be delivered to postsynaptic neuron.
+        /// Gets the signal to be delivered to postsynaptic neuron.
         /// </summary>
-        /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
+        /// <param name="collectStatistics">Specifies whether to update efficacy statistics.</param>
         public double GetSignal(bool collectStatistics)
         {
             //Source neuron signal
-            double sourceNeuronSignal = _analogPresynapticSignal? _presynapticNeuronOutputData._analogSignal: _presynapticNeuronOutputData._spikingSignal;
+            double sourceNeuronSignal = _analogPresynapticSignal ? _presynapticNeuronOutputData._analogSignal : _presynapticNeuronOutputData._spikingSignal;
             //Short-term plasticity
             double efficacy = 1d;
             if (_efficacyComputer != null && sourceNeuronSignal > 0)
@@ -330,7 +328,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
                 //Update statistics if necessary
                 if (collectStatistics)
                 {
-                    EfficacyStat.AddSampleValue(efficacy);
+                    EfficacyStat.AddSample(efficacy);
                 }
             }
             //Final signal to be delivered
@@ -372,14 +370,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 
 
         //Inner classes
-        /// <summary>
-        /// Signal data to be queued
-        /// </summary>
         [Serializable]
-        protected class Signal
+        internal class Signal
         {
             /// <summary>
-            /// Weighted signal
+            /// The weighted signal.
             /// </summary>
             public double _weightedSignal;
 

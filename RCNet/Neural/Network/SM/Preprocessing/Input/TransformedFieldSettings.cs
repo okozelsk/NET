@@ -8,52 +8,52 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
     /// <summary>
-    /// Configuration of the transformed input field
+    /// Configuration of the transformed input field.
     /// </summary>
     [Serializable]
     public class TransformedFieldSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "NPTransformedInpFieldType";
         //Default values
         /// <summary>
-        /// Default value of parameter specifying if to route transformed field to readout layer together with other predictors 
+        /// The default value of the parameter specifying whether to route the transformed input field to the readout layer.
         /// </summary>
         public const bool DefaultRouteToReadout = true;
 
         //Attribute properties
         /// <summary>
-        /// Transformed field name
+        /// The name of the transformed input field.
         /// </summary>
         public string Name { get; }
 
         /// <summary>
-        /// Configuration of the associated transformer
+        /// The configuration of the associated transformer.
         /// </summary>
         public RCNetBaseSettings TransformerCfg { get; }
 
         /// <summary>
-        /// Specifies whether to route transformed field to readout layer together with other predictors
+        /// Specifies whether to route the transformed input field to the readout layer.
         /// </summary>
         public bool RouteToReadout { get; }
 
         /// <summary>
-        /// Configuration of real feature filter
+        /// The configuration of the feature filter associated with the transformed input field.
         /// </summary>
         public RealFeatureFilterSettings FeatureFilterCfg { get; }
 
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="name">Transformed field name</param>
-        /// <param name="transformerCfg">Configuration of associated transformer</param>
-        /// <param name="routeToReadout">Specifies whether to route transformed field to readout layer together with other predictors</param>
-        /// <param name="featureFilterCfg">Configuration of real feature filter</param>
+        /// <param name="name">The name of the transformed input field.</param>
+        /// <param name="transformerCfg">The configuration of the associated transformer.</param>
+        /// <param name="routeToReadout">Specifies whether to route the transformed input field to the readout layer.</param>
+        /// <param name="featureFilterCfg">The configuration of the feature filter associated with the transformed input field.</param>
         public TransformedFieldSettings(string name,
                                         RCNetBaseSettings transformerCfg,
                                         bool routeToReadout = DefaultRouteToReadout,
@@ -69,9 +69,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Copy constructor
+        /// The copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public TransformedFieldSettings(TransformedFieldSettings source)
             : this(source.Name, source.TransformerCfg, source.RouteToReadout, source.FeatureFilterCfg)
         {
@@ -81,7 +81,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml data containing the settings.</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public TransformedFieldSettings(XElement elem)
         {
             //Validation
@@ -99,7 +99,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultRouteToReadout { get { return (RouteToReadout == DefaultRouteToReadout); } }
 

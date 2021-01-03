@@ -8,57 +8,57 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
     /// <summary>
-    /// Configuration of the all varying input fields
+    /// Configuration of all the varying input fields.
     /// </summary>
     [Serializable]
     public class VaryingFieldsSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "NPVaryingInpFieldsType";
         //Default values
         /// <summary>
-        /// Default value of parameter specifying if to route input fields to readout layer together with other predictors 
+        /// The default value of the parameter specifying whether to route the varying input fields to the readout layer.
         /// </summary>
         public const bool DefaultRouteToReadout = false;
 
         //Attribute properties
         /// <summary>
-        /// Input spikes coder settings
+        /// The configuration of the input spikes coder.
         /// </summary>
-        public InputSpikesCoderSettings SpikesCoderCfg { get; }
+        public InputSpikesCoderSettings InputSpikesCoderCfg { get; }
 
         /// <summary>
-        /// External input fields settings
+        /// The configuration of the external input fields.
         /// </summary>
         public ExternalFieldsSettings ExternalFieldsCfg { get; }
 
         /// <summary>
-        /// Transformed input fields settings
+        /// The configuration of the transformed input fields.
         /// </summary>
         public TransformedFieldsSettings TransformedFieldsCfg { get; }
 
         /// <summary>
-        /// Generated input fields settings
+        /// The configuration of the generated input fields.
         /// </summary>
         public GeneratedFieldsSettings GeneratedFieldsCfg { get; }
 
         /// <summary>
-        /// Specifies whether to route input fields to readout layer together with other predictors
+        /// Specifies whether to route the varying input fields to the readout layer.
         /// </summary>
         public bool RouteToReadout { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="spikesCoderCfg">Input spikes coder settings</param>
-        /// <param name="externalFieldsCfg">External input fields settings</param>
-        /// <param name="transformedFieldsCfg">Transformed input fields settings</param>
-        /// <param name="generatedFieldsCfg">Generated input fields settings</param>
-        /// <param name="routeToReadout">Specifies whether to route input fields to readout layer together with other predictors</param>
+        /// <param name="spikesCoderCfg">The configuration of the input spikes coder.</param>
+        /// <param name="externalFieldsCfg">The configuration of the external input fields.</param>
+        /// <param name="transformedFieldsCfg">The configuration of the transformed input fields.</param>
+        /// <param name="generatedFieldsCfg">The configuration of the generated input fields.</param>
+        /// <param name="routeToReadout">Specifies whether to route the varying input fields to the readout layer.</param>
         public VaryingFieldsSettings(InputSpikesCoderSettings spikesCoderCfg,
                                      ExternalFieldsSettings externalFieldsCfg,
                                      TransformedFieldsSettings transformedFieldsCfg = null,
@@ -66,7 +66,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
                                      bool routeToReadout = DefaultRouteToReadout
                                      )
         {
-            SpikesCoderCfg = (InputSpikesCoderSettings)spikesCoderCfg.DeepClone();
+            InputSpikesCoderCfg = (InputSpikesCoderSettings)spikesCoderCfg.DeepClone();
             ExternalFieldsCfg = (ExternalFieldsSettings)externalFieldsCfg.DeepClone();
             TransformedFieldsCfg = transformedFieldsCfg == null ? null : (TransformedFieldsSettings)transformedFieldsCfg.DeepClone();
             GeneratedFieldsCfg = generatedFieldsCfg == null ? null : (GeneratedFieldsSettings)generatedFieldsCfg.DeepClone();
@@ -78,9 +78,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// The deep copy constructor
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public VaryingFieldsSettings(VaryingFieldsSettings source)
-            : this(source.SpikesCoderCfg, source.ExternalFieldsCfg, source.TransformedFieldsCfg, source.GeneratedFieldsCfg, source.RouteToReadout)
+            : this(source.InputSpikesCoderCfg, source.ExternalFieldsCfg, source.TransformedFieldsCfg, source.GeneratedFieldsCfg, source.RouteToReadout)
         {
             return;
         }
@@ -88,13 +88,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings.</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public VaryingFieldsSettings(XElement elem)
         {
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            SpikesCoderCfg = new InputSpikesCoderSettings(settingsElem.Elements("spikesCoder").First());
+            InputSpikesCoderCfg = new InputSpikesCoderSettings(settingsElem.Elements("spikesCoder").First());
             ExternalFieldsCfg = new ExternalFieldsSettings(settingsElem.Elements("externalFields").First());
             XElement transformedFieldsElem = settingsElem.Elements("transformedFields").FirstOrDefault();
             TransformedFieldsCfg = transformedFieldsElem == null ? null : new TransformedFieldsSettings(transformedFieldsElem);
@@ -107,7 +107,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
 
         //Properties
         /// <summary>
-        /// Total number of fields (external + transformed + generated)
+        /// Gets the total number of varying input fields (external + transformed + generated).
         /// </summary>
         public int TotalNumOfFields
         {
@@ -120,7 +120,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultRouteToReadout { get { return (RouteToReadout == DefaultRouteToReadout); } }
 
@@ -173,7 +173,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Returns names of all defined input fields
+        /// Gets the collection of all defined varying input fields.
         /// </summary>
         public List<string> GetNames()
         {
@@ -200,10 +200,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Returns the zero-based index of the field among concated external and generated fields or -1 if name was not found.
+        /// Gets the zero-based index of the varying input field.
         /// </summary>
-        /// <param name="fieldName">Name of the field</param>
-        /// <param name="ex">Specifies whether to throw exception when not found</param>
+        /// <param name="fieldName">The name of the varying input field.</param>
+        /// <param name="ex">Specifies whether to throw an exception or return -1 in case the varying input field not found.</param>
         public int GetFieldID(string fieldName, bool ex = true)
         {
             int index = 0;
@@ -248,9 +248,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Returns configuration of the given field
+        /// Gets the configuration of the varying input field.
         /// </summary>
-        /// <param name="fieldName">Field name</param>
+        /// <param name="fieldName">The name of the varying input field.</param>
         public RCNetBaseSettings GetFieldCfg(string fieldName)
         {
             int index = ExternalFieldsCfg.GetFieldID(fieldName, false);
@@ -279,7 +279,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName,
-                                             SpikesCoderCfg.GetXml(suppressDefaults),
+                                             InputSpikesCoderCfg.GetXml(suppressDefaults),
                                              ExternalFieldsCfg.GetXml(suppressDefaults)
                                              );
             if (TransformedFieldsCfg != null)

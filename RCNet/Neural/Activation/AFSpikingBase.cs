@@ -1,89 +1,89 @@
-﻿using System;
-using RCNet.Extensions;
+﻿using RCNet.Extensions;
 using RCNet.MathTools;
 using RCNet.MathTools.VectorMath;
+using System;
 
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Base class for the spiking activation functions.
+    /// The base class for the spiking activation functions.
     /// </summary>
     [Serializable]
     public abstract class AFSpikingBase : IActivation
     {
         //Constants
         /// <summary>
-        /// Index of MembraneV evolving variable
+        /// An index of the MembraneV evolving variable.
         /// </summary>
         protected const int VarMembraneVIdx = 0;
 
         //Parameters
         /// <summary>
-        /// Range of the membrane potential
+        /// The range of the membrane potential.
         /// </summary>
         protected Interval _vRange;
         /// <summary>
-        /// Membrane rest potential
+        /// The membrane rest potential.
         /// </summary>
         protected double _restV;
         /// <summary>
-        /// Membrane after reset potential
+        /// The mmbrane after reset potential.
         /// </summary>
         protected double _resetV;
         /// <summary>
-        /// Minimum membrane voltage
+        /// The minimum membrane voltage.
         /// </summary>
         protected double _minV;
         /// <summary>
-        /// Membrane initial potential
+        /// The membrane initial potential.
         /// </summary>
         protected double _initialV;
         /// <summary>
-        /// Membrane firing potential
+        /// The membrane firing potential.
         /// </summary>
         protected double _firingThresholdV;
         /// <summary>
-        /// Refractory periods after firing
+        /// The number of refractory periods after the firing.
         /// </summary>
         protected int _refractoryPeriods;
         /// <summary>
-        /// Coefficient for conversion of incoming stimuli current to expected physical unit 
+        /// The coefficient for conversion of incoming stimuli current to expected quantity unit.
         /// </summary>
         protected double _currentCoeff;
         /// <summary>
-        /// Coefficient for conversion of membrane potential to expected physical unit 
+        /// The coefficient for conversion of membrane potential to expected quantity unit.
         /// </summary>
         protected double _potentialCoeff;
 
         //Operation attributes
         /// <summary>
-        /// Evolving variables
+        /// The inner evolving variables.
         /// </summary>
         protected Vector _evolVars;
         /// <summary>
-        /// Specifies whether the membrane is in refractory mode
+        /// Indicates whether the membrane is in the refractory mode.
         /// </summary>
         protected bool _inRefractory;
         /// <summary>
-        /// Specifies current refractory period of the membrane
+        /// The current refractory period number of the membrane.
         /// </summary>
         protected int _refractoryPeriod;
         /// <summary>
-        /// Adjusted (modified) input stimuli
+        /// The adjusted input stimuli.
         /// </summary>
         protected double _stimuli;
 
         /// <summary>
-        /// Constructs an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="restV">Membrane rest potential</param>
-        /// <param name="resetV">Membrane reset potential</param>
-        /// <param name="firingThresholdV">Firing threshold</param>
-        /// <param name="refractoryPeriods">Refractory periods</param>
-        /// <param name="numOfEvolvingVars">Number of evolving variables</param>
-        /// <param name="inputCurrentCoeff">Coefficient of the current</param>
-        /// <param name="membranePotentialCoeff">Coefficient of the membrane potential</param>
-        /// <param name="initialVRatio">Initial membrane potential in form of the ratio between 0 and 1 where 0 corresponds to a Min(resetV, restV) potential and 1 corresponds to a firingThreshold.</param>
+        /// <param name="restV">The membrane rest potential.</param>
+        /// <param name="resetV">The membrane reset potential.</param>
+        /// <param name="firingThresholdV">The membrane firing threshold.</param>
+        /// <param name="refractoryPeriods">The number of refractory periods.</param>
+        /// <param name="numOfEvolvingVars">The number of inner evolving variables.</param>
+        /// <param name="inputCurrentCoeff">The coefficient of the input current.</param>
+        /// <param name="membranePotentialCoeff">The coefficient of the membrane potential.</param>
+        /// <param name="initialVRatio">The membrane initial potential in form of a ratio between 0 and 1, where 0 corresponds to a Min(resetV, restV) potential and 1 corresponds to a firingThreshold.</param>
         protected AFSpikingBase(double restV,
                                 double resetV,
                                 double firingThresholdV,
@@ -119,23 +119,23 @@ namespace RCNet.Neural.Activation
 
         //Attribute properties
         /// <summary>
-        /// Range of state of the membrane potential
+        /// The range of the state of the membrane potential.
         /// </summary>
         public Interval InternalStateRange { get; }
 
         /// <summary>
-        /// State of the membrane potential
+        /// The state of the membrane potential.
         /// </summary>
         public double InternalState { get { return _potentialCoeff * _evolVars[VarMembraneVIdx]; } }
 
         /// <summary>
-        /// State of the membrane potential normalized between 0 and 1
+        /// The state of the membrane potential normalized between 0 and 1.
         /// </summary>
         public double NormalizedInternalState { get { return InternalStateRange.Rescale(InternalState, Interval.IntZP1); } }
 
         //Methods
         /// <summary>
-        /// Resets activation function to its initial state
+        /// Resets the activation function to its initial state.
         /// </summary>
         public virtual void Reset()
         {
@@ -146,18 +146,18 @@ namespace RCNet.Neural.Activation
         }
 
         /// <summary>
-        /// Computes evolving variables
+        /// Computes the inner evolving variables.
         /// </summary>
-        /// <returns>Resulting spike (true) or no spike (false)</returns>
+        /// <returns>The resulting spike (true) or no spike (false).</returns>
         public abstract bool ComputeEvolVars();
 
 
         /// <summary>
-        /// Triggered when membrane is firing a spike
+        /// Triggered hook when membrane is firing a spike.
         /// </summary>
         protected virtual void OnFiring()
         {
-            //Base implementation does nothing
+            //The base implementation does nothing
             return;
         }
 
@@ -165,7 +165,7 @@ namespace RCNet.Neural.Activation
         public virtual double Compute(double x)
         {
             //Reset the membrane potential?
-            if(_evolVars[VarMembraneVIdx] == _firingThresholdV)
+            if (_evolVars[VarMembraneVIdx] == _firingThresholdV)
             {
                 _evolVars[VarMembraneVIdx] = _resetV;
                 //Enter refractory?

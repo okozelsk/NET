@@ -6,26 +6,26 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.PM
 {
     /// <summary>
-    /// The collection of the predictors mapper's allowed input field configurations
+    /// Configuration of the predictors mapper's allowed input fields.
     /// </summary>
     [Serializable]
     public class AllowedInputFieldsSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "SMMapperAllowedInputFieldsType";
 
         //Attribute properties
         /// <summary>
-        /// Collection of pools settings
+        /// The collection of the allowed input field configurations.
         /// </summary>
         public List<AllowedInputFieldSettings> AllowedInputFieldCfgCollection { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         private AllowedInputFieldsSettings()
         {
@@ -34,9 +34,9 @@ namespace RCNet.Neural.Network.SM.PM
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="allowedInputFieldCfgCollection">Allowed input field settings collection</param>
+        /// <param name="allowedInputFieldCfgCollection">The collection of the allowed input field configurations.</param>
         public AllowedInputFieldsSettings(IEnumerable<AllowedInputFieldSettings> allowedInputFieldCfgCollection)
             : this()
         {
@@ -46,9 +46,9 @@ namespace RCNet.Neural.Network.SM.PM
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="allowedInputFieldCfgCollection">Allowed input field settings collection</param>
+        /// <param name="allowedInputFieldCfgCollection">The allowed input field configurations.</param>
         public AllowedInputFieldsSettings(params AllowedInputFieldSettings[] allowedInputFieldCfgCollection)
             : this()
         {
@@ -60,7 +60,7 @@ namespace RCNet.Neural.Network.SM.PM
         /// <summary>
         /// The deep copy constructor
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public AllowedInputFieldsSettings(AllowedInputFieldsSettings source)
             : this()
         {
@@ -71,7 +71,7 @@ namespace RCNet.Neural.Network.SM.PM
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings.</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public AllowedInputFieldsSettings(XElement elem)
         {
             //Validation
@@ -98,7 +98,7 @@ namespace RCNet.Neural.Network.SM.PM
             {
                 throw new ArgumentException($"At least one allowed input field configuration must be specified.", "AllowedInputFieldCfgCollection");
             }
-            //Uniqueness of field name
+            //Uniqueness of the field name
             string[] names = new string[AllowedInputFieldCfgCollection.Count];
             names[0] = AllowedInputFieldCfgCollection[0].Name;
             for (int i = 1; i < AllowedInputFieldCfgCollection.Count; i++)
@@ -113,9 +113,9 @@ namespace RCNet.Neural.Network.SM.PM
         }
 
         /// <summary>
-        /// Adds cloned allowed input field configurations from given collection into the internal collection
+        /// Adds allowed input field configurations from the specified collection into the internal collection.
         /// </summary>
-        /// <param name="allowedInputFieldCfgCollection">Allowed input field settings collection</param>
+        /// <param name="allowedInputFieldCfgCollection">The collection of the allowed input field configurations.</param>
         private void AddAllowedInputFields(IEnumerable<AllowedInputFieldSettings> allowedInputFieldCfgCollection)
         {
             foreach (AllowedInputFieldSettings allowedInputFieldCfg in allowedInputFieldCfgCollection)
@@ -126,9 +126,9 @@ namespace RCNet.Neural.Network.SM.PM
         }
 
         /// <summary>
-        /// Check if specified input field is allowed
+        /// Checks whether the specified input field is allowed.
         /// </summary>
-        /// <param name="inputFieldName">Name of the input field</param>
+        /// <param name="inputFieldName">The name of the input field.</param>
         public bool IsAllowed(string inputFieldName)
         {
             foreach (AllowedInputFieldSettings fieldCfg in AllowedInputFieldCfgCollection)

@@ -7,33 +7,33 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
 {
     /// <summary>
-    /// Configuration of the analog neuron's Retainment property (leaky integrator neuron)
+    /// Configuration of the analog neuron Retainment property.
     /// </summary>
     [Serializable]
     public class RetainmentSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "RetainmentType";
 
         //Attribute properties
         /// <summary>
-        /// Specifies how many neurons within the context will have the Retainment property (leaky integrator neuron)
+        /// Specifies the ratio of the neurons having the Retainment property.
         /// </summary>
         public double Density { get; }
         /// <summary>
-        /// Retainment strength random settings
+        /// The configuration of the retainment strength.
         /// </summary>
         public URandomValueSettings StrengthCfg { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="density">Specifies how many neurons within the context will have the Retainment property (leaky integrator neuron)</param>
-        /// <param name="strengthCfg">Retainment strength random settings</param>
+        /// <param name="density">Specifies the ratio of the neurons having the Retainment property.</param>
+        /// <param name="strengthCfg">The configuration of the retainment strength.</param>
         public RetainmentSettings(double density, URandomValueSettings strengthCfg)
         {
             Density = density;
@@ -43,9 +43,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         }
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public RetainmentSettings(RetainmentSettings source)
             : this(source.Density, source.StrengthCfg)
         {
@@ -55,7 +55,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings.</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public RetainmentSettings(XElement elem)
         {
             //Validation
@@ -112,6 +112,6 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
             return GetXml("retainment", suppressDefaults);
         }
 
-    }//RetanmentSettings
+    }//RetainmentSettings
 
 }//Namespace

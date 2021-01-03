@@ -10,27 +10,26 @@ using System.Xml.Linq;
 namespace Demo.DemoConsoleApp.SM
 {
     /// <summary>
-    /// Holds the StateMachine demo cases configurations.
+    /// Configuration of the StateMachine demo cases.
     /// </summary>
     public class SMDemoSettings
     {
         //Constants
         //Attribute properties
         /// <summary>
-        /// Location where the csv sample data files are stored.
+        /// The data location
         /// </summary>
         public string DataFolder { get; }
         /// <summary>
-        /// Collection of demo case definitions.
+        /// The collection of the demo case configurations.
         /// </summary>
         public List<CaseSettings> CaseCfgCollection { get; }
 
         //Constructor
         /// <summary>
-        /// Creates initialized instance based on given xml file.
-        /// This is the only way to instantiate StateMachine demo settings.
+        /// Creates initialized instance from the specified xml file.
         /// </summary>
-        /// <param name="fileName">Xml file consisting of demo cases definitions</param>
+        /// <param name="fileName">The name of the xml file consisting of demo cases configurations.</param>
         public SMDemoSettings(string fileName)
         {
             //Validate xml file and load the document
@@ -60,26 +59,26 @@ namespace Demo.DemoConsoleApp.SM
 
         //Inner classes
         /// <summary>
-        /// Holds the configuration of the single demo case.
+        /// Implements the configuration of the single demo case.
         /// </summary>
         public class CaseSettings
         {
             //Constants
             //Attribute properties
             /// <summary>
-            /// Demo case descriptive name
+            /// The name of the demo case.
             /// </summary>
             public string Name { get; }
             /// <summary>
-            /// Demo case training data file (appropriate csv format)
+            /// The name of the file containing the training data.
             /// </summary>
             public string TrainingDataFileName { get; }
             /// <summary>
-            /// Demo case verification data file (appropriate csv format)
+            /// The name of the file containing the verification data.
             /// </summary>
             public string VerificationDataFileName { get; }
             /// <summary>
-            /// State machine configuration
+            /// The configuration of the State Machine.
             /// </summary>
             public StateMachineSettings StateMachineCfg { get; }
 
@@ -91,17 +90,17 @@ namespace Demo.DemoConsoleApp.SM
                 Name = demoCaseElem.Attribute("name").Value;
                 //Samples
                 XElement samplesElem = demoCaseElem.Elements("samples").First();
-                //Full path to training csv file
+                //Training data file (full path)
                 TrainingDataFileName = Path.Combine(dir, samplesElem.Attribute("trainingData").Value);
                 //Verification data file
                 if (samplesElem.Attribute("verificationData").Value.Trim().Length > 0)
                 {
-                    //Full path to verification csv file
+                    //Full path
                     VerificationDataFileName = Path.Combine(dir, samplesElem.Attribute("verificationData").Value);
                 }
                 else
                 {
-                    //Empty - no verification data
+                    //Empty - no verification data specified
                     VerificationDataFileName = string.Empty;
                 }
                 //State Machine configuration

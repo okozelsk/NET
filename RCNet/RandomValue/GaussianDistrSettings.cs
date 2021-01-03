@@ -5,43 +5,43 @@ using System.Xml.Linq;
 namespace RCNet.RandomValue
 {
     /// <summary>
-    /// Configuration of the Gaussian random distribution
+    /// Configuration of the Gaussian random distribution.
     /// </summary>
     [Serializable]
     public class GaussianDistrSettings : RCNetBaseSettings, IDistrSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "GaussianDistrType";
         //Default values
         /// <summary>
-        /// Default value of Mean
+        /// The default value of the mean.
         /// </summary>
         public const double DefaultMeanValue = 0d;
         /// <summary>
-        /// Default value of StdDev
+        /// The default value of the standard deviation.
         /// </summary>
         public const double DefaultStdDevValue = 1d;
 
         //Attributes
         /// <summary>
-        /// Mean
+        /// The mean.
         /// </summary>
         public double Mean { get; }
 
         /// <summary>
-        /// Standard deviation
+        /// The standard deviation.
         /// </summary>
         public double StdDev { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="mean">Mean</param>
-        /// <param name="stdDev">Standard deviation</param>
+        /// <param name="mean">The mean.</param>
+        /// <param name="stdDev">The standard deviation.</param>
         public GaussianDistrSettings(double mean = DefaultMeanValue, double stdDev = DefaultStdDevValue)
         {
             Mean = mean;
@@ -51,9 +51,9 @@ namespace RCNet.RandomValue
         }
 
         /// <summary>
-        /// Copy constructor
+        /// The copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public GaussianDistrSettings(GaussianDistrSettings source)
         {
             Mean = source.Mean;
@@ -62,9 +62,9 @@ namespace RCNet.RandomValue
         }
 
         /// <summary>
-        /// Creates an instance and initializes it from given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem"> Xml element containing the initialization settings.</param>
+        /// <param name="elem"> A xml element containing the configuration data.</param>
         public GaussianDistrSettings(XElement elem)
         {
             //Validation

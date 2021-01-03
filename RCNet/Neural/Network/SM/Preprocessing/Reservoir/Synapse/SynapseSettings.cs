@@ -5,35 +5,35 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {
     /// <summary>
-    /// Configuration of the synapse
+    /// Configuration of a synapse.
     /// </summary>
     [Serializable]
     public class SynapseSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "SynapseType";
 
         //Attribute properties
         /// <summary>
-        /// Configuration parameters of a synapse providing signal to hidden spiking neuron
+        /// The configuration of a synapse connecting postsynaptic hidden spiking neuron.
         /// </summary>
         public SynapseSTSettings SpikingTargetCfg { get; }
 
         /// <summary>
-        /// Configuration parameters of a synapse providing signal to hidden analog neuron
+        /// The configuration of a synapse connecting postsynaptic hidden analog neuron.
         /// </summary>
         public SynapseATSettings AnalogTargetCfg { get; }
 
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="spikingTargetCfg">Configuration parameters of a synapse providing signal to hidden spiking neuron</param>
-        /// <param name="analogTargetCfg">Configuration parameters of a synapse providing signal to hidden analog neuron</param>
+        /// <param name="spikingTargetCfg">The configuration of a synapse connecting postsynaptic hidden spiking neuron.</param>
+        /// <param name="analogTargetCfg">The configuration of a synapse connecting postsynaptic hidden analog neuron.</param>
         public SynapseSettings(SynapseSTSettings spikingTargetCfg = null,
                                SynapseATSettings analogTargetCfg = null
                                )
@@ -45,9 +45,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         }
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public SynapseSettings(SynapseSettings source)
             : this(source.SpikingTargetCfg, source.AnalogTargetCfg)
         {
@@ -57,7 +57,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public SynapseSettings(XElement elem)
         {
             //Validation
@@ -75,12 +75,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultSpikingTargetCfg { get { return SpikingTargetCfg.ContainsOnlyDefaults; } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultAnalogTargetCfg { get { return AnalogTargetCfg.ContainsOnlyDefaults; } }
 

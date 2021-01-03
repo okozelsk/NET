@@ -5,57 +5,57 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Configuration of the LinearTransformer
+    /// Configuration of the LinearTransformer.
     /// </summary>
     [Serializable]
     public class LinearTransformerSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "LinearTransformerType";
         //Default values
         /// <summary>
-        /// Default value of the A coefficient
+        /// The default value of the A coefficient.
         /// </summary>
         public const double DefaultA = 1d;
         /// <summary>
-        /// Default value of the B coefficient
+        /// The default value of the B coefficient.
         /// </summary>
         public const double DefaultB = 1d;
 
 
         //Attribute properties
         /// <summary>
-        /// Name of the first (X) input field
+        /// The name of the first (X) input field.
         /// </summary>
         public string XInputFieldName { get; }
 
         /// <summary>
-        /// Name of the second (Y) input field
+        /// The name of the second (Y) input field.
         /// </summary>
         public string YInputFieldName { get; }
 
         /// <summary>
-        /// The A coefficient
+        /// The A coefficient.
         /// </summary>
         public double A { get; }
 
         /// <summary>
-        /// The B coefficient
+        /// The B coefficient.
         /// </summary>
         public double B { get; }
 
 
         //Constructors
         /// <summary>
-        /// Constructs an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="xInputFieldName">Name of the first (X) input field</param>
-        /// <param name="yInputFieldName">Name of the second (Y) input field</param>
-        /// <param name="a">The A coefficient</param>
-        /// <param name="b">The B coefficient</param>
+        /// <param name="xInputFieldName">The name of the first (X) input field.</param>
+        /// <param name="yInputFieldName">The name of the second (Y) input field.</param>
+        /// <param name="a">The A coefficient.</param>
+        /// <param name="b">The B coefficient.</param>
         public LinearTransformerSettings(string xInputFieldName, string yInputFieldName, double a = DefaultA, double b = DefaultB)
         {
             XInputFieldName = xInputFieldName;
@@ -67,9 +67,9 @@ namespace RCNet.Neural.Data.Transformers
         }
 
         /// <summary>
-        /// Deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public LinearTransformerSettings(LinearTransformerSettings source)
             : this(source.XInputFieldName, source.YInputFieldName, source.A, source.B)
         {
@@ -79,7 +79,7 @@ namespace RCNet.Neural.Data.Transformers
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public LinearTransformerSettings(XElement elem)
         {
             //Validation
@@ -95,12 +95,12 @@ namespace RCNet.Neural.Data.Transformers
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultA { get { return (A == DefaultA); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultB { get { return (B == DefaultB); } }
 

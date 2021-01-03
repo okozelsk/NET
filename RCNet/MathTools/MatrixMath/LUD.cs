@@ -4,9 +4,18 @@ using System;
 
 namespace RCNet.MathTools.MatrixMath
 {
+
     /// <summary>
-    /// LU Decomposition.
+    /// Implements the LU (Lowed-Upper) decomposition of a square matrix.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This class is based on a class from the public domain JAMA package.
+    /// </para>
+    /// <para>
+    /// http://math.nist.gov/javanumerics/jama/
+    /// </para>
+    /// </remarks>
     public class LUD
     {
         //Attributes
@@ -15,18 +24,18 @@ namespace RCNet.MathTools.MatrixMath
 
         //Constructor
         /// <summary>
-        /// Instantiates the LU decomposition
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="A">Source matrix A</param>
-        public LUD(Matrix A)
+        /// <param name="matrix">The square matrix.</param>
+        public LUD(Matrix matrix)
         {
-            //Initialization
-            //Checks squared matrix
-            if (!A.IsSquared)
+            //Check the matrix is the square matrix
+            if (!matrix.IsSquareMatrix)
             {
-                throw new ArgumentException("Matrix is not squared.", "A");
+                throw new ArgumentException("Matrix is not square.", "matrix");
             }
-            _size = A.NumOfRows;
+            //Initialization
+            _size = matrix.NumOfRows;
             //LU data
             _lu = new double[_size][];
             for (int i = 0; i < _size; i++)
@@ -44,7 +53,7 @@ namespace RCNet.MathTools.MatrixMath
                     {
                         sum += _lu[i][k] * _lu[k][j];
                     }
-                    _lu[i][j] = A.Data[i][j] - sum;
+                    _lu[i][j] = matrix.Data[i][j] - sum;
                 }
                 for (int j = i + 1; j < _size; j++)
                 {
@@ -53,7 +62,7 @@ namespace RCNet.MathTools.MatrixMath
                     {
                         sum += _lu[j][k] * _lu[k][i];
                     }
-                    _lu[j][i] = (1d / _lu[i][i]) * (A.Data[j][i] - sum);
+                    _lu[j][i] = (1d / _lu[i][i]) * (matrix.Data[j][i] - sum);
                 }
             }
             return;
@@ -67,10 +76,10 @@ namespace RCNet.MathTools.MatrixMath
 
         //Methods
         /// <summary>
-        /// Method solves system of linear equations A*x = b.
+        /// Solves system of linear equations A*x = b.
         /// </summary>
-        /// <param name="b">Vector of desired results (b)</param>
-        /// <returns>Vector of computed linear coefficients (x)</returns>
+        /// <param name="b">Vector of desired results (b).</param>
+        /// <returns>Vector of computed linear coefficients (x).</returns>
         public Vector Solve(Vector b)
         {
             if (_size != b.Length)

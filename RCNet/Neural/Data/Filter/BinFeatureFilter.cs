@@ -1,20 +1,19 @@
-﻿using RCNet.Extensions;
-using RCNet.MathTools;
+﻿using RCNet.MathTools;
 using System;
 
 namespace RCNet.Neural.Data.Filter
 {
     /// <summary>
-    /// Implements the binary feature filter
+    /// Implements the binary feature filter.
     /// </summary>
     [Serializable]
     public class BinFeatureFilter : FeatureFilterBase
     {
         //Constructor
         /// <summary>
-        /// Instantiates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="outputRange">Filter's output range</param>
+        /// <param name="outputRange">The filter's output range.</param>
         public BinFeatureFilter(Interval outputRange)
             : base(FeatureType.Binary, outputRange)
         {
@@ -22,11 +21,11 @@ namespace RCNet.Neural.Data.Filter
         }
 
         /// <summary>
-        /// Instantiates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="outputRange">Filter's output range</param>
-        /// <param name="settings">Settings class</param>
-        public BinFeatureFilter(Interval outputRange, BinFeatureFilterSettings settings)
+        /// <param name="outputRange">The filter's output range.</param>
+        /// <param name="cfg">The filter configuration.</param>
+        public BinFeatureFilter(Interval outputRange, BinFeatureFilterSettings cfg)
             : this(outputRange)
         {
             return;

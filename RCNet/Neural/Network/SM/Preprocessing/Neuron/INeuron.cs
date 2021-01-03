@@ -1,59 +1,49 @@
 ﻿using RCNet.Neural.Activation;
-using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
-using System.Collections.Generic;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 {
     /// <summary>
-    /// Common interface for the input and hidden neurons
+    /// The common interface of the input and hidden neurons.
     /// </summary>
     public interface INeuron
     {
-        //Attribute properties
-        /// <summary>
-        /// Information about a neuron location within the neural preprocessor
-        /// </summary>
+        //Properties
+        /// <inheritdoc cref="NeuronLocation"/>
         NeuronLocation Location { get; }
 
-        /// <summary>
-        /// Neuron's key statistics
-        /// </summary>
+        /// <inheritdoc cref="NeuronStatistics"/>
         NeuronStatistics Statistics { get; }
 
-        /// <summary>
-        /// Neuron type (input or hidden)
-        /// </summary>
-        NeuronCommon.NeuronType Type { get; }
+        /// <inheritdoc cref="NeuronType"/>
+        NeuronType Type { get; }
 
-        /// <summary>
-        /// Type of the activation function
-        /// </summary>
+        /// <inheritdoc cref="ActivationType"/>
         ActivationType TypeOfActivation { get; }
 
-        /// <summary>
-        /// Neuron's output data
-        /// </summary>
+        /// <inheritdoc cref="NeuronOutputData"/>
         NeuronOutputData OutputData { get; }
 
         //Methods
         /// <summary>
-        /// Resets neuron to its initial state
+        /// Resets the neuron to its initial state.
         /// </summary>
-        /// <param name="statistics">Specifies whether to reset internal statistics</param>
+        /// <param name="statistics">Specifies whether to reset also the neuron's statistics.</param>
         void Reset(bool statistics);
 
         /// <summary>
-        /// Stores new incoming stimulation.
+        /// Sets the new incoming stimulation.
         /// </summary>
-        /// <param name="iStimuli">Stimulation comming from input neurons</param>
-        /// <param name="rStimuli">Stimulation comming from reservoir neurons</param>
+        /// <param name="iStimuli">The stimulation incoming from the input neurons.</param>
+        /// <param name="rStimuli">The stimulation incoming from the hidden neurons.</param>
         void NewStimulation(double iStimuli, double rStimuli);
 
         /// <summary>
-        /// Computes neuron's new OutputData and updates Statistics.
-        /// Must be called only once per stored incoming stimulation.
+        /// Computes the neuron's outputs and optionally updates also its statistics.
         /// </summary>
-        /// <param name="collectStatistics">Specifies whether to update internal statistics</param>
+        /// <remarks>
+        /// It must be called only once per the new stimulation.
+        /// </remarks>
+        /// <param name="collectStatistics">Specifies whether to update the neuron's statistics.</param>
         void Recompute(bool collectStatistics);
 
     }//INeuron

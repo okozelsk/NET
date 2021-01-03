@@ -4,29 +4,29 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.PM
 {
     /// <summary>
-    /// Configuration of the predictors mapper's allowed input field
+    /// Configuration of the predictors mapper's allowed input field. 
     /// </summary>
     [Serializable]
     public class AllowedInputFieldSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "SMMapperAllowedInputFieldType";
 
         //Attribute properties
         /// <summary>
-        /// Name of the input field
+        /// The name of the input field.
         /// </summary>
         public string Name { get; }
 
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="name">Name of the input field</param>
+        /// <param name="name">The name of the input field.</param>
         public AllowedInputFieldSettings(string name)
         {
             Name = name;
@@ -35,9 +35,9 @@ namespace RCNet.Neural.Network.SM.PM
         }
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public AllowedInputFieldSettings(AllowedInputFieldSettings source)
             : this(source.Name)
         {
@@ -47,7 +47,7 @@ namespace RCNet.Neural.Network.SM.PM
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public AllowedInputFieldSettings(XElement elem)
         {
             //Validation

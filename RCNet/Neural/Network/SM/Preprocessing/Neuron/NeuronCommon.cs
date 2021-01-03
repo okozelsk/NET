@@ -1,26 +1,19 @@
 ﻿namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 {
+    //Enumerations
     /// <summary>
-    /// Enums and parsings of enum values for a Neuron type
+    /// The type of neuron.
     /// </summary>
-    public static class NeuronCommon
+    public enum NeuronType
     {
-        //Enums
         /// <summary>
-        /// Type of neuron
+        /// The Input neuron.
         /// </summary>
-        public enum NeuronType
-        {
-            /// <summary>
-            /// Input neuron
-            /// </summary>
-            Input,
-            /// <summary>
-            /// Hidden neuron
-            /// </summary>
-            Hidden
-        }//NeuronType
-
-    }//NeuronCommon
+        Input,
+        /// <summary>
+        /// The hidden neuron.
+        /// </summary>
+        Hidden
+    }//NeuronType
 
 } //Namespace

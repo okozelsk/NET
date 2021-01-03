@@ -3,32 +3,35 @@
 namespace RCNet.MathTools
 {
     /// <summary>
-    /// Class implements iterative computation of the weighted average.
+    /// Implements the weighted average.
     /// </summary>
     [Serializable]
     public class WeightedAvg
     {
         //Attribute properties
         /// <summary>
-        /// Number of considered samples
+        /// The number of samples.
         /// </summary>
         public int NumOfSamples { get; private set; }
+
         /// <summary>
-        /// The weighted average
+        /// The sum of samples.
         /// </summary>
-        public double Avg { get; private set; }
+        public double SumOfSamples { get; private set; }
+
         /// <summary>
-        /// The sum of values
-        /// </summary>
-        public double SumOfValues { get; private set; }
-        /// <summary>
-        /// The sum of weights
+        /// The sum of weights.
         /// </summary>
         public double SumOfWeights { get; private set; }
 
+        /// <summary>
+        /// The computed weighted average.
+        /// </summary>
+        public double Result { get; private set; }
+
         //Constructors
         /// <summary>
-        /// Constructs an unitialized instance
+        /// Creates an unitialized instance.
         /// </summary>
         public WeightedAvg()
         {
@@ -37,40 +40,34 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Deep copy constructor
+        /// The copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public WeightedAvg(WeightedAvg source)
         {
             Adopt(source);
             return;
         }
 
-        //Properties
-        /// <summary>
-        /// Indicates the readyness
-        /// </summary>
-        public bool Initialized { get { return (NumOfSamples > 0); } }
-
         //Methods
         /// <summary>
-        /// Computes the weighted average value
+        /// Computes the resulting weighted average.
         /// </summary>
         private double Compute()
         {
             if (SumOfWeights != 0 && NumOfSamples > 0)
             {
-                Avg = SumOfValues / SumOfWeights;
+                Result = SumOfSamples / SumOfWeights;
             }
             else
             {
-                Avg = 0;
+                Result = 0;
             }
-            return Avg;
+            return Result;
         }
 
         /// <summary>
-        /// Creates a deep copy of this instance
+        /// Creates the deep copy of this instance.
         /// </summary>
         public WeightedAvg DeepClone()
         {
@@ -78,81 +75,84 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Resets the instance to the initial state
+        /// Resets the instance.
         /// </summary>
         public void Reset()
         {
-            SumOfValues = 0;
+            SumOfSamples = 0;
             SumOfWeights = 0;
-            Avg = 0;
+            Result = 0;
             NumOfSamples = 0;
             return;
         }
 
         /// <summary>
-        /// Adopts the source instance.
+        /// Adopts the data from source instance.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public void Adopt(WeightedAvg source)
         {
-            SumOfValues = source.SumOfValues;
+            SumOfSamples = source.SumOfSamples;
             SumOfWeights = source.SumOfWeights;
-            Avg = source.Avg;
+            Result = source.Result;
             NumOfSamples = source.NumOfSamples;
             return;
         }
 
         /// <summary>
-        /// Adds the sample value and its weight into the weighted average
+        /// Adds the next sample value and its weight into the weighted average.
         /// </summary>
-        /// <param name="value">Value</param>
-        /// <param name="weight">Weight</param>
-        /// <returns>Weighted average</returns>
-        public double AddSampleValue(double value, double weight = 1)
+        /// <param name="value">The value.</param>
+        /// <param name="weight">The value weight.</param>
+        /// <returns>The resulting weighted average.</returns>
+        public double AddSample(double value, double weight = 1d)
         {
-            SumOfValues += value * weight;
+            SumOfSamples += value * weight;
             SumOfWeights += weight;
             ++NumOfSamples;
             return Compute();
         }
 
         /// <summary>
-        /// Removes the sample value and its weight from the weighted average
+        /// Removes the sample value and its weight from the weighted average.
         /// </summary>
-        /// <param name="value">Value</param>
-        /// <param name="weight">Weight</param>
-        /// <returns>Weighted average</returns>
-        public double RemoveSampleValue(double value, double weight = 1)
+        /// <param name="value">The value.</param>
+        /// <param name="weight">The value weight.</param>
+        /// <returns>The resulting weighted average.</returns>
+        public double RemoveSample(double value, double weight = 1)
         {
             if (NumOfSamples > 0)
             {
-                SumOfValues -= value * weight;
+                SumOfSamples -= value * weight;
                 SumOfWeights -= weight;
                 --NumOfSamples;
                 if (NumOfSamples == 0)
                 {
-                    SumOfValues = 0;
+                    SumOfSamples = 0;
                     SumOfWeights = 0;
                 }
             }
             else
             {
-                throw new InvalidOperationException($"Can't remove sample value because there is no samples.");
+                throw new InvalidOperationException($"Can't remove the sample because there is no samples.");
             }
             return Compute();
         }
 
         /// <summary>
-        /// Function computes weighted average for next hypothetical sample value.
-        /// Function does not change the instance, it is a simulation only.
+        /// Computes the weighted average for the next hypothetical sample.
         /// </summary>
-        /// <param name="simValue">Next hypothetical sample value</param>
-        /// <param name="simWeight">Next hypothetical sample value weight</param>
-        /// <returns>Weighted average</returns>
+        /// <remarks>
+        /// Operation does not change the instance data.
+        /// </remarks>
+        /// <param name="simValue">The next sample value.</param>
+        /// <param name="simWeight">The next sample value weight.</param>
+        /// <returns>The resulting weighted average.</returns>
         public double SimulateNext(double simValue, double simWeight = 1)
         {
-            return (SumOfValues + (simValue * simWeight)) / (SumOfWeights + simWeight);
+            return (SumOfSamples + (simValue * simWeight)) / (SumOfWeights + simWeight);
         }
 
     }//WeightedAvg
+
 }//Namespace

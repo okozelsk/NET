@@ -9,14 +9,14 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
 {
     /// <summary>
-    /// Configuration of the group of spiking neurons
+    /// Configuration of a group of spiking neurons.
     /// </summary>
     [Serializable]
     public class SpikingNeuronGroupSettings : RCNetBaseSettings, INeuronGroupSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "PoolSpikingNeuronGroupType";
 
@@ -31,7 +31,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         public IActivationSettings ActivationCfg { get; }
 
         /// <summary>
-        /// Configuration of the neuron's homogenous excitability
+        /// The configuration of the neurons homogenous excitability.
         /// </summary>
         public HomogenousExcitabilitySettings HomogenousExcitabilityCfg { get; }
 
@@ -47,14 +47,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="name">Name of the neuron group</param>
-        /// <param name="relShare">Specifies how big relative portion of pool's neurons is formed by this group of the neurons</param>
-        /// <param name="activationCfg">Common activation function settings of the groupped neurons</param>
-        /// <param name="predictorsCfg">Configuration of the predictors</param>
-        /// <param name="homogenousExcitabilityCfg">Configuration of the neuron's homogenous excitability</param>
-        /// <param name="biasCfg">Each neuron within the group receives constant input bias. Value of the neuron's bias is driven by this random settings</param>
+        /// <param name="name">The name of the neuron group.</param>
+        /// <param name="relShare">Specifies how big relative portion of pool's neurons is formed by this group of the neurons.</param>
+        /// <param name="activationCfg">The common configuration of the neurons' activation function.</param>
+        /// <param name="predictorsCfg">The common configuration of the predictors provider.</param>
+        /// <param name="homogenousExcitabilityCfg">The configuration of the neurons homogenous excitability.</param>
+        /// <param name="biasCfg">The configuration of the constant input bias.</param>
         public SpikingNeuronGroupSettings(string name,
                                           double relShare,
                                           IActivationSettings activationCfg,
@@ -74,9 +74,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         }
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public SpikingNeuronGroupSettings(SpikingNeuronGroupSettings source)
             : this(source.Name, source.RelShare, source.ActivationCfg, source.PredictorsCfg, source.HomogenousExcitabilityCfg,
                   source.BiasCfg)
@@ -87,7 +87,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings.</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public SpikingNeuronGroupSettings(XElement elem)
         {
             //Validation
@@ -113,7 +113,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultHomogenousExcitabilityCfg { get { return HomogenousExcitabilityCfg.ContainsOnlyDefaults; } }
 

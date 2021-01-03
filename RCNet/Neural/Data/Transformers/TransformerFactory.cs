@@ -5,14 +5,14 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Helper class for the proper loading of configurations and the proper instantiationing of the input fields transformers
+    /// Provides a proper instantiation of the transformers and also proper loading of their configurations.
     /// </summary>
     public static class TransformerFactory
     {
         /// <summary>
-        /// Based on element name loads proper type of transformer settings
+        /// Based on the xml element name loads the proper type of transformer configuration.
         /// </summary>
-        /// <param name="elem">Element containing settings</param>
+        /// <param name="elem">A xml element containing the configuration.</param>
         public static RCNetBaseSettings LoadSettings(XElement elem)
         {
             switch (elem.Name.LocalName)
@@ -33,110 +33,110 @@ namespace RCNet.Neural.Data.Transformers
         }
 
         /// <summary>
-        /// Returns collection of names of the fields associated with the transformed field
+        /// Gets the collection of names of the fields associated with the transformer configuration.
         /// </summary>
-        /// <param name="settings">Transformed field configuration</param>
-        public static List<string> GetAssociatedNames(RCNetBaseSettings settings)
+        /// <param name="cfg">The transformer configuration.</param>
+        public static List<string> GetAssociatedNames(RCNetBaseSettings cfg)
         {
             List<string> names = new List<string>();
-            Type cfgType = settings.GetType();
+            Type cfgType = cfg.GetType();
             if (cfgType == typeof(DiffTransformerSettings))
             {
-                names.Add(((DiffTransformerSettings)settings).InputFieldName);
+                names.Add(((DiffTransformerSettings)cfg).InputFieldName);
             }
             else if (cfgType == typeof(CDivTransformerSettings))
             {
-                names.Add(((CDivTransformerSettings)settings).InputFieldName);
+                names.Add(((CDivTransformerSettings)cfg).InputFieldName);
             }
             else if (cfgType == typeof(LogTransformerSettings))
             {
-                names.Add(((LogTransformerSettings)settings).InputFieldName);
+                names.Add(((LogTransformerSettings)cfg).InputFieldName);
             }
             else if (cfgType == typeof(ExpTransformerSettings))
             {
-                names.Add(((ExpTransformerSettings)settings).InputFieldName);
+                names.Add(((ExpTransformerSettings)cfg).InputFieldName);
             }
             else if (cfgType == typeof(PowerTransformerSettings))
             {
-                names.Add(((PowerTransformerSettings)settings).InputFieldName);
+                names.Add(((PowerTransformerSettings)cfg).InputFieldName);
             }
             else if (cfgType == typeof(YeoJohnsonTransformerSettings))
             {
-                names.Add(((YeoJohnsonTransformerSettings)settings).InputFieldName);
+                names.Add(((YeoJohnsonTransformerSettings)cfg).InputFieldName);
             }
             else if (cfgType == typeof(MWStatTransformerSettings))
             {
-                names.Add(((MWStatTransformerSettings)settings).InputFieldName);
+                names.Add(((MWStatTransformerSettings)cfg).InputFieldName);
             }
             else if (cfgType == typeof(MulTransformerSettings))
             {
-                names.Add(((MulTransformerSettings)settings).XInputFieldName);
-                names.Add(((MulTransformerSettings)settings).YInputFieldName);
+                names.Add(((MulTransformerSettings)cfg).XInputFieldName);
+                names.Add(((MulTransformerSettings)cfg).YInputFieldName);
             }
             else if (cfgType == typeof(DivTransformerSettings))
             {
-                names.Add(((DivTransformerSettings)settings).XInputFieldName);
-                names.Add(((DivTransformerSettings)settings).YInputFieldName);
+                names.Add(((DivTransformerSettings)cfg).XInputFieldName);
+                names.Add(((DivTransformerSettings)cfg).YInputFieldName);
             }
             else if (cfgType == typeof(LinearTransformerSettings))
             {
-                names.Add(((LinearTransformerSettings)settings).XInputFieldName);
-                names.Add(((LinearTransformerSettings)settings).YInputFieldName);
+                names.Add(((LinearTransformerSettings)cfg).XInputFieldName);
+                names.Add(((LinearTransformerSettings)cfg).YInputFieldName);
             }
             else
             {
-                throw new ArgumentException($"Unexpected transformer configuration {cfgType.Name}", "settings");
+                throw new ArgumentException($"Unexpected transformer configuration {cfgType.Name}", "cfg");
             }
             return names;
         }
 
         /// <summary>
-        /// Instantiates transformer of proper type according to settings
+        /// Instantiates the appropriate transformer.
         /// </summary>
-        /// <param name="fieldNames">Collection of names of all available input fields</param>
-        /// <param name="settings">Transformer configuration</param>
-        public static ITransformer Create(List<string> fieldNames, RCNetBaseSettings settings)
+        /// <param name="fieldNames">The collection of names of all already available fields.</param>
+        /// <param name="cfg">The transformer configuration.</param>
+        public static ITransformer Create(List<string> fieldNames, RCNetBaseSettings cfg)
         {
-            Type cfgType = settings.GetType();
+            Type cfgType = cfg.GetType();
             if (cfgType == typeof(DiffTransformerSettings))
             {
-                return new DiffTransformer(fieldNames, (DiffTransformerSettings)settings);
+                return new DiffTransformer(fieldNames, (DiffTransformerSettings)cfg);
             }
             else if (cfgType == typeof(CDivTransformerSettings))
             {
-                return new CDivTransformer(fieldNames, (CDivTransformerSettings)settings);
+                return new CDivTransformer(fieldNames, (CDivTransformerSettings)cfg);
             }
             else if (cfgType == typeof(LogTransformerSettings))
             {
-                return new LogTransformer(fieldNames, (LogTransformerSettings)settings);
+                return new LogTransformer(fieldNames, (LogTransformerSettings)cfg);
             }
             else if (cfgType == typeof(ExpTransformerSettings))
             {
-                return new ExpTransformer(fieldNames, (ExpTransformerSettings)settings);
+                return new ExpTransformer(fieldNames, (ExpTransformerSettings)cfg);
             }
             else if (cfgType == typeof(PowerTransformerSettings))
             {
-                return new PowerTransformer(fieldNames, (PowerTransformerSettings)settings);
+                return new PowerTransformer(fieldNames, (PowerTransformerSettings)cfg);
             }
             else if (cfgType == typeof(YeoJohnsonTransformerSettings))
             {
-                return new YeoJohnsonTransformer(fieldNames, (YeoJohnsonTransformerSettings)settings);
+                return new YeoJohnsonTransformer(fieldNames, (YeoJohnsonTransformerSettings)cfg);
             }
             else if (cfgType == typeof(MWStatTransformerSettings))
             {
-                return new MWStatTransformer(fieldNames, (MWStatTransformerSettings)settings);
+                return new MWStatTransformer(fieldNames, (MWStatTransformerSettings)cfg);
             }
             else if (cfgType == typeof(MulTransformerSettings))
             {
-                return new MulTransformer(fieldNames, (MulTransformerSettings)settings);
+                return new MulTransformer(fieldNames, (MulTransformerSettings)cfg);
             }
             else if (cfgType == typeof(DivTransformerSettings))
             {
-                return new DivTransformer(fieldNames, (DivTransformerSettings)settings);
+                return new DivTransformer(fieldNames, (DivTransformerSettings)cfg);
             }
             else if (cfgType == typeof(LinearTransformerSettings))
             {
-                return new LinearTransformer(fieldNames, (LinearTransformerSettings)settings);
+                return new LinearTransformer(fieldNames, (LinearTransformerSettings)cfg);
             }
             else
             {

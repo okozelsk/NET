@@ -1,139 +1,137 @@
-﻿using System;
-
-namespace RCNet.MathTools
+﻿namespace RCNet.MathTools
 {
     /// <summary>
-    /// Encaptualates SI physical unit
+    /// Implements the SI units and quantity prefixes.
     /// </summary>
     public static class PhysUnit
     {
         /// <summary>
-        /// SI base and derived units
+        /// SI unit (base or derived).
         /// </summary>
         public enum SIUnit
         {
             /// <summary>
-            /// Length
+            /// The unit of the length.
             /// </summary>
             Metre,
             /// <summary>
-            /// Mass
+            /// The unit of the mass.
             /// </summary>
             Kilogram,
             /// <summary>
-            /// Time
+            /// The unit of the time.
             /// </summary>
             Second,
             /// <summary>
-            /// Electric current
+            /// The unit of the electric current.
             /// </summary>
             Ampere,
             /// <summary>
-            /// Thermodynamic temperature
+            /// The unit of the thermodynamic temperature.
             /// </summary>
             Kelvin,
             /// <summary>
-            /// Amount of substance
+            /// The unit of the amount of substance.
             /// </summary>
             Mole,
             /// <summary>
-            /// Luminous intensity
+            /// The unit of the luminous intensity.
             /// </summary>
             Candela,
             /// <summary>
-            /// Angle
+            /// The unit of the angle.
             /// </summary>
             Radian,
             /// <summary>
-            /// Solid angle
+            /// The unit of the solid angle.
             /// </summary>
             Steradian,
             /// <summary>
-            /// Frequency
+            /// The unit of the frequency.
             /// </summary>
             Hertz,
             /// <summary>
-            /// Force
+            /// The unit of the force.
             /// </summary>
             Newton,
             /// <summary>
-            /// Pressure, stress
+            /// The unit of the pressure, stress.
             /// </summary>
             Pascal,
             /// <summary>
-            /// Energy, work, heat
+            /// The unit of the energy, work, heat.
             /// </summary>
             Joule,
             /// <summary>
-            /// Power, radiant flux
+            /// The unit of the power, radiant flux.
             /// </summary>
             Watt,
             /// <summary>
-            /// Electric charge, quantity of electricity
+            /// The unit of the electric charge, quantity of electricity.
             /// </summary>
             Coulomb,
             /// <summary>
-            /// Voltage (electrical potential)
+            /// The unit of the voltage (electrical potential).
             /// </summary>
             Volt,
             /// <summary>
-            /// Capacitance
+            /// The unit of the capacitance.
             /// </summary>
             Farad,
             /// <summary>
-            /// Resistance, impedance, reactance
+            /// The unit of the resistance, impedance, reactance.
             /// </summary>
             Ohm,
             /// <summary>
-            /// Conductance
+            /// The unit of the conductance.
             /// </summary>
             Siemens,
             /// <summary>
-            /// Magnetic flux
+            /// The unit of the magnetic flux.
             /// </summary>
             Weber,
             /// <summary>
-            /// Magnetic flux density
+            /// The unit of the magnetic flux density.
             /// </summary>
             Tesla,
             /// <summary>
-            /// Inductance
+            /// The unit of the inductance.
             /// </summary>
             Henry,
             /// <summary>
-            /// Temperature relative to 273.15 Kelvin
+            /// The unit of the temperature relative to 273.15 Kelvin.
             /// </summary>
             Celsius,
             /// <summary>
-            /// Luminous flux
+            /// The unit of the luminous flux.
             /// </summary>
             Lumen,
             /// <summary>
-            /// Illuminance
+            /// The unit of the illuminance.
             /// </summary>
             Lux,
             /// <summary>
-            /// Radioactivity
+            /// The unit of the radioactivity.
             /// </summary>
             Becquerel,
             /// <summary>
-            /// Absorbed dose
+            /// The unit of the absorbed dose.
             /// </summary>
             Gray,
             /// <summary>
-            /// Equivalent dose
+            /// The unit of the equivalent dose.
             /// </summary>
             Sievert,
             /// <summary>
-            /// Catalytic activity
+            /// The unit of the catalytic activity.
             /// </summary>
             Katal
         }
 
         /// <summary>
-        /// Metric prefixes
+        /// SI unit prefix
         /// </summary>
-        public enum MetricPrefix
+        public enum UnitPrefix
         {
             /// <summary>
             /// Base
@@ -190,124 +188,57 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Conversion to basic unit quantity
+        /// Converts the specified quantity to the base quantity.
         /// </summary>
-        /// <param name="quantity">Quantity</param>
-        /// <param name="prefix">Metric prefix corresponding to specified quantity</param>
-        public static double ToBase(double quantity, MetricPrefix prefix)
+        /// <param name="quantity">The quantity to be converted.</param>
+        /// <param name="prefix">The corresponding prefix of the specified quantity.</param>
+        public static double ToBase(double quantity, UnitPrefix prefix)
         {
             switch (prefix)
             {
-                case MetricPrefix.None: return quantity;
-                case MetricPrefix.Atto: return quantity * 1e-18;
-                case MetricPrefix.Femto: return quantity * 1e-15;
-                case MetricPrefix.Piko: return quantity * 1e-12;
-                case MetricPrefix.Nano: return quantity * 1e-9;
-                case MetricPrefix.Mikro: return quantity * 1e-6;
-                case MetricPrefix.Milli: return quantity * 1e-3;
-                case MetricPrefix.Kilo: return quantity * 1e3;
-                case MetricPrefix.Mega: return quantity * 1e6;
-                case MetricPrefix.Giga: return quantity * 1e9;
-                case MetricPrefix.Tera: return quantity * 1e12;
-                case MetricPrefix.Peta: return quantity * 1e15;
-                case MetricPrefix.Exa: return quantity * 1e18;
+                case UnitPrefix.None: return quantity;
+                case UnitPrefix.Atto: return quantity * 1e-18;
+                case UnitPrefix.Femto: return quantity * 1e-15;
+                case UnitPrefix.Piko: return quantity * 1e-12;
+                case UnitPrefix.Nano: return quantity * 1e-9;
+                case UnitPrefix.Mikro: return quantity * 1e-6;
+                case UnitPrefix.Milli: return quantity * 1e-3;
+                case UnitPrefix.Kilo: return quantity * 1e3;
+                case UnitPrefix.Mega: return quantity * 1e6;
+                case UnitPrefix.Giga: return quantity * 1e9;
+                case UnitPrefix.Tera: return quantity * 1e12;
+                case UnitPrefix.Peta: return quantity * 1e15;
+                case UnitPrefix.Exa: return quantity * 1e18;
                 default: return quantity;
             }
         }
 
         /// <summary>
-        /// Conversion from basic unit quantity to a multiple or fraction
+        /// Converts the base quantity to specified quantity.
         /// </summary>
-        /// <param name="quantity">Basic unit quantity</param>
-        /// <param name="prefix">Metric prefix corresponding to desired multiple or fraction</param>
-        public static double FromBase(double quantity, MetricPrefix prefix)
+        /// <param name="quantity">The base quantity.</param>
+        /// <param name="prefix">The required quantity prefix.</param>
+        public static double FromBase(double quantity, UnitPrefix prefix)
         {
             switch (prefix)
             {
-                case MetricPrefix.None: return quantity;
-                case MetricPrefix.Atto: return quantity * 1e18;
-                case MetricPrefix.Femto: return quantity * 1e15;
-                case MetricPrefix.Piko: return quantity * 1e12;
-                case MetricPrefix.Nano: return quantity * 1e9;
-                case MetricPrefix.Mikro: return quantity * 1e6;
-                case MetricPrefix.Milli: return quantity * 1e3;
-                case MetricPrefix.Kilo: return quantity * 1e-3;
-                case MetricPrefix.Mega: return quantity * 1e-6;
-                case MetricPrefix.Giga: return quantity * 1e-9;
-                case MetricPrefix.Tera: return quantity * 1e-12;
-                case MetricPrefix.Peta: return quantity * 1e-15;
-                case MetricPrefix.Exa: return quantity * 1e-18;
+                case UnitPrefix.None: return quantity;
+                case UnitPrefix.Atto: return quantity * 1e18;
+                case UnitPrefix.Femto: return quantity * 1e15;
+                case UnitPrefix.Piko: return quantity * 1e12;
+                case UnitPrefix.Nano: return quantity * 1e9;
+                case UnitPrefix.Mikro: return quantity * 1e6;
+                case UnitPrefix.Milli: return quantity * 1e3;
+                case UnitPrefix.Kilo: return quantity * 1e-3;
+                case UnitPrefix.Mega: return quantity * 1e-6;
+                case UnitPrefix.Giga: return quantity * 1e-9;
+                case UnitPrefix.Tera: return quantity * 1e-12;
+                case UnitPrefix.Peta: return quantity * 1e-15;
+                case UnitPrefix.Exa: return quantity * 1e-18;
                 default: return quantity;
             }
         }
-
-        /// <summary>
-        /// Represents quantity in physical unit
-        /// </summary>
-        [Serializable]
-        public class Quantity
-        {
-            //Attributes
-            private readonly SIUnit _unit;
-            private double _quantity;
-
-            //Constructor
-            /// <summary>
-            /// Instantiates an uninitialized instance
-            /// </summary>
-            /// <param name="unit">SI unit</param>
-            public Quantity(SIUnit unit)
-            {
-                _unit = unit;
-                _quantity = 0;
-                return;
-            }
-
-            /// <summary>
-            /// Instantiates an initialized instance
-            /// </summary>
-            /// <param name="quantity">Quantity</param>
-            /// <param name="prefix">Metric prefix corresponding to specified quantity</param>
-            /// <param name="unit">Unit of specified quantity</param>
-            public Quantity(double quantity, MetricPrefix prefix, SIUnit unit)
-            {
-                _unit = unit;
-                _quantity = ToBase(quantity, prefix);
-                return;
-            }
-
-            //Properties
-            /// <summary>
-            /// Basic SI unit
-            /// </summary>
-            public SIUnit BasicUnit { get { return _unit; } }
-            /// <summary>
-            /// Quantity in base units
-            /// </summary>
-            public double BasicUnitQuantity { get { return _quantity; } }
-
-            //Methods
-            /// <summary>
-            /// Returns multiple or fraction of the quantity
-            /// </summary>
-            /// <param name="prefix">Metric prefix corresponding to desired multiple or fraction of the basic unit</param>
-            public double Get(MetricPrefix prefix = MetricPrefix.None)
-            {
-                return FromBase(_quantity, prefix);
-            }
-
-            /// <summary>
-            /// Sets new quantity
-            /// </summary>
-            /// <param name="quantity">Quantity</param>
-            /// <param name="prefix">Metric prefix corresponding to specified quantity</param>
-            public void Set(double quantity, MetricPrefix prefix = MetricPrefix.None)
-            {
-                _quantity = ToBase(quantity, prefix);
-                return;
-            }
-
-        }//Quantity
 
     }//PhysUnit
+
 }//Namespace

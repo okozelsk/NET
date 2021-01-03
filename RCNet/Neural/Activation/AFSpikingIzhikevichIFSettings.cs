@@ -8,122 +8,120 @@ namespace RCNet.Neural.Activation
 {
     /// <summary>
     /// Configuration of the AFSpikingIzhikevichIF activation function.
-    /// Arguments are in RandomValue form to allow their dynamic random initialization within the specified ranges.
     /// </summary>
     [Serializable]
     public class AFSpikingIzhikevichIFSettings : RCNetBaseSettings, IActivationSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "ActivationIzhikevichIFType";
 
         //Typical values
         /// <summary>
-        /// Typical value of the parameter "a" in the original Izhikevich model
+        /// The typical value of the parameter "a" in the original Izhikevich model.
         /// </summary>
         public const double TypicalRecoveryTimeScale = 0.02;
         /// <summary>
-        /// Typical value of the parameter "b" in the original Izhikevich model
+        /// The typical value of the parameter "b" in the original Izhikevich model.
         /// </summary>
         public const double TypicalRecoverySensitivity = 0.2;
         /// <summary>
-        /// Typical value of the parameter "d" in the original Izhikevich model
+        /// The typical value of the parameter "d" in the original Izhikevich model.
         /// </summary>
         public const double TypicalRecoveryReset = 2;
         /// <summary>
-        /// Typical value of the membrane resting potential
+        /// The typical value of the membrane resting potential.
         /// </summary>
         public const double TypicalRestV = -70;
         /// <summary>
-        /// Typical value of the parameter "c" in the original Izhikevich model
+        /// The typical value of the parameter "c" in the original Izhikevich model.
         /// </summary>
         public const double TypicalResetV = -65;
         /// <summary>
-        /// Typical value of the membrane firing treshold
+        /// The typical value of the membrane firing threshold.
         /// </summary>
         public const double TypicalFiringThresholdV = 30;
 
         //Attribute properties
         /// <summary>
-        /// Dimensionless. Describes the time scale of the recovery variable. Smaller values result in slower recovery.
-        /// (parameter a in original model)
+        /// The dimensionless parameter "a" in the original Izhikevich model. Describes the time scale of the recovery variable. Smaller values result in slower recovery.
         /// </summary>
         public URandomValueSettings RecoveryTimeScale { get; }
         /// <summary>
-        /// Dimensionless. Describes the sensitivity of the recovery variable to the subthreshold fluctuations of the membrane potential.
-        /// (parameter b in original model)
+        /// The dimensionless parameter "b" in the original Izhikevich model. Describes the sensitivity of the recovery variable to the subthreshold fluctuations of the membrane potential.
         /// </summary>
         public URandomValueSettings RecoverySensitivity { get; }
         /// <summary>
-        /// Dimensionless. Describes after-spike reset of the recovery variable.
-        /// (parameter d in original model)
+        /// The dimensionless parameter "d" in the original Izhikevich model. Describes after-spike reset of the recovery variable.
         /// </summary>
         public URandomValueSettings RecoveryReset { get; }
         /// <summary>
-        /// Membrane rest potential (mV)
+        /// The membrane rest potential (mV).
         /// </summary>
         public RandomValueSettings RestV { get; }
         /// <summary>
-        /// Membrane reset potential (mV)
-        /// (parameter c in original model)
+        /// The membrane reset potential (mV). The parameter "c" in the original Izhikevich model.
         /// </summary>
         public RandomValueSettings ResetV { get; }
         /// <summary>
-        /// Membrane firing threshold (mV)
+        /// The membrane firing threshold (mV).
         /// </summary>
         public RandomValueSettings FiringThresholdV { get; }
         /// <summary>
-        /// Number of after spike computation cycles while an input stimuli is ignored (ms)
+        /// The number of after-spike computation cycles while an input stimuli to be ignored (cycles).
         /// </summary>
         public int RefractoryPeriods { get; }
         /// <summary>
-        /// ODE numerical solver method
+        /// The ODE numerical solver method.
         /// </summary>
         public ODENumSolver.Method SolverMethod { get; }
         /// <summary>
-        /// ODE numerical solver computation steps of the time step 
+        /// The number of computation sub-steps of the ODE numerical solver.
         /// </summary>
         public int SolverCompSteps { get; }
         /// <summary>
-        /// Duration of the stimulation
+        /// The duration of the membrane stimulation (ms).
         /// </summary>
         public double StimuliDuration { get; }
 
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="recoveryTimeScale">Time scale of the recovery variable</param>
-        /// <param name="recoverySensitivity">Sensitivity of the recovery variable to the subthreshold fluctuations of the membrane potential</param>
-        /// <param name="recoveryReset">After-spike reset of the recovery variable</param>
-        /// <param name="restV">Membrane rest potential (mV)</param>
-        /// <param name="resetV">Membrane reset potential (mV)</param>
-        /// <param name="firingThresholdV">Membrane firing threshold (mV)</param>
-        /// <param name="refractoryPeriods">Number of after spike computation cycles while an input stimuli is ignored (ms)</param>
-        /// <param name="solverMethod">ODE numerical solver method</param>
-        /// <param name="solverCompSteps">ODE numerical solver computation steps of the time step</param>
-        /// <param name="stimuliDuration">Duration of the stimulation</param>
+        /// <remarks>
+        /// The arguments are in RandomValue form to allow their dynamic random initialization within the specified ranges.
+        /// </remarks>
+        /// <param name="recoveryTimeScale">The time scale of the recovery variable.</param>
+        /// <param name="recoverySensitivity">The sensitivity of the recovery variable to the sub-threshold fluctuations of the membrane potential.</param>
+        /// <param name="recoveryReset">The after-spike reset of the recovery variable.</param>
+        /// <param name="restV">The membrane rest potential (mV).</param>
+        /// <param name="resetV">The membrane reset potential (mV).</param>
+        /// <param name="firingThresholdV">The membrane firing threshold (mV).</param>
+        /// <param name="refractoryPeriods">The number of after-spike computation cycles while an input stimuli to be ignored (cycles).</param>
+        /// <param name="solverMethod">The ODE numerical solver method to be used.</param>
+        /// <param name="solverCompSteps">The number of computation sub-steps of the ODE numerical solver.</param>
+        /// <param name="stimuliDuration">The duration of the membrane stimulation (ms).</param>
         public AFSpikingIzhikevichIFSettings(URandomValueSettings recoveryTimeScale = null,
-                                    URandomValueSettings recoverySensitivity = null,
-                                    URandomValueSettings recoveryReset = null,
-                                    RandomValueSettings restV = null,
-                                    RandomValueSettings resetV = null,
-                                    RandomValueSettings firingThresholdV = null,
-                                    int refractoryPeriods = ActivationFactory.DefaultRefractoryPeriods,
-                                    ODENumSolver.Method solverMethod = ActivationFactory.DefaultSolverMethod,
-                                    int solverCompSteps = ActivationFactory.DefaultSolverCompSteps,
-                                    double stimuliDuration = ActivationFactory.DefaultStimuliDuration
-                                    )
+                                             URandomValueSettings recoverySensitivity = null,
+                                             URandomValueSettings recoveryReset = null,
+                                             RandomValueSettings restV = null,
+                                             RandomValueSettings resetV = null,
+                                             RandomValueSettings firingThresholdV = null,
+                                             int refractoryPeriods = ActivationFactory.DefaultRefractoryPeriods,
+                                             ODENumSolver.Method solverMethod = ActivationFactory.DefaultSolverMethod,
+                                             int solverCompSteps = ActivationFactory.DefaultSolverCompSteps,
+                                             double stimuliDuration = ActivationFactory.DefaultStimuliDuration
+                                             )
         {
-            RecoveryTimeScale = URandomValueSettings.CloneOrDefault(recoveryTimeScale, TypicalRecoveryTimeScale);
-            RecoverySensitivity = URandomValueSettings.CloneOrDefault(recoverySensitivity, TypicalRecoverySensitivity);
-            RecoveryReset = URandomValueSettings.CloneOrDefault(recoveryReset, TypicalRecoveryReset);
-            RestV = RandomValueSettings.CloneOrDefault(restV, TypicalRestV);
-            ResetV = RandomValueSettings.CloneOrDefault(resetV, TypicalResetV);
-            FiringThresholdV = RandomValueSettings.CloneOrDefault(firingThresholdV, TypicalFiringThresholdV);
+            RecoveryTimeScale = URandomValueSettings.CloneOrCreate(recoveryTimeScale, TypicalRecoveryTimeScale);
+            RecoverySensitivity = URandomValueSettings.CloneOrCreate(recoverySensitivity, TypicalRecoverySensitivity);
+            RecoveryReset = URandomValueSettings.CloneOrCreate(recoveryReset, TypicalRecoveryReset);
+            RestV = RandomValueSettings.CloneOrCreate(restV, TypicalRestV);
+            ResetV = RandomValueSettings.CloneOrCreate(resetV, TypicalResetV);
+            FiringThresholdV = RandomValueSettings.CloneOrCreate(firingThresholdV, TypicalFiringThresholdV);
             RefractoryPeriods = refractoryPeriods;
             SolverMethod = solverMethod;
             SolverCompSteps = solverCompSteps;
@@ -133,9 +131,9 @@ namespace RCNet.Neural.Activation
         }
 
         /// <summary>
-        /// Copy constructor
+        /// The copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public AFSpikingIzhikevichIFSettings(AFSpikingIzhikevichIFSettings source)
         {
             RecoveryTimeScale = (URandomValueSettings)source.RecoveryTimeScale.DeepClone();
@@ -152,20 +150,20 @@ namespace RCNet.Neural.Activation
         }
 
         /// <summary>
-        /// Creates an instance and initializes it from given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public AFSpikingIzhikevichIFSettings(XElement elem)
         {
             //Validation
             XElement activationSettingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            RecoveryTimeScale = URandomValueSettings.LoadOrDefault(activationSettingsElem, "recoveryTimeScale", TypicalRecoveryTimeScale);
-            RecoverySensitivity = URandomValueSettings.LoadOrDefault(activationSettingsElem, "recoverySensitivity", TypicalRecoverySensitivity);
-            RecoveryReset = URandomValueSettings.LoadOrDefault(activationSettingsElem, "recoveryReset", TypicalRecoveryReset);
-            RestV = RandomValueSettings.LoadOrDefault(activationSettingsElem, "restV", TypicalRestV);
-            ResetV = RandomValueSettings.LoadOrDefault(activationSettingsElem, "resetV", TypicalResetV);
-            FiringThresholdV = RandomValueSettings.LoadOrDefault(activationSettingsElem, "firingThresholdV", TypicalFiringThresholdV);
+            RecoveryTimeScale = URandomValueSettings.LoadOrCreate(activationSettingsElem, "recoveryTimeScale", TypicalRecoveryTimeScale);
+            RecoverySensitivity = URandomValueSettings.LoadOrCreate(activationSettingsElem, "recoverySensitivity", TypicalRecoverySensitivity);
+            RecoveryReset = URandomValueSettings.LoadOrCreate(activationSettingsElem, "recoveryReset", TypicalRecoveryReset);
+            RestV = RandomValueSettings.LoadOrCreate(activationSettingsElem, "restV", TypicalRestV);
+            ResetV = RandomValueSettings.LoadOrCreate(activationSettingsElem, "resetV", TypicalResetV);
+            FiringThresholdV = RandomValueSettings.LoadOrCreate(activationSettingsElem, "firingThresholdV", TypicalFiringThresholdV);
             RefractoryPeriods = int.Parse(activationSettingsElem.Attribute("refractoryPeriods").Value, CultureInfo.InvariantCulture);
             SolverMethod = (ODENumSolver.Method)Enum.Parse(typeof(ODENumSolver.Method), activationSettingsElem.Attribute("solverMethod").Value, true);
             SolverCompSteps = int.Parse(activationSettingsElem.Attribute("solverCompSteps").Value, CultureInfo.InvariantCulture);
@@ -179,52 +177,52 @@ namespace RCNet.Neural.Activation
         public ActivationType TypeOfActivation { get { return ActivationType.Spiking; } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultRecoveryTimeScale { get { return (RecoveryTimeScale.Min == TypicalRecoveryTimeScale && RecoveryTimeScale.Max == TypicalRecoveryTimeScale && RecoveryTimeScale.DistrType == RandomCommon.DistributionType.Uniform); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultRecoverySensitivity { get { return (RecoverySensitivity.Min == TypicalRecoverySensitivity && RecoverySensitivity.Max == TypicalRecoverySensitivity && RecoverySensitivity.DistrType == RandomCommon.DistributionType.Uniform); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultRecoveryReset { get { return (RecoveryReset.Min == TypicalRecoveryReset && RecoveryReset.Max == TypicalRecoveryReset && RecoveryReset.DistrType == RandomCommon.DistributionType.Uniform); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultRestV { get { return (RestV.Min == TypicalRestV && RestV.Max == TypicalRestV && !RestV.RandomSign && RestV.DistrType == RandomCommon.DistributionType.Uniform); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultResetV { get { return (ResetV.Min == TypicalResetV && ResetV.Max == TypicalResetV && !ResetV.RandomSign && ResetV.DistrType == RandomCommon.DistributionType.Uniform); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultFiringThresholdV { get { return (FiringThresholdV.Min == TypicalFiringThresholdV && FiringThresholdV.Max == TypicalFiringThresholdV && !FiringThresholdV.RandomSign && FiringThresholdV.DistrType == RandomCommon.DistributionType.Uniform); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultRefractoryPeriods { get { return (RefractoryPeriods == ActivationFactory.DefaultRefractoryPeriods); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultSolverMethod { get { return (SolverMethod == ActivationFactory.DefaultSolverMethod); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultSolverCompSteps { get { return (SolverCompSteps == ActivationFactory.DefaultSolverCompSteps); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultStimuliDuration { get { return (StimuliDuration == ActivationFactory.DefaultStimuliDuration); } }
 

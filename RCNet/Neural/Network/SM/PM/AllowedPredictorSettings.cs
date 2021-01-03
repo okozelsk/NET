@@ -5,29 +5,27 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.PM
 {
     /// <summary>
-    /// Configuration of the predictors mapper's allowed predictor
+    /// Configuration of the predictors mapper's allowed predictor.
     /// </summary>
     [Serializable]
     public class AllowedPredictorSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "SMMapperAllowedPredictorType";
 
         //Attribute properties
-        /// <summary>
-        /// Predictor ID
-        /// </summary>
+        /// <inheritdoc cref="PredictorsProvider.PredictorID"/>
         public PredictorsProvider.PredictorID PredictorID { get; }
 
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="predictorID">Predictor ID</param>
+        /// <param name="predictorID">An identifier of the predictor.</param>
         public AllowedPredictorSettings(PredictorsProvider.PredictorID predictorID)
         {
             PredictorID = predictorID;
@@ -36,9 +34,9 @@ namespace RCNet.Neural.Network.SM.PM
         }
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public AllowedPredictorSettings(AllowedPredictorSettings source)
             : this(source.PredictorID)
         {
@@ -48,7 +46,7 @@ namespace RCNet.Neural.Network.SM.PM
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public AllowedPredictorSettings(XElement elem)
         {
             //Validation

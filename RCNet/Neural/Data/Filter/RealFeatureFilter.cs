@@ -4,14 +4,14 @@ using System;
 namespace RCNet.Neural.Data.Filter
 {
     /// <summary>
-    /// Implements the real number feature filter
+    /// Implements the real number feature filter.
     /// </summary>
     [Serializable]
     public class RealFeatureFilter : FeatureFilterBase
     {
         //Constants
         /// <summary>
-        /// Standard reserve is 10% of the sampled range
+        /// The range reserve to cover the possible unseen samples. The standard reserve is 10%. 
         /// </summary>
         public const double RangeReserveCoeff = 0.1d;
 
@@ -23,11 +23,11 @@ namespace RCNet.Neural.Data.Filter
 
         //Constructor
         /// <summary>
-        /// Instantiates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="outputRange">Filter's output range</param>
-        /// <param name="standardize">Apply data standardization</param>
-        /// <param name="keepReserve">Keep range reserve for future unseen data</param>
+        /// <param name="outputRange">The filter's output range.</param>
+        /// <param name="standardize">Specifies whether to apply the data standardization.</param>
+        /// <param name="keepReserve">Specifies whether to keep range reserve for possible unseen data.</param>
         public RealFeatureFilter(Interval outputRange, bool standardize = true, bool keepReserve = true)
             : base(FeatureType.Real, outputRange)
         {
@@ -39,15 +39,15 @@ namespace RCNet.Neural.Data.Filter
         }
 
         /// <summary>
-        /// Instantiates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="outputRange">Filter's output range</param>
-        /// <param name="settings">Settings class</param>
-        public RealFeatureFilter(Interval outputRange, RealFeatureFilterSettings settings)
+        /// <param name="outputRange">The filter's output range.</param>
+        /// <param name="cfg">The feature filter configuration.</param>
+        public RealFeatureFilter(Interval outputRange, RealFeatureFilterSettings cfg)
             : base(FeatureType.Real, outputRange)
         {
-            _standardize = settings.Standardize;
-            _keepReserve = settings.KeepReserve;
+            _standardize = cfg.Standardize;
+            _keepReserve = cfg.KeepReserve;
             _range = new Interval();
             _invalidated = true;
             return;
@@ -82,7 +82,7 @@ namespace RCNet.Neural.Data.Filter
         }
 
         /// <summary>
-        /// Recomputes range
+        /// Recomputes the range.
         /// </summary>
         private void RecomputeRange(Interval range, BasicStat stat)
         {
@@ -112,7 +112,7 @@ namespace RCNet.Neural.Data.Filter
 
 
         /// <summary>
-        /// Recomputes internal range when invalidated
+        /// Recomputes the internal range when invalidated.
         /// </summary>
         private void RecomputeRange()
         {

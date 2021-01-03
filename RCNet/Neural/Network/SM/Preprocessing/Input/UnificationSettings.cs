@@ -6,39 +6,39 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
     /// <summary>
-    /// Configuration of the input pattern unification
+    /// Configuration of the input pattern unification.
     /// </summary>
     [Serializable]
     public class UnificationSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "NPUnificationType";
         //Default values
         /// <summary>
-        /// Default value of the parameter specifying if to detrend input pattern data
+        /// The default value of the parameter specifying whether to detrend the input pattern data.
         /// </summary>
         public const bool DefaultDetrend = false;
         /// <summary>
-        /// Default value of the parameter specifying if to unify amplitude of input pattern data
+        /// The default value of the parameter specifying whether to unify an amplitude of the input pattern data.
         /// </summary>
         public const bool DefaultUnifyAmplitude = false;
 
         //Attribute properties
         /// <summary>
-        /// Specifies whether to detrend input pattern data
+        /// Specifies whether to detrend the input pattern data.
         /// </summary>
         public bool Detrend { get; }
 
         /// <summary>
-        /// Specifies whether to unify amplitude of input pattern data
+        /// Specifies whether to unify an amplitude of the input pattern data.
         /// </summary>
         public bool UnifyAmplitude { get; }
 
         /// <summary>
-        /// Settings of input pattern resampling
+        /// The configuration of the input data resampling.
         /// </summary>
         public ResamplingSettings ResamplingCfg { get; }
 
@@ -46,9 +46,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Creates an itialized instance.
         /// </summary>
-        /// <param name="detrend">Specifies whether to detrend input pattern data</param>
-        /// <param name="unifyAmplitude">Specifies whether to unify amplitude of input pattern data</param>
-        /// <param name="resamplingCfg">Settings of input pattern resampling</param>
+        /// <param name="detrend">Specifies whether to detrend the input pattern data.</param>
+        /// <param name="unifyAmplitude">Specifies whether to unify an amplitude of the input pattern data.</param>
+        /// <param name="resamplingCfg">The configuration of the input data resampling.</param>
         public UnificationSettings(bool detrend = DefaultDetrend,
                                    bool unifyAmplitude = DefaultUnifyAmplitude,
                                    ResamplingSettings resamplingCfg = null
@@ -64,7 +64,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public UnificationSettings(UnificationSettings source)
             : this(source.Detrend, source.UnifyAmplitude, source.ResamplingCfg)
         {
@@ -72,9 +72,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Creates an initialized instance from the given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public UnificationSettings(XElement elem)
         {
             //Validation
@@ -97,12 +97,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultDetrend { get { return (Detrend == DefaultDetrend); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultUnifyAmplitude { get { return (UnifyAmplitude == DefaultUnifyAmplitude); } }
 

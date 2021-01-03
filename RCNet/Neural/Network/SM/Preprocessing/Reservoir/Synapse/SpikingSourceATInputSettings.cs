@@ -6,44 +6,44 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {
     /// <summary>
-    /// Configuration of a synapse providing input spiking signal to hidden analog neuron
+    /// Configuration of an input synapse connecting presynaptic input spiking neuron and postsynaptic hidden analog neuron.
     /// </summary>
     [Serializable]
     public class SpikingSourceATInputSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "SynapseSpikingSourceATInputType";
 
         //Default values
         /// <summary>
-        /// Default minimum weight
+        /// The default minimum weight.
         /// </summary>
         public const double DefaultMinWeight = 0d;
         /// <summary>
-        /// Default maximum weight
+        /// The default maximum weight.
         /// </summary>
         public const double DefaultMaxWeight = 1d;
 
         //Attribute properties
         /// <summary>
-        /// Synapse's weight settings
+        /// The configuration of the synapse's weight.
         /// </summary>
         public URandomValueSettings WeightCfg { get; }
 
         /// <summary>
-        /// Synapse's plasticity configuration
+        /// The configuration of the synapse's plasticity.
         /// </summary>
         public PlasticityATInputSettings PlasticityCfg { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="weightCfg">Synapse's weight settings</param>
-        /// <param name="plasticityCfg">Synapse's plasticity configuration</param>
+        /// <param name="weightCfg">The configuration of the synapse's weight.</param>
+        /// <param name="plasticityCfg">The configuration of the synapse's plasticity.</param>
         public SpikingSourceATInputSettings(URandomValueSettings weightCfg = null,
                                             PlasticityATInputSettings plasticityCfg = null
                                             )
@@ -56,9 +56,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public SpikingSourceATInputSettings(SpikingSourceATInputSettings source)
             : this(source.WeightCfg, source.PlasticityCfg)
         {
@@ -69,7 +69,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public SpikingSourceATInputSettings(XElement elem)
         {
             //Validation
@@ -85,12 +85,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultWeightCfg { get { return (WeightCfg.Min == DefaultMinWeight && WeightCfg.Max == DefaultMaxWeight && WeightCfg.IsDefaultDistrType); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultPlasticityCfg { get { return (PlasticityCfg.ContainsOnlyDefaults); } }
 

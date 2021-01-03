@@ -5,50 +5,50 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Configuration of the PowerTransformer
+    /// Configuration of the PowerTransformer.
     /// </summary>
     [Serializable]
     public class PowerTransformerSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "PowerTransformerType";
         //Default values
         /// <summary>
-        /// Default exponent
+        /// The default exponent.
         /// </summary>
         public const double DefaultExponent = 0.5d;
         /// <summary>
-        /// Default keep sign
+        /// The default value of the parameter specifying whether to keep the original value sign.
         /// </summary>
         public const bool DefaultKeepSign = true;
 
         //Attribute properties
         /// <summary>
-        /// Name of the input field to be transformed
+        /// The name of the input field to be transformed.
         /// </summary>
         public string InputFieldName { get; }
 
         /// <summary>
-        /// Exponent
+        /// The exponent.
         /// </summary>
         public double Exponent { get; }
 
         /// <summary>
-        /// Specifies whether to keep original sign
+        /// Specifies whether to keep the original value sign.
         /// </summary>
         public bool KeepSign { get; }
 
 
         //Constructors
         /// <summary>
-        /// Constructs an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="inputFieldName">Name of the input field to be transformed</param>
-        /// <param name="exponent">Exponent</param>
-        /// <param name="keepSign">Specifies whether to keep original sign</param>
+        /// <param name="inputFieldName">The name of the input field to be transformed.</param>
+        /// <param name="exponent">The exponent.</param>
+        /// <param name="keepSign">Specifies whether to keep the original value sign.</param>
         public PowerTransformerSettings(string inputFieldName, double exponent = DefaultExponent, bool keepSign = DefaultKeepSign)
         {
             InputFieldName = inputFieldName;
@@ -59,9 +59,9 @@ namespace RCNet.Neural.Data.Transformers
         }
 
         /// <summary>
-        /// Deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public PowerTransformerSettings(PowerTransformerSettings source)
             : this(source.InputFieldName, source.Exponent, source.KeepSign)
         {
@@ -71,7 +71,7 @@ namespace RCNet.Neural.Data.Transformers
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public PowerTransformerSettings(XElement elem)
         {
             //Validation
@@ -86,12 +86,12 @@ namespace RCNet.Neural.Data.Transformers
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultExponent { get { return Exponent == DefaultExponent; } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultKeepSign { get { return KeepSign == DefaultKeepSign; } }
 

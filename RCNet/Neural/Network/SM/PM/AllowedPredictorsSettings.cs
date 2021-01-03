@@ -7,26 +7,26 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.PM
 {
     /// <summary>
-    /// The collection of predictors mapper's allowed predictors configuration
+    /// Configuration of the predictors mapper's allowed predictors.
     /// </summary>
     [Serializable]
     public class AllowedPredictorsSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "SMMapperAllowedPredictorsType";
 
         //Attribute properties
         /// <summary>
-        /// Collection of predictors settings
+        /// The collection of the allowed predictor configurations.
         /// </summary>
         public List<AllowedPredictorSettings> AllowedPredictorCfgCollection { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         private AllowedPredictorsSettings()
         {
@@ -35,9 +35,9 @@ namespace RCNet.Neural.Network.SM.PM
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="allowedPredictorCfgCollection">Allowed predictor settings collection</param>
+        /// <param name="allowedPredictorCfgCollection">The collection of the allowed predictor configurations.</param>
         public AllowedPredictorsSettings(IEnumerable<AllowedPredictorSettings> allowedPredictorCfgCollection)
             : this()
         {
@@ -47,9 +47,9 @@ namespace RCNet.Neural.Network.SM.PM
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="allowedPredictorCfgCollection">Allowed predictor settings collection</param>
+        /// <param name="allowedPredictorCfgCollection">The allowed predictor configurations.</param>
         public AllowedPredictorsSettings(params AllowedPredictorSettings[] allowedPredictorCfgCollection)
             : this()
         {
@@ -59,9 +59,9 @@ namespace RCNet.Neural.Network.SM.PM
         }
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public AllowedPredictorsSettings(AllowedPredictorsSettings source)
             : this()
         {
@@ -72,7 +72,7 @@ namespace RCNet.Neural.Network.SM.PM
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings.</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public AllowedPredictorsSettings(XElement elem)
         {
             //Validation
@@ -114,9 +114,9 @@ namespace RCNet.Neural.Network.SM.PM
         }
 
         /// <summary>
-        /// Adds cloned allowed predictor configurations from given collection into the internal collection
+        /// Adds the allowed predictor configurations from the specified collection into the internal collection.
         /// </summary>
-        /// <param name="allowedPredictorCfgCollection">Allowed predictor settings collection</param>
+        /// <param name="allowedPredictorCfgCollection">The allowed predictor configurations.</param>
         private void AddAllowedPredictors(IEnumerable<AllowedPredictorSettings> allowedPredictorCfgCollection)
         {
             foreach (AllowedPredictorSettings allowedPredictorCfg in allowedPredictorCfgCollection)
@@ -127,9 +127,9 @@ namespace RCNet.Neural.Network.SM.PM
         }
 
         /// <summary>
-        /// Check if specified predictor is allowed
+        /// Checks whether the specified predictor is allowed.
         /// </summary>
-        /// <param name="predictorID">Predictor ID</param>
+        /// <param name="predictorID">An identifier of the predictor.</param>
         public bool IsAllowed(PredictorsProvider.PredictorID predictorID)
         {
             foreach (AllowedPredictorSettings predictorCfg in AllowedPredictorCfgCollection)

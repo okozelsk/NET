@@ -4,35 +4,34 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Data
 {
     /// <summary>
-    /// Bundle of input, computed and desired ideal vectors
+    /// Implements the bundle of input, computed and ideal (desired) data vectors.
     /// </summary>
     [Serializable]
     public class ResultBundle
     {
         //Attributes
         /// <summary>
-        /// Collection of input vectors
+        /// The collection of input vectors.
         /// </summary>
         public List<double[]> InputVectorCollection { get; }
 
         /// <summary>
-        /// Collection of computed vectors
+        /// The collection of computed vectors.
         /// </summary>
         public List<double[]> ComputedVectorCollection { get; }
 
         /// <summary>
-        /// Collection of ideal vectors (desired values)
+        /// The collection of ideal vectors.
         /// </summary>
         public List<double[]> IdealVectorCollection { get; }
 
         //Constructors
         /// <summary>
-        /// Instantiates data bundle.
-        /// Creates shallow copy of given lists
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="inputVectorCollection">Collection of input vectors</param>
-        /// <param name="computedVectorCollection">Collection of computed vectors</param>
-        /// <param name="idealVectorCollection">Collection of ideal vectors</param>
+        /// <param name="inputVectorCollection">The collection of input vectors.</param>
+        /// <param name="computedVectorCollection">The collection of computed vectors.</param>
+        /// <param name="idealVectorCollection">The collection of ideal vectors.</param>
         public ResultBundle(List<double[]> inputVectorCollection, List<double[]> computedVectorCollection, List<double[]> idealVectorCollection)
         {
             InputVectorCollection = new List<double[]>(inputVectorCollection);
@@ -42,7 +41,7 @@ namespace RCNet.Neural.Data
         }
 
         /// <summary>
-        /// Instantiates data bundle
+        /// Creates an uninitialized instance.
         /// </summary>
         public ResultBundle()
         {
@@ -53,9 +52,9 @@ namespace RCNet.Neural.Data
         }
 
         /// <summary>
-        /// Instantiates data bundle
+        /// Creates an uninitialized instance.
         /// </summary>
-        /// <param name="expectedNumOfRows">Expected number of vector rows</param>
+        /// <param name="expectedNumOfRows">The expected number of vector rows.</param>
         public ResultBundle(int expectedNumOfRows)
         {
             InputVectorCollection = new List<double[]>(expectedNumOfRows);
@@ -65,11 +64,11 @@ namespace RCNet.Neural.Data
         }
 
         /// <summary>
-        /// Adds vectors into the bundle
+        /// Adds vectors into the bundle.
         /// </summary>
-        /// <param name="inputVector">Input vector</param>
-        /// <param name="computedVector">Computed vector</param>
-        /// <param name="idealVector">Ideal vector (desired)</param>
+        /// <param name="inputVector">The input vector.</param>
+        /// <param name="computedVector">The computed vector.</param>
+        /// <param name="idealVector">The ideal vector.</param>
         public void AddVectors(double[] inputVector, double[] computedVector, double[] idealVector)
         {
             InputVectorCollection.Add(inputVector);

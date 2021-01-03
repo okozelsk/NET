@@ -8,18 +8,18 @@ using System.Xml.Schema;
 namespace RCNet
 {
     /// <summary>
-    /// Base class for standard settings classes used in RCNet library
+    /// The base class of all configurations classes.
     /// </summary>
     [Serializable]
     public abstract class RCNetBaseSettings
     {
         //Static attributes
         /// <summary>
-        /// Shared schema instance of RCNetTypes.xsd
+        /// The shared schema instance of RCNetTypes.
         /// </summary>
         protected static readonly XmlSchema _RCNetTypesSchema;
         /// <summary>
-        /// Shared compiled schema set
+        /// The shared compiled schema set.
         /// </summary>
         protected static readonly XmlSchemaSet _validationSchemaSet;
 
@@ -27,7 +27,7 @@ namespace RCNet
 
         //Constructors
         /// <summary>
-        /// Static constructor
+        /// The static constructor.
         /// </summary>
         static RCNetBaseSettings()
         {
@@ -39,7 +39,7 @@ namespace RCNet
         }
 
         /// <summary>
-        /// Protected constructor.
+        /// The protected constructor.
         /// </summary>
         protected RCNetBaseSettings()
         {
@@ -48,17 +48,17 @@ namespace RCNet
 
         //Properties
         /// <summary>
-        /// Indicates the fully default configuration
+        /// Indicates the fully default configuration.
         /// </summary>
         public abstract bool ContainsOnlyDefaults { get; }
 
         //Static methods
         /// <summary>
-        /// Loads schema instance of RCNetTypes.xsd
+        /// Loads an instance of the RCNetTypes schema.
         /// </summary>
         public static XmlSchema LoadRCNetTypesSchema()
         {
-            //Load instance of RCNetTypes.xsd
+            //Load an instance of RCNetTypes.xsd
             Assembly assemblyRCNet = Assembly.GetExecutingAssembly();
             using (Stream schemaStream = assemblyRCNet.GetManifestResourceStream("RCNet.RCNetTypes.xsd"))
             {
@@ -67,12 +67,12 @@ namespace RCNet
         }
 
         /// <summary>
-        /// Validates and completes given xml element against specified xsd type defined in RCNetTypes.xsd
+        /// Validates and completes the xml element against the specified xsd type defined in RCNetTypes schema.
         /// </summary>
-        /// <param name="elem">Xml element to be validated and completed</param>
-        /// <param name="xsdTypeName">Name of the xsd type defined in RCNetTypes.xsd to be used for xml element validation and completion</param>
-        /// <param name="newElemInstance">If true, new XElement instance will be returned and elem will stay unchanged. If false, the same instance of elem will be returned.</param>
-        /// <returns>Validated and completed xml element</returns>
+        /// <param name="elem">The xml element to be validated and completed.</param>
+        /// <param name="xsdTypeName">The name of the xsd type defined in RCNetTypes schema.</param>
+        /// <param name="newElemInstance">Specifies whether to create the new xml element instance.</param>
+        /// <returns>The validated and completed xml element.</returns>
         public static XElement Validate(XElement elem, string xsdTypeName, bool newElemInstance = true)
         {
             XmlQualifiedName xmlQualifiedName = new XmlQualifiedName(xsdTypeName, "RCNetTypes");
@@ -91,28 +91,28 @@ namespace RCNet
 
         //Methods
         /// <summary>
-        /// Creates the deep copy instance of this instance
+        /// Creates the deep copy instance of this instance.
         /// </summary>
         public abstract RCNetBaseSettings DeepClone();
 
         /// <summary>
-        /// Checks the correctness of the configuration
+        /// Checks the correctness of the configuration.
         /// </summary>
         protected abstract void Check();
 
         /// <summary>
-        /// Generates the xml element containing the entire configuration.
+        /// Gets the generated xml element containing the entire configuration.
         /// </summary>
-        /// <param name="rootElemName">Name to be used for the root xml element.</param>
-        /// <param name="suppressDefaults">Specifies whether to omit optional nodes containing only default values</param>
-        /// <returns>The root XElement containing the entire configuration</returns>
+        /// <param name="rootElemName">The name of the root xml element.</param>
+        /// <param name="suppressDefaults">Specifies whether to omit optional nodes containing only defaults.</param>
+        /// <returns>The xml element containing the entire configuration.</returns>
         public abstract XElement GetXml(string rootElemName, bool suppressDefaults);
 
         /// <summary>
-        /// Generates defaultly named root xml element containing the configuration.
+        /// Gets the generated defaultly named xml element containing the entire configuration.
         /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to omit optional nodes containing only default values</param>
-        /// <returns>The root XElement containing the entire configuration</returns>
+        /// <param name="suppressDefaults">Specifies whether to omit optional nodes containing only defaults.</param>
+        /// <returns>The xml element containing the entire configuration.</returns>
         public virtual XElement GetXml(bool suppressDefaults)
         {
             return GetXml("config", suppressDefaults);

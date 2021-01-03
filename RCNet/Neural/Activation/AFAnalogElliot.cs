@@ -1,26 +1,26 @@
-﻿using System;
-using RCNet.Extensions;
+﻿using RCNet.Extensions;
 using RCNet.MathTools;
+using System;
 
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Implements the Elliot (aka Softsign) activation function
+    /// Implements the Elliot (aka Softsign) activation function.
     /// </summary>
     [Serializable]
     public class AFAnalogElliot : AFAnalogBase
     {
         //Attribute properties
         /// <summary>
-        /// The curve slope
+        /// The curve slope.
         /// </summary>
         public double Slope { get; }
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="slope">Slope of the curve</param>
+        /// <param name="slope">The slope of the curve.</param>
         public AFAnalogElliot(double slope)
             : base(Interval.IntN1P1)
         {

@@ -3,15 +3,15 @@
 namespace RCNet.MathTools
 {
     /// <summary>
-    /// Helper combinatorics functions.
+    /// Implements helper combinatorics functions.
     /// </summary>
     public static class Combinatorics
     {
         /// <summary>
-        /// Computes number of combinations of length k from n
+        /// Computes number of combinations.
         /// </summary>
-        /// <param name="n">Number of elements</param>
-        /// <param name="k">Length of the combination</param>
+        /// <param name="n">The total number of elements.</param>
+        /// <param name="k">The length of the combination.</param>
         public static ulong ComputeNumOfCombinations(uint n, uint k)
         {
             //Basic checks
@@ -35,11 +35,11 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Computes the occurence probability of specific element in a random combination of length k from n elements
+        /// Computes the occurence probability of an element in a combination.
         /// </summary>
-        /// <param name="n">Number of elements</param>
-        /// <param name="k">Length of the combination</param>
-        public static double ComputeProbabilityOfElemInCombination(uint n, uint k)
+        /// <param name="n">The total number of elements.</param>
+        /// <param name="k">The length of the combination.</param>
+        public static double ComputeElemInCombinationProbability(uint n, uint k)
         {
             //Basic checks
             if (k == 0 || n == 0 || k > n)

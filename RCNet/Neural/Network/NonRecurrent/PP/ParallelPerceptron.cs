@@ -7,35 +7,38 @@ using System.Threading.Tasks;
 namespace RCNet.Neural.Network.NonRecurrent.PP
 {
     /// <summary>
-    /// Class implements a parallel perceptron.
+    /// Implements the parallel perceptron network.
     /// </summary>
+    /// <remarks>
+    /// The parallel perceptron network has only one output value, always between -1 and 1.
+    /// </remarks>
     [Serializable]
     public class ParallelPerceptron : INonRecurrentNetwork
     {
         //Constants
         /// <summary>
-        /// Dummy bias input value
+        /// The dummy bias input.
         /// </summary>
         public const double BiasValue = 1d;
 
         //Attribute properties
         /// <summary>
-        /// Number of network's input values
+        /// The number of network's input values.
         /// </summary>
         public int NumOfInputValues { get; }
 
         /// <summary>
-        /// Number of network's treshold gates
+        /// The number of network's threshold gates.
         /// </summary>
         public int Gates { get; }
 
         /// <summary>
-        /// Network's output resolution
+        /// The network's output resolution.
         /// </summary>
         public int Resolution { get; }
 
         /// <summary>
-        /// Output squash coeeficient (= Resolution / 2)
+        /// The output squash coefficient (= Resolution / 2).
         /// </summary>
         public double ResSquashCoeff { get; }
 
@@ -46,11 +49,11 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="numOfInputs">Number of input values</param>
-        /// <param name="gates">Number of parallel treshold gates</param>
-        /// <param name="resolution">Requiered output resolution (number of distinct values)</param>
+        /// <param name="numOfInputs">The number of input values.</param>
+        /// <param name="gates">The number of network's threshold gates.</param>
+        /// <param name="resolution">The network's output resolution (the number of distinct values).</param>
         public ParallelPerceptron(int numOfInputs, int gates, int resolution)
         {
             NumOfInputValues = numOfInputs;
@@ -75,12 +78,12 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="numOfInputs">Number of input values</param>
-        /// <param name="settings">Configuration parameters</param>
-        public ParallelPerceptron(int numOfInputs, ParallelPerceptronSettings settings)
-            : this(numOfInputs, settings.Gates, settings.Resolution)
+        /// <param name="numOfInputs">The number of input values.</param>
+        /// <param name="cfg">The configuration.</param>
+        public ParallelPerceptron(int numOfInputs, ParallelPerceptronSettings cfg)
+            : this(numOfInputs, cfg.Gates, cfg.Resolution)
         {
             return;
         }
@@ -139,11 +142,11 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         }
 
         /// <summary>
-        /// Computes network output values
+        /// Computes the network output values.
         /// </summary>
-        /// <param name="input">Input values to be passed into the network</param>
-        /// <param name="gateSums">Array of sums computed by treshold gates. Array must be allocated to NumOfGates size</param>
-        /// <returns>Computed output values</returns>
+        /// <param name="input">The input values to be passed into the network.</param>
+        /// <param name="gateSums">The sums computed by the threshold gates. Array must be allocated to size = number of gates.</param>
+        /// <returns>The computed values.</returns>
         public double[] Compute(double[] input, double[] gateSums)
         {
             double sum = 0;
@@ -190,7 +193,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         }
 
         /// <summary>
-        /// Returns copy of all network internal weights (in a flat format)
+        /// Returns the copy of all the network internal weights (in a flat format).
         /// </summary>
         public double[] GetWeights()
         {
@@ -198,9 +201,9 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         }
 
         /// <summary>
-        /// Adopts the given weights.
+        /// Sets the internal weights.
         /// </summary>
-        /// <param name="newFlatWeights">New weights to be adopted (in a flat format)</param>
+        /// <param name="newFlatWeights">The new weights (in a flat format).</param>
         public void SetWeights(double[] newFlatWeights)
         {
             newFlatWeights.CopyTo(_flatWeights, 0);
@@ -223,7 +226,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         }
 
         /// <summary>
-        /// Normalizes internal weights
+        /// Normalizes the internal weights.
         /// </summary>
         public void NormalizeWeights()
         {

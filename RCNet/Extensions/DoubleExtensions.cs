@@ -4,23 +4,23 @@ using System.Runtime.CompilerServices;
 namespace RCNet.Extensions
 {
     /// <summary>
-    /// Useful extensions of Double class.
+    /// Implements useful extensions of a double.
     /// </summary>
     public static class DoubleExtensions
     {
         //Constants
         /// <summary>
-        /// Reasonable min non-negative value
+        /// The reasonable non-negative min value.
         /// </summary>
         public const double ReasonableAbsMin = 1e-20;
 
         /// <summary>
-        /// Reasonable max non-negative value
+        /// The reasonable non-negative max value.
         /// </summary>
         public const double ReasonableAbsMax = 1e20;
 
         /// <summary>
-        /// Checks if this is a computable double value.
+        /// Checks whether this value is a valid value for computations.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsValid(this double x)
@@ -33,8 +33,11 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Bounds given value.
+        /// Returns this value bounded in specified min and max value.
         /// </summary>
+        /// <param name="min">The min value.</param>
+        /// <param name="max">The max value.</param>
+        /// <param name="x"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double Bound(this double x, double min = -ReasonableAbsMax, double max = ReasonableAbsMax)
         {
@@ -42,17 +45,20 @@ namespace RCNet.Extensions
             {
                 return min;
             }
-            if (x > max)
+            else if (x > max)
             {
                 return max;
             }
-            return x;
+            else
+            {
+                return x;
+            }
         }
 
         /// <summary>
-        /// Computes the power (faster than Math.Pow)
+        /// Computes the power (faster than Math.Pow).
         /// </summary>
-        /// <param name="exponent">uint exponent</param>
+        /// <param name="exponent">An uint exponent.</param>
         /// <param name="x"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double Power(this double x, uint exponent)

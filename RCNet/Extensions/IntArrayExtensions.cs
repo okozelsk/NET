@@ -4,13 +4,13 @@ using System.Runtime.CompilerServices;
 namespace RCNet.Extensions
 {
     /// <summary>
-    /// Useful extensions of Array of int
+    /// Implements useful extensions of an array of integers.
     /// </summary>
     public static class IntArrayExtensions
     {
         //Methods
         /// <summary>
-        /// Fills given array with the indexes 0...(Array.Length - 1)
+        /// Fills the array with the indices.
         /// </summary>
         /// <param name="array"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -24,9 +24,9 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Fills given array with randomly shuffled indexes 0...(ArrayLength - 1)
+        /// Fills the array with the indices in a random order.
         /// </summary>
-        /// <param name="rand">Random generator to be used</param>
+        /// <param name="rand">The random generator to be used.</param>
         /// <param name="array"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ShuffledIndices(this int[] array, Random rand)
@@ -37,7 +37,7 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Returns index of the min value within an int array
+        /// Returns an index of the min value within the array.
         /// </summary>
         /// <param name="array"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -57,7 +57,7 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Returns index of the max value within an int array
+        /// Returns an index of the max value within the array.
         /// </summary>
         /// <param name="array"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -77,7 +77,7 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Returns the max value within an array
+        /// Returns the max value within the array.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Max(this int[] array)
@@ -94,7 +94,7 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Returns the min value within an array
+        /// Returns the min value within the array.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Min(this int[] array)
@@ -111,7 +111,7 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Returns sum of values within an array
+        /// Returns the sum of the values within the array.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Sum(this int[] array)
@@ -123,8 +123,6 @@ namespace RCNet.Extensions
             }
             return sum;
         }
-
-
 
     }//IntArrayExtensions
 

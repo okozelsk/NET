@@ -6,54 +6,54 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {
     /// <summary>
-    /// Configuration of a synapse providing signal to hidden analog neuron
+    /// Configuration of a synapse connecting a postsynaptic hidden analog neuron.
     /// </summary>
     [Serializable]
     public class SynapseATSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "SynapseATType";
         /// <summary>
-        /// Numeric value indicating no application of the spectral radius
+        /// The numeric code indicating no application of the spectral radius.
         /// </summary>
         public const double NASpectralRadiusNum = -1d;
         /// <summary>
-        /// Code indicating no application of the spectral radius
+        /// The string code indicating no application of the spectral radius.
         /// </summary>
         public const string NASpectralRadiusCode = "NA";
 
         //Default values
         /// <summary>
-        /// Default spectral radius (num)
+        /// The default value of the spectral radius.
         /// </summary>
         public const double DefaultSpectralRadiusNum = 0.9999d;
 
         //Attribute properties
         /// <summary>
-        /// Inhibitory synapse settings
+        /// The spectral radius.
         /// </summary>
         public double SpectralRadius { get; }
 
         /// <summary>
-        /// Input synapse settings
+        /// The configuration of an input synapse.
         /// </summary>
         public SynapseATInputSettings InputSynCfg { get; }
 
         /// <summary>
-        /// Indifferent synapse settings
+        /// The configuration of the indifferent synapse.
         /// </summary>
         public SynapseATIndifferentSettings IndifferentSynCfg { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="spectralRadius">Spectral radius</param>
-        /// <param name="inputSynCfg">Input synapse settings</param>
-        /// <param name="indifferentSynCfg">Indifferent synapse settings</param>
+        /// <param name="spectralRadius">The spectral radius.</param>
+        /// <param name="inputSynCfg">The configuration of an input synapse.</param>
+        /// <param name="indifferentSynCfg">The configuration of the indifferent synapse.</param>
         public SynapseATSettings(double spectralRadius = DefaultSpectralRadiusNum,
                                  SynapseATInputSettings inputSynCfg = null,
                                  SynapseATIndifferentSettings indifferentSynCfg = null
@@ -68,9 +68,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public SynapseATSettings(SynapseATSettings source)
             : this(source.SpectralRadius, source.InputSynCfg, source.IndifferentSynCfg)
         {
@@ -81,7 +81,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public SynapseATSettings(XElement elem)
         {
             //Validation
@@ -99,17 +99,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultSpectralRadius { get { return SpectralRadius == DefaultSpectralRadiusNum; } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultInputSynCfg { get { return InputSynCfg.ContainsOnlyDefaults; } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultIndifferentSynCfg { get { return IndifferentSynCfg.ContainsOnlyDefaults; } }
 

@@ -4,20 +4,20 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Configuration of the AFAnalogBentIdentity activation function
+    /// Configuration of the AFAnalogBentIdentity activation function.
     /// </summary>
     [Serializable]
     public class AFAnalogBentIdentitySettings : RCNetBaseSettings, IActivationSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The The name of the associated xsd type..
         /// </summary>
         public const string XsdTypeName = "ActivationBentIdentityType";
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         public AFAnalogBentIdentitySettings()
         {
@@ -25,18 +25,18 @@ namespace RCNet.Neural.Activation
         }
 
         /// <summary>
-        /// Copy constructor
+        /// The copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public AFAnalogBentIdentitySettings(AFAnalogBentIdentitySettings source)
         {
             return;
         }
 
         /// <summary>
-        /// Creates an instance and initializes it from given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public AFAnalogBentIdentitySettings(XElement elem)
         {
             //Validation

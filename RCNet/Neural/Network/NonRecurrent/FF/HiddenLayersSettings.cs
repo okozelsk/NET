@@ -5,26 +5,26 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.NonRecurrent.FF
 {
     /// <summary>
-    /// The collection of the feed forward network's hidden layers configurations
+    /// Configuration of the feed forward network's hidden layers.
     /// </summary>
     [Serializable]
     public class HiddenLayersSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "FFNetHiddenLayersType";
 
         //Attribute properties
         /// <summary>
-        /// Collection of classification networks settings
+        /// The collection of hidden layer configurations.
         /// </summary>
         public List<HiddenLayerSettings> HiddenLayerCfgCollection { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         public HiddenLayersSettings()
         {
@@ -33,9 +33,9 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="hiddenLayersCfgs">Collection of hidden layers settings</param>
+        /// <param name="hiddenLayersCfgs">The collection of hidden layer configurations.</param>
         public HiddenLayersSettings(IEnumerable<HiddenLayerSettings> hiddenLayersCfgs)
             : this()
         {
@@ -47,9 +47,9 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="hiddenLayersCfgs">Hidden layer settings</param>
+        /// <param name="hiddenLayersCfgs">The configurations of the hidden layers.</param>
         public HiddenLayersSettings(params HiddenLayerSettings[] hiddenLayersCfgs)
             : this()
         {
@@ -61,9 +61,9 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         }
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public HiddenLayersSettings(HiddenLayersSettings source)
             : this()
         {
@@ -77,7 +77,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public HiddenLayersSettings(XElement elem)
             : this()
         {

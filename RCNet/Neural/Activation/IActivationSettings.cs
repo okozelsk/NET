@@ -3,7 +3,7 @@
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Common interface of all the activation configurations
+    /// The common interface of all configurations of the activation functions.
     /// </summary>
     public interface IActivationSettings
     {

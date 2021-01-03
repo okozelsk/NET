@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Implements the "two input fields division" transformation
+    /// Implements the "two input fields division" transformation.
     /// </summary>
     [Serializable]
     public class DivTransformer : ITransformer
@@ -14,19 +14,19 @@ namespace RCNet.Neural.Data.Transformers
         //Attributes
         private readonly int _xFieldIdx;
         private readonly int _yFieldIdx;
-        private readonly DivTransformerSettings _settings;
+        private readonly DivTransformerSettings _cfg;
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="availableFieldNames">Collection of names of all available input fields</param>
-        /// <param name="settings">Configuration</param>
-        public DivTransformer(List<string> availableFieldNames, DivTransformerSettings settings)
+        /// <param name="availableFieldNames">The collection of names of all available input fields.</param>
+        /// <param name="cfg">The configuration.</param>
+        public DivTransformer(List<string> availableFieldNames, DivTransformerSettings cfg)
         {
-            _settings = (DivTransformerSettings)settings.DeepClone();
-            _xFieldIdx = availableFieldNames.IndexOf(_settings.XInputFieldName);
-            _yFieldIdx = availableFieldNames.IndexOf(_settings.YInputFieldName);
+            _cfg = (DivTransformerSettings)cfg.DeepClone();
+            _xFieldIdx = availableFieldNames.IndexOf(_cfg.XInputFieldName);
+            _yFieldIdx = availableFieldNames.IndexOf(_cfg.YInputFieldName);
             return;
         }
 
@@ -57,4 +57,5 @@ namespace RCNet.Neural.Data.Transformers
         }
 
     }//DivTransformer
+
 }//Namespace

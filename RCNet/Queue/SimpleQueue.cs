@@ -5,19 +5,21 @@ namespace RCNet.Queue
 {
     /// <summary>
     /// Implements a simple FIFO queue template.
-    /// Supports access to enqueued elements so it can be also used as the "sliding window"
     /// </summary>
+    /// <remarks>
+    /// Supports access to enqueued elements so it can be also used as the moving data window.
+    /// </remarks>
     [Serializable]
     public class SimpleQueue<T>
     {
         //Attribute properties
         /// <summary>
-        /// Maximum capacity of the queue
+        /// The maximum capacity of the queue.
         /// </summary>
         public int Capacity { get; private set; }
 
         /// <summary>
-        /// Number of elements in the queue
+        /// The number of elements in the queue.
         /// </summary>
         public int Count { get; private set; }
 
@@ -28,9 +30,9 @@ namespace RCNet.Queue
 
         //Constructor
         /// <summary>
-        /// Instantiate empty queue
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="capacity">Maximum capacity of the queue</param>
+        /// <param name="capacity">The maximum capacity of the queue.</param>
         public SimpleQueue(int capacity)
         {
             Capacity = capacity;
@@ -41,31 +43,31 @@ namespace RCNet.Queue
 
         //Properties
         /// <summary>
-        /// Indicates full queue
+        /// Indicates the queue is full.
         /// </summary>
         public bool Full { get { return (Count == Capacity); } }
 
         //Methods
         /// <summary>
-        /// Throws InvalidOperationException
+        /// Throws the InvalidOperationException.
         /// </summary>
-        /// <param name="text">Exception text</param>
+        /// <param name="text">The exception text.</param>
         private void ThrowInvalidOperationException(string text)
         {
             throw new InvalidOperationException(text);
         }
 
         /// <summary>
-        /// Throws IndexOutOfRangeException
+        /// Throws the IndexOutOfRangeException.
         /// </summary>
-        /// <param name="text">Exception text</param>
+        /// <param name="text">The exception text.</param>
         private void ThrowIndexOutOfRangeException(string text)
         {
             throw new IndexOutOfRangeException(text);
         }
 
         /// <summary>
-        /// Resets queue to its initial state
+        /// Resets the queue to its initial state.
         /// </summary>
         public void Reset()
         {
@@ -76,10 +78,10 @@ namespace RCNet.Queue
         }
 
         /// <summary>
-        /// Resets queue and changes the queue capacity.
+        /// Resets the queue and changes the queue capacity.
         /// </summary>
-        /// <param name="newCapacity">New capacity of the queue</param>
-        /// <param name="forceShrink">Determines whether to reallocate queue buffer even if new capacity is smaller than queue buffer size</param>
+        /// <param name="newCapacity">The new maximum capacity of the queue.</param>
+        /// <param name="forceShrink">Specifies whether to reallocate queue buffer even if the new capacity is smaller than the current buffer size.</param>
         public void Resize(int newCapacity, bool forceShrink = false)
         {
             Reset();
@@ -92,9 +94,11 @@ namespace RCNet.Queue
         }
 
         /// <summary>
-        /// Returns element from queue buffer on the next enqueue position.
-        /// If element exists then it can be reused in immediately following Enqueue call.
+        /// Gets an element from queue buffer at the next enqueue position.
         /// </summary>
+        /// <remarks>
+        /// If the element exists then it can be reused in immediately following Enqueue call.
+        /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T GetElementAtEnqueuePosition()
         {
@@ -102,11 +106,11 @@ namespace RCNet.Queue
         }
 
         /// <summary>
-        /// Returns zero based index within the queue buffer related to logical position 0..(Count-1) following specified logical order.
+        /// Gets the physical zero-based index within the queue buffer corresponding to a logical position 0..(Count-1) following the specified logical order.
         /// </summary>
-        /// <param name="logicalPos">Logical position 0..(Count-1)</param>
-        /// <param name="latestFirst">Specifies logical order (latest..oldest or vice versa)</param>
-        /// <returns>Non-negative index</returns>
+        /// <param name="logicalPos">The logical position 0..(Count-1).</param>
+        /// <param name="latestFirst">Specifies the logical order (latest..oldest or vice versa).</param>
+        /// <returns>The physical zero-based index.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int GetElementIndex(int logicalPos, bool latestFirst = false)
         {
@@ -131,11 +135,11 @@ namespace RCNet.Queue
         }
 
         /// <summary>
-        /// Returns enqueued element at the zero based logical position 0..(Count-1) respecting desired logical order of elements.
+        /// Gets an enqueued element at the zero-based logical position 0..(Count-1) respecting desired logical order of elements.
         /// </summary>
-        /// <param name="logicalPos">Logical position 0..(Count-1)</param>
-        /// <param name="latestFirst">Specifies logical order (latest..oldest or oldest..latest)</param>
-        /// <returns>Element at the logical position</returns>
+        /// <param name="logicalPos">The logical position 0..(Count-1).</param>
+        /// <param name="latestFirst">Specifies the logical order (latest..oldest or oldest..latest).</param>
+        /// <returns>An element at the logical position.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T GetElementAt(int logicalPos, bool latestFirst = false)
         {
@@ -143,12 +147,12 @@ namespace RCNet.Queue
         }
 
         /// <summary>
-        /// Sets element at the zero based logical position 0..(Count-1) respecting desired logical order of elements.
+        /// Sets an element at the zero-based logical position 0..(Count-1) respecting desired logical order of elements.
         /// </summary>
-        /// <param name="elem">Element to be set at specified logical position 0..(Count-1)</param>
-        /// <param name="logicalPos">Logical position 0..(Count-1)</param>
-        /// <param name="latestFirst">Specifies logical order (latest..oldest or oldest..latest)</param>
-        /// <returns>Replaced element at the logical position</returns>
+        /// <param name="elem">An element to be set.</param>
+        /// <param name="logicalPos">The logical position 0..(Count-1).</param>
+        /// <param name="latestFirst">Specifies the logical order (latest..oldest or oldest..latest).</param>
+        /// <returns>The replaced element at the logical position.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T SetElementAt(T elem, int logicalPos, bool latestFirst = false)
         {
@@ -159,11 +163,11 @@ namespace RCNet.Queue
         }
 
         /// <summary>
-        /// Adds element into the queue
+        /// Adds an element into the queue.
         /// </summary>
-        /// <param name="elem">Element to be added</param>
-        /// <param name="autoDequeue">Specifies whether to atomatically dequeue when queue is full</param>
-        /// <returns>True if success, False if queue is full</returns>
+        /// <param name="elem">An element to be added.</param>
+        /// <param name="autoDequeue">Specifies whether to atomatically dequeue when queue is full.</param>
+        /// <returns>True if success, False if queue is full.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Enqueue(T elem, bool autoDequeue = false)
         {
@@ -188,9 +192,9 @@ namespace RCNet.Queue
         }
 
         /// <summary>
-        /// Picks up next element from the queue (FIFO order)
+        /// Dequeues an element from the queue (FIFO order).
         /// </summary>
-        /// <returns>Dequeued element</returns>
+        /// <returns>The dequeued element.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Dequeue()
         {
@@ -214,9 +218,8 @@ namespace RCNet.Queue
         }
 
         /// <summary>
-        /// Returns shallow copy of this queue
+        /// Creates the shallow copy of this queue.
         /// </summary>
-        /// <returns></returns>
         public SimpleQueue<T> ShallowClone()
         {
             SimpleQueue<T> newQueue = new SimpleQueue<T>(Capacity);

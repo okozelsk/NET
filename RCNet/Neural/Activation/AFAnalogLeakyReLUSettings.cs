@@ -6,44 +6,43 @@ namespace RCNet.Neural.Activation
 {
     /// <summary>
     /// Configuration of the AFAnalogLeakyReLU activation function.
-    /// Arguments are in RandomValue form to allow their dynamic random initialization within the specified ranges.
     /// </summary>
     [Serializable]
     public class AFAnalogLeakyReLUSettings : RCNetBaseSettings, IActivationSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "ActivationLeakyReLUType";
 
         //Typical values
         /// <summary>
-        /// Typical negative slope
+        /// The typical negative slope.
         /// </summary>
         public const double TypicalNegSlope = 0.05;
 
         //Attribute properties
         /// <summary>
-        /// The negative slope
+        /// The negative slope.
         /// </summary>
         public URandomValueSettings NegSlope { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         /// <param name="negSlope">The negative slope</param>
         public AFAnalogLeakyReLUSettings(URandomValueSettings negSlope = null)
         {
-            NegSlope = URandomValueSettings.CloneOrDefault(negSlope, TypicalNegSlope);
+            NegSlope = URandomValueSettings.CloneOrCreate(negSlope, TypicalNegSlope);
             return;
         }
 
         /// <summary>
-        /// Copy constructor
+        /// The copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public AFAnalogLeakyReLUSettings(AFAnalogLeakyReLUSettings source)
         {
             NegSlope = (URandomValueSettings)source.NegSlope.DeepClone();
@@ -51,15 +50,15 @@ namespace RCNet.Neural.Activation
         }
 
         /// <summary>
-        /// Creates an instance and initializes it from given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public AFAnalogLeakyReLUSettings(XElement elem)
         {
             //Validation
             XElement activationSettingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            NegSlope = URandomValueSettings.LoadOrDefault(activationSettingsElem, "negSlope", TypicalNegSlope);
+            NegSlope = URandomValueSettings.LoadOrCreate(activationSettingsElem, "negSlope", TypicalNegSlope);
             return;
         }
 
@@ -68,7 +67,7 @@ namespace RCNet.Neural.Activation
         public ActivationType TypeOfActivation { get { return ActivationType.Analog; } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultNegSlope { get { return (NegSlope.Min == TypicalNegSlope && NegSlope.Max == TypicalNegSlope && NegSlope.DistrType == RandomCommon.DistributionType.Uniform); } }
 

@@ -6,66 +6,66 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {
     /// <summary>
-    /// Configuration of a synapse providing excitatory signal to hidden spiking neuron
+    /// Configuration of an excitatory synapse connecting postsynaptic hidden spiking neuron.
     /// </summary>
     [Serializable]
     public class SynapseSTExcitatorySettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "SynapseSTExcitatoryType";
 
         //Default values
         /// <summary>
-        /// Default delay method
+        /// The default delay method.
         /// </summary>
         const Synapse.SynapticDelayMethod DefaultDelayMethod = Synapse.SynapticDelayMethod.Random;
         /// <summary>
-        /// Default maximum delay
+        /// The default maximum delay.
         /// </summary>
         const int DefaultMaxDelay = 0;
         /// <summary>
-        /// Default relative share
+        /// The default relative share.
         /// </summary>
         const double DefaultRelShare = 4;
 
         //Attribute properties
         /// <summary>
-        /// Specifies how to decide synaptic delay
+        /// The synaptic delay method.
         /// </summary>
         public Synapse.SynapticDelayMethod DelayMethod { get; }
 
         /// <summary>
-        /// Maximum delay of the signal
+        /// The maximum synaptic delay.
         /// </summary>
         public int MaxDelay { get; }
 
         /// <summary>
-        /// Relative share
+        /// The relative share.
         /// </summary>
         public double RelShare { get; }
 
         /// <summary>
-        /// Configuration of synapse having analog source neuron
+        /// The configuration of the synapse connecting analog presynaptic neuron.
         /// </summary>
         public AnalogSourceSettings AnalogSourceCfg { get; }
 
         /// <summary>
-        /// Configuration of synapse having spiking source neuron
+        /// The configuration of the synapse connecting spiking presynaptic neuron.
         /// </summary>
         public SpikingSourceSTExcitatorySettings SpikingSourceCfg { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="delayMethod">Specifies how to decide synaptic delay</param>
-        /// <param name="maxDelay">Maximum delay of the signal</param>
-        /// <param name="relShare">Relative share</param>
-        /// <param name="analogSourceCfg">Configuration of synapse having analog source neuron</param>
-        /// <param name="spikingSourceCfg">Configuration of synapse having spiking source neuron</param>
+        /// <param name="delayMethod">The synaptic delay method.</param>
+        /// <param name="maxDelay">The maximum synaptic delay.</param>
+        /// <param name="relShare">The relative share.</param>
+        /// <param name="analogSourceCfg">The configuration of the synapse connecting analog presynaptic neuron.</param>
+        /// <param name="spikingSourceCfg">The configuration of the synapse connecting spiking presynaptic neuron.</param>
         public SynapseSTExcitatorySettings(Synapse.SynapticDelayMethod delayMethod = DefaultDelayMethod,
                                            int maxDelay = DefaultMaxDelay,
                                            double relShare = DefaultRelShare,
@@ -84,9 +84,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public SynapseSTExcitatorySettings(SynapseSTExcitatorySettings source)
             : this(source.DelayMethod, source.MaxDelay, source.RelShare, source.AnalogSourceCfg, source.SpikingSourceCfg)
         {
@@ -97,7 +97,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public SynapseSTExcitatorySettings(XElement elem)
         {
             //Validation
@@ -116,27 +116,27 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultDelayMethod { get { return (DelayMethod == DefaultDelayMethod); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultMaxDelay { get { return (MaxDelay == DefaultMaxDelay); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultRelShare { get { return (RelShare == DefaultRelShare); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultAnalogSourceCfg { get { return AnalogSourceCfg.ContainsOnlyDefaults; } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultSpikingSourceCfg { get { return SpikingSourceCfg.ContainsOnlyDefaults; } }
 

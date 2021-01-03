@@ -4,7 +4,7 @@ using System;
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 {
     /// <summary>
-    /// Key statistics of the neuron
+    /// Implements the holder of the neuron's key statistics.
     /// </summary>
     [Serializable]
     public class NeuronStatistics
@@ -12,39 +12,39 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         //Constants
         //Attribute properties
         /// <summary>
-        /// Statistics of neuron's input stimulation component
+        /// The statistics of stimulation incoming from the input neurons.
         /// </summary>
         public BasicStat InputStimuliStat { get; }
 
         /// <summary>
-        /// Statistics of neuron's stimulation component incoming from the reservoir
+        /// The statistics of stimulation incoming from the reservoir's hidden neurons.
         /// </summary>
         public BasicStat ReservoirStimuliStat { get; }
 
         /// <summary>
-        /// Statistics of neuron's total stimulation (all components together: Bias + Input + Reservoir)
+        /// The statistics of the total stimulation (Bias + Input + Hidden).
         /// </summary>
         public BasicStat TotalStimuliStat { get; }
 
         /// <summary>
-        /// Statistics of activations
+        /// The statistics of activations.
         /// </summary>
         public BasicStat ActivationStat { get; }
 
         /// <summary>
-        /// Statistics of neuron's emitted analog signal (always [0,1])
+        /// The statistics of the neuron's normalized analog output signal.
         /// </summary>
         public BasicStat AnalogSignalStat { get; }
 
         /// <summary>
-        /// Statistics of neuron's emitted spikes (always [0,1])
+        /// The statistics of the neuron's spiking output signal.
         /// </summary>
         public BasicStat FiringStat { get; }
 
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         public NeuronStatistics()
         {
@@ -59,7 +59,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 
         //Methods
         /// <summary>
-        /// Resets all statistics
+        /// Resets the statistics.
         /// </summary>
         public void Reset()
         {
@@ -73,24 +73,25 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         }
 
         /// <summary>
-        /// Updates statistics
+        /// Updates the statistics.
         /// </summary>
-        /// <param name="iStimuli">Incoming stimulation related to part coming from connected Input neurons</param>
-        /// <param name="rStimuli">Incoming stimulation related to part coming from connected reservoir's neurons</param>
-        /// <param name="tStimuli">Incoming stimulation (all components together including Bias)</param>
-        /// <param name="activationState">Neuron's activation state</param>
-        /// <param name="analogSignal">Neuron's output analog signal</param>
-        /// <param name="spike">Neuron's output spike signal</param>
-        public void Update(double iStimuli, double rStimuli, double tStimuli, double activationState, double analogSignal, double spike)
+        /// <param name="iStimuli">The stimulation incoming from the input neurons.</param>
+        /// <param name="rStimuli">The stimulation incoming from the reservoir's hidden neurons.</param>
+        /// <param name="tStimuli">The total stimulation (Bias + Input + Hidden).</param>
+        /// <param name="activation">The activation.</param>
+        /// <param name="analogSignal">The analog output signal.</param>
+        /// <param name="spike">The spiking output signal.</param>
+        public void Update(double iStimuli, double rStimuli, double tStimuli, double activation, double analogSignal, double spike)
         {
-            InputStimuliStat.AddSampleValue(iStimuli);
-            ReservoirStimuliStat.AddSampleValue(rStimuli);
-            TotalStimuliStat.AddSampleValue(tStimuli);
-            ActivationStat.AddSampleValue(activationState);
-            AnalogSignalStat.AddSampleValue(analogSignal);
-            FiringStat.AddSampleValue(spike);
+            InputStimuliStat.AddSample(iStimuli);
+            ReservoirStimuliStat.AddSample(rStimuli);
+            TotalStimuliStat.AddSample(tStimuli);
+            ActivationStat.AddSample(activation);
+            AnalogSignalStat.AddSample(analogSignal);
+            FiringStat.AddSample(spike);
             return;
         }
 
     }//NeuronStatistics
+
 }//Namespace

@@ -5,10 +5,17 @@ using System.Threading.Tasks;
 namespace RCNet.MathTools.MatrixMath
 {
     /// <summary>
-    /// Eigenvalues and eigenvectors of a real matrix.
-    /// This class is based on a class from the public domain JAMA package.
-    /// http://math.nist.gov/javanumerics/jama/
+    /// Implements the Eigenvalue decomposition of a square matrix.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This class is based on a class from the public domain JAMA package.
+    /// RCNet project adds the parallel computation to improve the performance.
+    /// </para>
+    /// <para>
+    /// http://math.nist.gov/javanumerics/jama/
+    /// </para>
+    /// </remarks>
     public class EVD
     {
         /// <summary>
@@ -58,18 +65,19 @@ namespace RCNet.MathTools.MatrixMath
 
         //Constructor
         /// <summary>
-        /// Check for symmetry, then construct the eigenvalue decomposition
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="matrix">Square matrix</param>
+        /// <param name="matrix">The square matrix.</param>
         public EVD(Matrix matrix)
         {
+            //Check the matrix is the square matrix
+            if (!matrix.IsSquareMatrix)
+            {
+                throw new ArgumentException("Matrix is not square.", "matrix");
+            }
+            //Initialization
             double[][] matrixData = matrix.Data;
             _dimension = matrix.NumOfCols;
-            if (_dimension != matrix.NumOfRows)
-            {
-                throw new ArgumentException("Matrix is not squared.", "matrix");
-            }
-
             _eigenvectors = new double[_dimension][];
             Parallel.For(0, _dimension, row =>
             {
@@ -1137,5 +1145,6 @@ namespace RCNet.MathTools.MatrixMath
         }
 
     }//EVD
+
 }//Namespace
 

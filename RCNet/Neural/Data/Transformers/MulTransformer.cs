@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Implements the "two input fields multiplication" transformation
+    /// Implements the multiplication transformation. It multiplies the value of the first field by the value of the second field.
     /// </summary>
     [Serializable]
     public class MulTransformer : ITransformer
@@ -14,19 +14,19 @@ namespace RCNet.Neural.Data.Transformers
         //Attributes
         private readonly int _xFieldIdx;
         private readonly int _yFieldIdx;
-        private readonly MulTransformerSettings _settings;
+        private readonly MulTransformerSettings _cfg;
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="availableFieldNames">Collection of names of all available input fields</param>
-        /// <param name="settings">Configuration</param>
-        public MulTransformer(List<string> availableFieldNames, MulTransformerSettings settings)
+        /// <param name="availableFieldNames">The collection of names of all available input fields.</param>
+        /// <param name="cfg">The configuration.</param>
+        public MulTransformer(List<string> availableFieldNames, MulTransformerSettings cfg)
         {
-            _settings = (MulTransformerSettings)settings.DeepClone();
-            _xFieldIdx = availableFieldNames.IndexOf(_settings.XInputFieldName);
-            _yFieldIdx = availableFieldNames.IndexOf(_settings.YInputFieldName);
+            _cfg = (MulTransformerSettings)cfg.DeepClone();
+            _xFieldIdx = availableFieldNames.IndexOf(_cfg.XInputFieldName);
+            _yFieldIdx = availableFieldNames.IndexOf(_cfg.YInputFieldName);
             return;
         }
 

@@ -1,10 +1,9 @@
-﻿using RCNet.Extensions;
-using System;
+﻿using System;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 {
     /// <summary>
-    /// Neuron's output data
+    /// Implements the holder of the neuron's outputs.
     /// </summary>
     [Serializable]
     public class NeuronOutputData
@@ -13,28 +12,28 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 
         //Attributes
         /// <summary>
-        /// Neuron's output analog signal
+        /// The neuron's output analog signal.
         /// </summary>
         public double _analogSignal;
 
         /// <summary>
-        /// Neuron's output spiking signal
+        /// The neuron's output spiking signal.
         /// </summary>
         public double _spikingSignal;
 
         /// <summary>
-        /// Computation cycles gone from the last emitted spike or start (if no spike emitted before current computation cycle)
+        /// The number of computation cycles gone from the last emitted spike or from the start if no spike yet.
         /// </summary>
         public int _spikeLeak;
 
         /// <summary>
-        /// Specifies, if neuron has already emitted spike before current computation cycle
+        /// Specifies whether the neuron has already emitted a spike before the current computation cycle.
         /// </summary>
         public bool _afterFirstSpike;
 
         //Constructor
         /// <summary>
-        /// Instantiates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         public NeuronOutputData()
         {
@@ -43,9 +42,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         }
 
         /// <summary>
-        /// Copy constructor
+        /// The copy constructor.
         /// </summary>
-        /// <param name="source">Source instance.</param>
+        /// <param name="source">The source instance.</param>
         public NeuronOutputData(NeuronOutputData source)
         {
             _analogSignal = source._analogSignal;
@@ -57,7 +56,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 
         //Methods
         /// <summary>
-        /// Resets neuron's output data to its initial state
+        /// Resets the neuron's output data.
         /// </summary>
         public void Reset()
         {
@@ -68,7 +67,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         }
 
         /// <summary>
-        /// Creates deep copy of this instance
+        /// Creates the deep copy of this instance.
         /// </summary>
         public NeuronOutputData DeepClone()
         {

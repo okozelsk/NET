@@ -1,49 +1,48 @@
-﻿using System;
+﻿using RCNet.RandomValue;
+using System;
 using System.Xml.Linq;
-using RCNet.RandomValue;
 
 namespace RCNet.Neural.Activation
 {
     /// <summary>
     /// Configuration of the AFAnalogElliot activation function.
-    /// Arguments are in RandomValue form to allow their dynamic random initialization within the specified ranges.
     /// </summary>
     [Serializable]
     public class AFAnalogElliotSettings : RCNetBaseSettings, IActivationSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "ActivationElliotType";
 
         //Typical values
         /// <summary>
-        /// Curve slope
+        /// The typical slope of the curve.
         /// </summary>
         public const double TypicalSlope = 1;
 
         //Attribute properties
         /// <summary>
-        /// Slope of the curve
+        /// The slope of the curve.
         /// </summary>
         public URandomValueSettings Slope { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="slope">Slope of the curve</param>
+        /// <param name="slope">The slope of the curve.</param>
         public AFAnalogElliotSettings(URandomValueSettings slope = null)
         {
-            Slope = URandomValueSettings.CloneOrDefault(slope, TypicalSlope);
+            Slope = URandomValueSettings.CloneOrCreate(slope, TypicalSlope);
             return;
         }
 
         /// <summary>
-        /// Copy constructor
+        /// The copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public AFAnalogElliotSettings(AFAnalogElliotSettings source)
         {
             Slope = (URandomValueSettings)source.Slope.DeepClone();
@@ -51,15 +50,15 @@ namespace RCNet.Neural.Activation
         }
 
         /// <summary>
-        /// Creates an instance and initializes it from given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public AFAnalogElliotSettings(XElement elem)
         {
             //Validation
             XElement activationSettingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            Slope = URandomValueSettings.LoadOrDefault(activationSettingsElem, "slope", TypicalSlope);
+            Slope = URandomValueSettings.LoadOrCreate(activationSettingsElem, "slope", TypicalSlope);
             return;
         }
 
@@ -68,7 +67,7 @@ namespace RCNet.Neural.Activation
         public ActivationType TypeOfActivation { get { return ActivationType.Analog; } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultSlope { get { return (Slope.Min == TypicalSlope && Slope.Max == TypicalSlope && Slope.DistrType == RandomCommon.DistributionType.Uniform); } }
 

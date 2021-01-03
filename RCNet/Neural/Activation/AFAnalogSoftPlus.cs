@@ -5,14 +5,14 @@ using System;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Implements the Soft Plus activation function
+    /// Implements the Soft Plus activation function.
     /// </summary>
     [Serializable]
     public class AFAnalogSoftPlus : AFAnalogBase
     {
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         public AFAnalogSoftPlus()
             : base(Interval.IntZPI)

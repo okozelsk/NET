@@ -1,54 +1,54 @@
-﻿using System;
+﻿using RCNet.MathTools.Differential;
+using System;
 using System.Globalization;
 using System.Xml.Linq;
-using RCNet.MathTools.Differential;
 
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Configuration of the AFSpikingIzhikevichIF activation function in automatic rich behaviour mode
+    /// Configuration of the AFSpikingIzhikevichIF activation function for the automatic rich behaviour mode.
     /// </summary>
     [Serializable]
     public class AFSpikingAutoIzhikevichIFSettings : RCNetBaseSettings, IActivationSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "ActivationAutoIzhikevichIFType";
 
         //Attribute properties
         /// <summary>
-        /// Number of after spike computation cycles while an input stimuli is ignored (ms)
+        /// The number of after-spike computation cycles while an input stimuli to be ignored (cycles).
         /// </summary>
         public int RefractoryPeriods { get; }
         /// <summary>
-        /// ODE numerical solver method
+        /// The ODE numerical solver method.
         /// </summary>
         public ODENumSolver.Method SolverMethod { get; }
         /// <summary>
-        /// ODE numerical solver computation steps of the time step 
+        /// The number of computation sub-steps of the ODE numerical solver.
         /// </summary>
         public int SolverCompSteps { get; }
         /// <summary>
-        /// Duration of the stimulation
+        /// The duration of the membrane stimulation (ms).
         /// </summary>
         public double StimuliDuration { get; }
 
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="refractoryPeriods">Number of after spike computation cycles while an input stimuli is ignored (ms)</param>
-        /// <param name="solverMethod">ODE numerical solver method</param>
-        /// <param name="solverCompSteps">ODE numerical solver computation steps of the time step</param>
-        /// <param name="stimuliDuration">Duration of the stimulation</param>
+        /// <param name="refractoryPeriods">The number of after-spike computation cycles while an input stimuli to be ignored (cycles).</param>
+        /// <param name="solverMethod">The ODE numerical solver method to be used.</param>
+        /// <param name="solverCompSteps">The number of computation sub-steps of the ODE numerical solver.</param>
+        /// <param name="stimuliDuration">The duration of the membrane stimulation (ms).</param>
         public AFSpikingAutoIzhikevichIFSettings(int refractoryPeriods = ActivationFactory.DefaultRefractoryPeriods,
-                                        ODENumSolver.Method solverMethod = ActivationFactory.DefaultSolverMethod,
-                                        int solverCompSteps = ActivationFactory.DefaultSolverCompSteps,
-                                        double stimuliDuration = ActivationFactory.DefaultStimuliDuration
-                                        )
+                                                 ODENumSolver.Method solverMethod = ActivationFactory.DefaultSolverMethod,
+                                                 int solverCompSteps = ActivationFactory.DefaultSolverCompSteps,
+                                                 double stimuliDuration = ActivationFactory.DefaultStimuliDuration
+                                                 )
         {
             RefractoryPeriods = refractoryPeriods;
             SolverMethod = solverMethod;
@@ -59,9 +59,9 @@ namespace RCNet.Neural.Activation
         }
 
         /// <summary>
-        /// Copy constructor
+        /// The copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public AFSpikingAutoIzhikevichIFSettings(AFSpikingAutoIzhikevichIFSettings source)
         {
             RefractoryPeriods = source.RefractoryPeriods;
@@ -72,9 +72,9 @@ namespace RCNet.Neural.Activation
         }
 
         /// <summary>
-        /// Creates an instance and initializes it from given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public AFSpikingAutoIzhikevichIFSettings(XElement elem)
         {
             //Validation
@@ -93,22 +93,22 @@ namespace RCNet.Neural.Activation
         public ActivationType TypeOfActivation { get { return ActivationType.Spiking; } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultRefractoryPeriods { get { return (RefractoryPeriods == ActivationFactory.DefaultRefractoryPeriods); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultSolverMethod { get { return (SolverMethod == ActivationFactory.DefaultSolverMethod); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultSolverCompSteps { get { return (SolverCompSteps == ActivationFactory.DefaultSolverCompSteps); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultStimuliDuration { get { return (StimuliDuration == ActivationFactory.DefaultStimuliDuration); } }
 

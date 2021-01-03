@@ -1,17 +1,17 @@
-﻿using System;
-using Demo.DemoConsoleApp.Log;
+﻿using Demo.DemoConsoleApp.Log;
 using RCNet.CsvTools;
 using RCNet.Neural.Data;
 using RCNet.Neural.Network.NonRecurrent;
 using RCNet.Neural.Network.SM;
 using RCNet.Neural.Network.SM.Preprocessing;
 using RCNet.Neural.Network.SM.Preprocessing.Input;
+using RCNet.Neural.Network.SM.Readout;
 
 
 namespace Demo.DemoConsoleApp.Examples
 {
     /// <summary>
-    /// Base class of the implemented examples
+    /// Implements the base class of the examples.
     /// </summary>
     public class ExampleBase
     {
@@ -28,10 +28,10 @@ namespace Demo.DemoConsoleApp.Examples
         //Methods
         //Event handlers
         /// <summary>
-        /// Displays information about the verification progress.
+        /// Displays an information about the verification progress.
         /// </summary>
-        /// <param name="totalNumOfInputs">Total number of inputs to be processed</param>
-        /// <param name="numOfProcessedInputs">Number of processed inputs</param>
+        /// <param name="totalNumOfInputs">The total number of inputs to be processed.</param>
+        /// <param name="numOfProcessedInputs">The number of already processed inputs.</param>
         protected void OnVerificationProgressChanged(int totalNumOfInputs, int numOfProcessedInputs)
         {
             //Display progress
@@ -43,15 +43,15 @@ namespace Demo.DemoConsoleApp.Examples
         }
 
         /// <summary>
-        /// Displays information about the preprocessing progress and at the end displays important NeuralPreprocessor's statistics.
+        /// Displays an information about the preprocessing progress and at the end displays important NeuralPreprocessor's statistics.
         /// </summary>
-        /// <param name="totalNumOfInputs">Total number of inputs to be processed</param>
-        /// <param name="numOfProcessedInputs">Number of processed inputs</param>
-        /// <param name="finalPreprocessingOverview">Final overview of the preprocessing phase</param>
+        /// <param name="totalNumOfInputs">The total number of inputs to be processed.</param>
+        /// <param name="numOfProcessedInputs">The number of already processed inputs.</param>
+        /// <param name="finalPreprocessingOverview">The final overview of the preprocessing.</param>
         protected void OnPreprocessingProgressChanged(int totalNumOfInputs,
-                                                    int numOfProcessedInputs,
-                                                    NeuralPreprocessor.PreprocessingOverview finalPreprocessingOverview
-                                                    )
+                                                      int numOfProcessedInputs,
+                                                      NeuralPreprocessor.PreprocessingOverview finalPreprocessingOverview
+                                                      )
         {
             if (finalPreprocessingOverview == null)
             {
@@ -72,39 +72,38 @@ namespace Demo.DemoConsoleApp.Examples
         }
 
         /// <summary>
-        /// Displays information about the readout unit regression progress.
+        /// Displays information about the build process progress.
         /// </summary>
-        /// <param name="buildingState">Current state of the regression process</param>
-        /// <param name="foundBetter">Indicates that the best readout unit was changed as a result of the performed epoch</param>
-        protected void OnRegressionEpochDone(TrainedNetworkBuilder.BuildingState buildingState, bool foundBetter)
+        /// <param name="buildProgress">The current state of the build process.</param>
+        /// <param name="foundBetter">Indicates that the best network so far was found during the last performed epoch.</param>
+        protected void OnEpochDone(TNRNetBuilder.BuildProgress buildProgress, bool foundBetter)
         {
             int reportEpochsInterval = 5;
             //Progress info
             if (foundBetter ||
-                (buildingState.Epoch % reportEpochsInterval) == 0 ||
-                buildingState.Epoch == buildingState.MaxEpochs ||
-                (buildingState.Epoch == 1 && buildingState.RegrAttemptNumber == 1)
+                (buildProgress.Epoch % reportEpochsInterval) == 0 ||
+                buildProgress.Epoch == buildProgress.MaxEpochs ||
+                (buildProgress.Epoch == 1 && buildProgress.AttemptNumber == 1)
                 )
             {
                 //Build progress report message
-                string progressText = buildingState.GetProgressInfo(4);
+                string progressText = buildProgress.GetInfo(4);
                 //Report the progress
-                _log.Write(progressText, !(buildingState.Epoch == 1 && buildingState.RegrAttemptNumber == 1));
+                _log.Write(progressText, !(buildProgress.Epoch == 1 && buildProgress.AttemptNumber == 1));
             }
             return;
         }
 
         /// <summary>
-        /// Loads given file and executes StateMachine training.
-        /// This version of function requires configured NeuralPreprocessor.
+        /// Loads the specified file and executes the StateMachine training.
         /// </summary>
-        /// <param name="stateMachine">Instance of StateMachine to be trained</param>
-        /// <param name="trainingDataFileName">Name of the csv file containing training data</param>
-        /// <param name="predictionInputVector">Returned vector to be used for next prediction (relevant only in case of continuous feeding of the input)</param>
+        /// <param name="stateMachine">An instance of StateMachine to be trained.</param>
+        /// <param name="trainingDataFileName">The name of the csv file containing the training data.</param>
+        /// <param name="predictionInputVector">The vector to be used for next prediction (relevant only in case of continuous feeding of the input).</param>
         protected void TrainStateMachine(StateMachine stateMachine, string trainingDataFileName, out double[] predictionInputVector)
         {
-            //Register to RegressionEpochDone event
-            stateMachine.RL.RegressionEpochDone += OnRegressionEpochDone;
+            //Register to EpochDone event
+            stateMachine.RL.EpochDone += OnEpochDone;
             //Load csv data
             CsvDataHolder trainingCsvData = new CsvDataHolder(trainingDataFileName);
             //Convert csv data to VectorBundle useable for StateMachine training
@@ -153,13 +152,12 @@ namespace Demo.DemoConsoleApp.Examples
         }
 
         /// <summary>
-        /// Loads given file and executes StateMachine verification.
-        /// This version of function requires configured NeuralPreprocessor.
+        /// Loads the specified file and executes the StateMachine verification.
         /// </summary>
-        /// <param name="stateMachine">Instance of StateMachine to be trained</param>
-        /// <param name="verificationDataFileName">Name of the csv file containing verification data</param>
-        /// <param name="omittedInputVector">Remaining input vector from training phase (relevant only in case of continuous feeding of the input)</param>
-        /// <param name="predictionInputVector">Returned vector to be used for next prediction (relevant only in case of continuous feeding of the input)</param>
+        /// <param name="stateMachine">An instance of StateMachine to be verified.</param>
+        /// <param name="verificationDataFileName">The name of the csv file containing the verification data.</param>
+        /// <param name="omittedInputVector">Remaining input vector from training phase (relevant only in case of continuous feeding of the input).</param>
+        /// <param name="predictionInputVector">The vector to be used for next prediction (relevant only in case of continuous feeding of the input).</param>
         protected void VerifyStateMachine(StateMachine stateMachine, string verificationDataFileName, double[] omittedInputVector, out double[] predictionInputVector)
         {
             //Load csv data
@@ -175,7 +173,7 @@ namespace Demo.DemoConsoleApp.Examples
                     //Continuous input feeding
                     //Last known input values from training (predictionInputVector) must be pushed into the reservoirs to keep time series continuity
                     //(first input data in verification.csv is output of the last data in training.csv)
-                    double[] tmp = stateMachine.Compute(omittedInputVector);
+                    double[] tmp = stateMachine.Compute(omittedInputVector, out ReadoutLayer.ReadoutData readoutData);
                     //Load verification data and get new predictionInputVector for final prediction
                     verificationData = VectorBundle.Load(verificationCsvData,
                                                          stateMachine.Config.NeuralPreprocessorCfg.InputEncoderCfg.VaryingFieldsCfg.ExternalFieldsCfg.GetFieldNames(),

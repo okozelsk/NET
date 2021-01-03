@@ -6,26 +6,26 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.PM
 {
     /// <summary>
-    /// Configuration of the predictors mapper
+    /// Configuration of the predictors mapper.
     /// </summary>
     [Serializable]
     public class MapperSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "SMMapperType";
 
         //Attribute properties
         /// <summary>
-        /// Collection of readout unit map configurations
+        /// The collection of the readout unit mapping configurations.
         /// </summary>
         public List<ReadoutUnitMapSettings> MapCfgCollection { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         private MapperSettings()
         {
@@ -34,9 +34,9 @@ namespace RCNet.Neural.Network.SM.PM
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="mapCfgCollection">Collection of readout unit map configurations</param>
+        /// <param name="mapCfgCollection">The collection of the readout unit mapping configurations.</param>
         public MapperSettings(IEnumerable<ReadoutUnitMapSettings> mapCfgCollection)
             : this()
         {
@@ -46,9 +46,9 @@ namespace RCNet.Neural.Network.SM.PM
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="mapCfgCollection">Collection of readout unit map configurations</param>
+        /// <param name="mapCfgCollection">The readout unit mapping configurations.</param>
         public MapperSettings(params ReadoutUnitMapSettings[] mapCfgCollection)
             : this()
         {
@@ -60,7 +60,7 @@ namespace RCNet.Neural.Network.SM.PM
         /// <summary>
         /// The deep copy constructor
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public MapperSettings(MapperSettings source)
             : this()
         {
@@ -71,7 +71,7 @@ namespace RCNet.Neural.Network.SM.PM
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings.</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public MapperSettings(XElement elem)
         {
             //Validation
@@ -113,9 +113,9 @@ namespace RCNet.Neural.Network.SM.PM
         }
 
         /// <summary>
-        /// Adds cloned readout unit map configurations from given collection into the internal collection
+        /// Adds the readout unit mapping configurations from the specified collection into the internal collection.
         /// </summary>
-        /// <param name="mapCfgCollection">Collection of readout unit map configurations</param>
+        /// <param name="mapCfgCollection">The collection of the readout unit mapping configurations.</param>
         private void AddMaps(IEnumerable<ReadoutUnitMapSettings> mapCfgCollection)
         {
             foreach (ReadoutUnitMapSettings mapCfg in mapCfgCollection)
@@ -126,10 +126,10 @@ namespace RCNet.Neural.Network.SM.PM
         }
 
         /// <summary>
-        /// Returns ID (index) of the map for given readout unit or -1 if the map not found (ex = false)
+        /// Gets the index of the readout unit mapping.
         /// </summary>
-        /// <param name="readoutUnitName">Readout unit name</param>
-        /// <param name="ex">Specifies whether to throw exception or return -1 if the map for given readout unit name not found</param>
+        /// <param name="readoutUnitName">The name of the readout unit.</param>
+        /// <param name="ex">Specifies whether to throw exception or return -1 in case the map for given readout unit name not found.</param>
         public int GetMapID(string readoutUnitName, bool ex = false)
         {
             for (int i = 0; i < MapCfgCollection.Count; i++)
@@ -150,10 +150,10 @@ namespace RCNet.Neural.Network.SM.PM
         }
 
         /// <summary>
-        /// Returns configuration of the given pool
+        /// Gets the configuration of the readout unit mapping.
         /// </summary>
-        /// <param name="readoutUnitName">Readout unit name</param>
-        /// <param name="ex">Specifies whether to throw exception or return -1 if the map for given readout unit name not found</param>
+        /// <param name="readoutUnitName">The name of the readout unit.</param>
+        /// <param name="ex">Specifies whether to throw exception or return -1 in case the map for given readout unit name not found.</param>
         public ReadoutUnitMapSettings GetMapCfg(string readoutUnitName, bool ex = false)
         {
             int mapID = GetMapID(readoutUnitName, ex);

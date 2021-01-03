@@ -5,34 +5,34 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Readout
 {
     /// <summary>
-    /// Configuration of the ReadoutUnit
+    /// Configuration of the readout unit.
     /// </summary>
     [Serializable]
     public class ReadoutUnitSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
-        public const string XsdTypeName = "ROutLayerUnitType";
+        public const string XsdTypeName = "ROutUnitType";
 
         //Attribute properties
         /// <summary>
-        /// Output field name
+        /// The name of the readout unit (the output field name).
         /// </summary>
         public string Name { get; }
 
         /// <summary>
-        /// Readout unit's Forecast or Classification task settings
+        /// The readout unit's task configuration.
         /// </summary>
         public ITaskSettings TaskCfg { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an unitialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="name">Output field name</param>
-        /// <param name="taskCfg">Readout unit's Forecast or Classification task settings</param>
+        /// <param name="name">The name of the readout unit (the output field name).</param>
+        /// <param name="taskCfg">The readout unit's task configuration.</param>
         public ReadoutUnitSettings(string name, ITaskSettings taskCfg)
         {
             Name = name;
@@ -42,9 +42,9 @@ namespace RCNet.Neural.Network.SM.Readout
         }
 
         /// <summary>
-        /// Copy constructor
+        /// The copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public ReadoutUnitSettings(ReadoutUnitSettings source)
             : this(source.Name, source.TaskCfg)
         {
@@ -54,7 +54,7 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml data containing the settings.</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public ReadoutUnitSettings(XElement elem)
         {
             //Validation
@@ -68,9 +68,13 @@ namespace RCNet.Neural.Network.SM.Readout
             {
                 TaskCfg = new ForecastTaskSettings(taskSettingsElem);
             }
-            else
+            else if (taskSettingsElem.Name.LocalName == "classification")
             {
                 TaskCfg = new ClassificationTaskSettings(taskSettingsElem);
+            }
+            else
+            {
+                throw new ArgumentException("Configuration element does not contain valid task specification.", "elem");
             }
             Check();
             return;

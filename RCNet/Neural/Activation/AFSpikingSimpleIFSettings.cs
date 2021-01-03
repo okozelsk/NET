@@ -1,92 +1,94 @@
-﻿using System;
+﻿using RCNet.RandomValue;
+using System;
 using System.Globalization;
 using System.Xml.Linq;
-using RCNet.RandomValue;
 
 namespace RCNet.Neural.Activation
 {
     /// <summary>
     /// Configuration of the AFSpikingSimpleIF activation function.
-    /// Arguments are in RandomValue form to allow their dynamic random initialization within the specified ranges.
     /// </summary>
     [Serializable]
     public class AFSpikingSimpleIFSettings : RCNetBaseSettings, IActivationSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "ActivationSimpleIFType";
 
         //Typical values
         /// <summary>
-        /// Typical value of resistance
+        /// The typical value of resistance.
         /// </summary>
         public const double TypicalResistance = 20;
         /// <summary>
-        /// Typical value of decay rate
+        /// The typical value of decay rate.
         /// </summary>
         public const double TypicalDecayRate = 0.05;
         /// <summary>
-        /// Typical value of reset voltage
+        /// The typical value of reset voltage.
         /// </summary>
         public const double TypicalResetV = 5;
         /// <summary>
-        /// Typical value of firing voltage
+        /// The typical value of firing voltage.
         /// </summary>
         public const double TypicalFiringThresholdV = 20;
 
         //Attribute properties
         /// <summary>
-        /// Membrane resistance (Mohm)
+        /// The membrane resistance (Mohm).
         /// </summary>
         public URandomValueSettings Resistance { get; }
         /// <summary>
-        /// Membrane potential decay rate
+        /// The membrane potential decay rate.
         /// </summary>
         public URandomValueSettings DecayRate { get; }
         /// <summary>
-        /// Membrane reset potential (mV)
+        /// The membrane reset potential (mV).
         /// </summary>
         public URandomValueSettings ResetV { get; }
         /// <summary>
-        /// Membrane firing threshold (mV)
+        /// The membrane firing threshold (mV).
         /// </summary>
         public URandomValueSettings FiringThresholdV { get; }
         /// <summary>
-        /// Number of after spike computation cycles while an input stimuli is ignored (ms)
+        /// The number of after-spike computation cycles while an input stimuli to be ignored (cycles).
         /// </summary>
         public int RefractoryPeriods { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="resistance">Membrane resistance (Mohm)</param>
-        /// <param name="decayRate">Membrane potential decay rate</param>
-        /// <param name="resetV">Membrane reset potential (mV)</param>
-        /// <param name="firingThresholdV">Membrane firing threshold (mV)</param>
-        /// <param name="refractoryPeriods">Number of after spike computation cycles while an input stimuli is ignored (ms)</param>
+        /// <remarks>
+        /// The arguments are in RandomValue form to allow their dynamic random initialization within the specified ranges.
+        /// </remarks>
+        /// <param name="resistance">The membrane resistance (Mohm).</param>
+        /// <param name="decayRate">The membrane potential decay rate.</param>
+        /// <param name="resetV">The membrane reset potential (mV).</param>
+        /// <param name="firingThresholdV">The membrane firing threshold (mV).</param>
+        /// <param name="refractoryPeriods">The number of after-spike computation cycles while an input stimuli to be ignored (cycles).</param>
         public AFSpikingSimpleIFSettings(URandomValueSettings resistance = null,
-                                URandomValueSettings decayRate = null,
-                                URandomValueSettings resetV = null,
-                                URandomValueSettings firingThresholdV = null,
-                                int refractoryPeriods = 1
-                                )
+                                         URandomValueSettings decayRate = null,
+                                         URandomValueSettings resetV = null,
+                                         URandomValueSettings firingThresholdV = null,
+                                         int refractoryPeriods = 1
+                                         )
         {
-            Resistance = URandomValueSettings.CloneOrDefault(resistance, TypicalResistance);
-            DecayRate = URandomValueSettings.CloneOrDefault(decayRate, TypicalDecayRate);
-            ResetV = URandomValueSettings.CloneOrDefault(resetV, TypicalResetV);
-            FiringThresholdV = URandomValueSettings.CloneOrDefault(firingThresholdV, TypicalFiringThresholdV);
+            Resistance = URandomValueSettings.CloneOrCreate(resistance, TypicalResistance);
+            DecayRate = URandomValueSettings.CloneOrCreate(decayRate, TypicalDecayRate);
+            ResetV = URandomValueSettings.CloneOrCreate(resetV, TypicalResetV);
+            FiringThresholdV = URandomValueSettings.CloneOrCreate(firingThresholdV, TypicalFiringThresholdV);
             RefractoryPeriods = refractoryPeriods;
             Check();
             return;
         }
 
         /// <summary>
-        /// Copy constructor
+        /// The copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public AFSpikingSimpleIFSettings(AFSpikingSimpleIFSettings source)
         {
             Resistance = (URandomValueSettings)source.Resistance.DeepClone();
@@ -98,18 +100,18 @@ namespace RCNet.Neural.Activation
         }
 
         /// <summary>
-        /// Creates an instance and initializes it from given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public AFSpikingSimpleIFSettings(XElement elem)
         {
             //Validation
             XElement activationSettingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            Resistance = URandomValueSettings.LoadOrDefault(activationSettingsElem, "resistance", TypicalResistance);
-            DecayRate = URandomValueSettings.LoadOrDefault(activationSettingsElem, "decayRate", TypicalDecayRate);
-            ResetV = URandomValueSettings.LoadOrDefault(activationSettingsElem, "resetV", TypicalResetV);
-            FiringThresholdV = URandomValueSettings.LoadOrDefault(activationSettingsElem, "firingThresholdV", TypicalFiringThresholdV);
+            Resistance = URandomValueSettings.LoadOrCreate(activationSettingsElem, "resistance", TypicalResistance);
+            DecayRate = URandomValueSettings.LoadOrCreate(activationSettingsElem, "decayRate", TypicalDecayRate);
+            ResetV = URandomValueSettings.LoadOrCreate(activationSettingsElem, "resetV", TypicalResetV);
+            FiringThresholdV = URandomValueSettings.LoadOrCreate(activationSettingsElem, "firingThresholdV", TypicalFiringThresholdV);
             RefractoryPeriods = int.Parse(activationSettingsElem.Attribute("refractoryPeriods").Value, CultureInfo.InvariantCulture);
             Check();
             return;
@@ -120,27 +122,27 @@ namespace RCNet.Neural.Activation
         public ActivationType TypeOfActivation { get { return ActivationType.Spiking; } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultResistance { get { return (Resistance.Min == TypicalResistance && Resistance.Max == TypicalResistance && Resistance.DistrType == RandomCommon.DistributionType.Uniform); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultDecayRate { get { return (DecayRate.Min == TypicalDecayRate && DecayRate.Max == TypicalDecayRate && DecayRate.DistrType == RandomCommon.DistributionType.Uniform); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultResetV { get { return (ResetV.Min == TypicalResetV && ResetV.Max == TypicalResetV && ResetV.DistrType == RandomCommon.DistributionType.Uniform); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultFiringThresholdV { get { return (FiringThresholdV.Min == TypicalFiringThresholdV && FiringThresholdV.Max == TypicalFiringThresholdV && FiringThresholdV.DistrType == RandomCommon.DistributionType.Uniform); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultRefractoryPeriods { get { return (RefractoryPeriods == ActivationFactory.DefaultRefractoryPeriods); } }
 

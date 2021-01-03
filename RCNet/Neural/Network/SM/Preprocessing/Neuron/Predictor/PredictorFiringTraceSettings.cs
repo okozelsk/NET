@@ -1,56 +1,55 @@
-﻿using RCNet.MathTools;
-using System;
+﻿using System;
 using System.Globalization;
 using System.Xml.Linq;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 {
     /// <summary>
-    /// Configuration of the FiringTrace predictor
+    /// Configuration of the FiringTrace predictor computer.
     /// </summary>
     [Serializable]
     public class PredictorFiringTraceSettings : RCNetBaseSettings, IPredictorSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "PredictorFiringTraceType";
         /// <summary>
-        /// Numeric value indicating no data window
+        /// The numeric code indicating no data window.
         /// </summary>
         public const int NAWindowNum = 0;
         /// <summary>
-        /// Code indicating no data window
+        /// The string code indicating no data window.
         /// </summary>
         public const string NAWindowCode = "NA";
         //Default values
         /// <summary>
-        /// Default value of the parameter specifying data window size
+        /// The default value of the parameter specifying the data window size.
         /// </summary>
         public const int DefaultWindow = NAWindowNum;
         /// <summary>
-        /// Default value of the parameter specifying trace fading strength
+        /// The default value of the parameter specifying the strength of trace fading.
         /// </summary>
         public const double DefaultFading = 0.005d;
 
         //Attribute properties
         /// <summary>
-        /// Specifies trace fading strength
+        /// Specifies the strength of trace fading.
         /// </summary>
         public double Fading { get; }
 
         /// <summary>
-        /// Specifies data window size
+        /// Specifies the data window size.
         /// </summary>
         public int Window { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="fading">Specifies trace fading strength</param>
-        /// <param name="window">Specifies data window size</param>
+        /// <param name="fading">Specifies the strength of trace fading.</param>
+        /// <param name="window">Specifies the data window size.</param>
         public PredictorFiringTraceSettings(double fading = DefaultFading, int window = DefaultWindow)
         {
             Fading = fading;
@@ -60,9 +59,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         }
 
         /// <summary>
-        /// Copy constructor
+        /// The copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public PredictorFiringTraceSettings(PredictorFiringTraceSettings source)
             : this(source.Fading, source.Window)
         {
@@ -70,9 +69,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         }
 
         /// <summary>
-        /// Creates initialized instance using xml element
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public PredictorFiringTraceSettings(XElement elem)
         {
             //Validation
@@ -102,12 +101,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         public bool NeedsContinuousActivationDiffStat { get { return false; } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultFading { get { return (Fading == DefaultFading); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultWindow { get { return (Window == DefaultWindow); } }
 
@@ -119,7 +118,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         /// <inheritdoc/>
         protected override void Check()
         {
-            if(Fading < 0 || Fading > 1)
+            if (Fading < 0 || Fading > 1)
             {
                 throw new ArgumentException($"Invalid Fading {Fading.ToString(CultureInfo.InvariantCulture)}. Fading must be GE0 and LE1.", "Fading");
             }

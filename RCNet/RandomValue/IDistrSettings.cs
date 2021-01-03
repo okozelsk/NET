@@ -1,7 +1,7 @@
 ﻿namespace RCNet.RandomValue
 {
     /// <summary>
-    /// Common interface of random distributions configurations
+    /// The common interface of random distribution configurations.
     /// </summary>
     public interface IDistrSettings
     {

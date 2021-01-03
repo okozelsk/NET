@@ -1,93 +1,92 @@
-﻿using System;
+﻿using RCNet.Neural.Network.NonRecurrent;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
-using RCNet.Neural.Network.NonRecurrent;
 
 namespace RCNet.Neural.Network.SM.Readout
 {
     /// <summary>
-    /// Configuration of the ReadoutLayer
+    /// Configuration of the readout layer.
     /// </summary>
     [Serializable]
     public class ReadoutLayerSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "ROutLayerType";
 
         //Attribute properties
         /// <summary>
-        /// Configuration of the cluster associated with the readout unit
+        /// The default configurations of the readout unit tasks.
         /// </summary>
-        public ClusterSettings ClusterCfg { get; }
+        public TaskDefaultsSettings TaskDefaultsCfg { get; }
 
         /// <summary>
-        /// Readout units configuration
+        /// The configuration of the readout units.
         /// </summary>
         public ReadoutUnitsSettings ReadoutUnitsCfg { get; }
 
         /// <summary>
-        /// Configuration of the decision maker applied on "One winner" groups
+        /// The configuration of the "One Takes All" groups.
         /// </summary>
-        public OneWinnerDecisionMakerSettings OneWinnerDecisionMakerCfg { get; }
+        public OneTakesAllGroupsSettings OneTakesAllGroupsCfg { get; }
 
         //Constructors
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="clusterCfg">Configuration of the cluster associated with the readout unit</param>
-        /// <param name="readoutUnitsCfg">Readout units configuration</param>
-        /// <param name="oneWinnerDecisionMakerCfg">Configuration of the decision maker applied on "One winner" groups</param>
-        public ReadoutLayerSettings(ClusterSettings clusterCfg,
+        /// <param name="taskDefaultsCfg">The default configurations of the readout unit tasks.</param>
+        /// <param name="readoutUnitsCfg">The configuration of the readout units.</param>
+        /// <param name="oneTakesAllGroupsCfg">The configuration of the "One Takes All" groups.</param>
+        public ReadoutLayerSettings(TaskDefaultsSettings taskDefaultsCfg,
                                     ReadoutUnitsSettings readoutUnitsCfg,
-                                    OneWinnerDecisionMakerSettings oneWinnerDecisionMakerCfg = null
+                                    OneTakesAllGroupsSettings oneTakesAllGroupsCfg = null
                                     )
         {
-            ClusterCfg = (ClusterSettings)clusterCfg.DeepClone();
+            TaskDefaultsCfg = (TaskDefaultsSettings)taskDefaultsCfg.DeepClone();
             ReadoutUnitsCfg = (ReadoutUnitsSettings)readoutUnitsCfg.DeepClone();
-            OneWinnerDecisionMakerCfg = (OneWinnerDecisionMakerSettings)oneWinnerDecisionMakerCfg?.DeepClone();
+            OneTakesAllGroupsCfg = (OneTakesAllGroupsSettings)oneTakesAllGroupsCfg?.DeepClone();
             Check();
             return;
         }
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public ReadoutLayerSettings(ReadoutLayerSettings source)
-            : this(source.ClusterCfg, source.ReadoutUnitsCfg, source.OneWinnerDecisionMakerCfg)
+            : this(source.TaskDefaultsCfg, source.ReadoutUnitsCfg, source.OneTakesAllGroupsCfg)
         {
             return;
         }
 
         /// <summary>
         /// Creates an initialized instance.
-        /// This is the preferred way to instantiate ReadoutLayer settings.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public ReadoutLayerSettings(XElement elem)
         {
             //Validation
             XElement settingsElem = Validate(elem, XsdTypeName);
             //Parsing
             //Cluster
-            ClusterCfg = new ClusterSettings(settingsElem.Element("cluster"));
+            TaskDefaultsCfg = new TaskDefaultsSettings(settingsElem.Element("taskDefaults"));
             //Readout units
             XElement readoutUnitsElem = settingsElem.Elements("readoutUnits").First();
             ReadoutUnitsCfg = new ReadoutUnitsSettings(readoutUnitsElem);
-            //One winner decision maker
-            XElement oneWinnerDecisionMakerElem = settingsElem.Elements("oneWinnerDecisionMaker").FirstOrDefault();
-            OneWinnerDecisionMakerCfg = oneWinnerDecisionMakerElem == null ? null : new OneWinnerDecisionMakerSettings(oneWinnerDecisionMakerElem);
+            //One-takes-all groups
+            XElement oneTakesAllGroupsElem = settingsElem.Elements("oneTakesAllGroups").FirstOrDefault();
+            OneTakesAllGroupsCfg = oneTakesAllGroupsElem == null ? null : new OneTakesAllGroupsSettings(oneTakesAllGroupsElem);
             Check();
             return;
         }
 
         //Properties
         /// <summary>
-        /// Collection of names of output fields
+        /// Gets the collection of output field names.
         /// </summary>
         public List<string> OutputFieldNameCollection
         {
@@ -101,37 +100,129 @@ namespace RCNet.Neural.Network.SM.Readout
         public override bool ContainsOnlyDefaults { get { return false; } }
 
         //Methods
+        /// <summary>
+        /// Gets the readout unit's specific or default forecast cluster chain configuration.
+        /// </summary>
+        /// <param name="readoutUnitID">The zero-based index of the readout unit.</param>
+        /// <returns>The forecast cluster chain configuration.</returns>
+        public TNRNetClusterChainRealSettings GetRUnitForecastClusterChainCfg(int readoutUnitID)
+        {
+            TNRNetClusterChainRealSettings resultCfg = ((ForecastTaskSettings)ReadoutUnitsCfg.ReadoutUnitCfgCollection[readoutUnitID].TaskCfg).ClusterChainCfg;
+            if (resultCfg == null)
+            {
+                //Use task default
+                resultCfg = TaskDefaultsCfg.ForecastClusterChainCfg;
+                if (resultCfg == null)
+                {
+                    //Not defined
+                    throw new ArgumentException($"For the readout unit {ReadoutUnitsCfg.ReadoutUnitCfgCollection[readoutUnitID].Name} there is not available the forecast cluster chain configuration (specific nor default).", "readoutUnitID");
+                }
+            }
+            return resultCfg;
+        }
+
+        /// <summary>
+        /// Gets the readout unit's specific or default forecast cluster chain configuration.
+        /// </summary>
+        /// <param name="readoutUnitName">The name of the readout unit.</param>
+        /// <returns>The forecast cluster chain configuration.</returns>
+        public TNRNetClusterChainRealSettings GetRUnitForecastClusterChainCfg(string readoutUnitName)
+        {
+            return GetRUnitForecastClusterChainCfg(ReadoutUnitsCfg.GetReadoutUnitID(readoutUnitName));
+        }
+
+        /// <summary>
+        /// Gets the readout unit's specific or default classification cluster chain configuration.
+        /// </summary>
+        /// <param name="readoutUnitID">The zero-based index of the readout unit.</param>
+        /// <returns>The classification cluster chain configuration.</returns>
+        public TNRNetClusterChainSingleBoolSettings GetRUnitTaskClassificationClusterChainCfg(int readoutUnitID)
+        {
+            TNRNetClusterChainSingleBoolSettings resultCfg = ((ClassificationTaskSettings)ReadoutUnitsCfg.ReadoutUnitCfgCollection[readoutUnitID].TaskCfg).ClusterChainCfg;
+            if (resultCfg == null)
+            {
+                //Use task default
+                resultCfg = TaskDefaultsCfg.ClassificationClusterChainCfg;
+                if (resultCfg == null)
+                {
+                    //Not defined
+                    throw new ArgumentException($"For the readout unit {ReadoutUnitsCfg.ReadoutUnitCfgCollection[readoutUnitID].Name} there is not available the classification cluster chain configuration (specific nor default).", "readoutUnitID");
+                }
+            }
+            return resultCfg;
+        }
+
+        /// <summary>
+        /// Gets the readout unit's specific or default classification cluster chain configuration.
+        /// </summary>
+        /// <param name="readoutUnitName">The name of the readout unit.</param>
+        /// <returns>The classification cluster chain configuration.</returns>
+        public TNRNetClusterChainSingleBoolSettings GetRUnitTaskClassificationClusterChainCfg(string readoutUnitName)
+        {
+            return GetRUnitTaskClassificationClusterChainCfg(ReadoutUnitsCfg.GetReadoutUnitID(readoutUnitName));
+        }
+
+        /// <summary>
+        /// Gets the indexes of the readout units belonging to a specified "One Takes All" group.
+        /// </summary>
+        /// <param name="groupName">The name of the "One Takes All" group.</param>
+        public List<int> GetOneTakesAllGroupMemberRUnitIndexes(string groupName)
+        {
+            List<int> indexes = new List<int>();
+            for (int i = 0; i < ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count; i++)
+            {
+                if (ReadoutUnitsCfg.ReadoutUnitCfgCollection[i].TaskCfg.Type == ReadoutUnit.TaskType.Classification)
+                {
+                    ClassificationTaskSettings taskCfg = (ClassificationTaskSettings)ReadoutUnitsCfg.ReadoutUnitCfgCollection[i].TaskCfg;
+                    if (taskCfg.OneTakesAllGroupName == groupName)
+                    {
+                        indexes.Add(i);
+                    }
+                }
+            }
+            return indexes;
+        }
+
         /// <inheritdoc />
         protected override void Check()
         {
             foreach (ReadoutUnitSettings rus in ReadoutUnitsCfg.ReadoutUnitCfgCollection)
             {
-                if (rus.TaskCfg.NetworkCfgCollection.Count == 0)
+                //Check that each one of readout units can get the appropriate result configuration
+                if (rus.TaskCfg.Type == ReadoutUnit.TaskType.Forecast)
                 {
-                    if (ClusterCfg.DefaultNetworksCfg.GetTaskNetworksCfgs(rus.TaskCfg.Type).Count == 0)
+                    //Check forecast task result can be assigned
+                    GetRUnitForecastClusterChainCfg(rus.Name);
+                }
+                else
+                {
+                    //Check classification task result can be assigned
+                    GetRUnitTaskClassificationClusterChainCfg(rus.Name);
+                    //Check that each specified One Takes All group name exists in groups configuration
+                    string oneTakesAllGroupName = ((ClassificationTaskSettings)rus.TaskCfg).OneTakesAllGroupName;
+                    if (oneTakesAllGroupName != ClassificationTaskSettings.DefaultOneTakesAllGroupName)
                     {
-                        throw new ArgumentException($"Readout unit {rus.Name} has not associated network(s) settings.", "ReadoutUnitsCfg");
+                        if (OneTakesAllGroupsCfg == null)
+                        {
+                            //Not defined
+                            throw new ArgumentException($"One Takes All group name {oneTakesAllGroupName} specified in readout unit {rus.Name} is not defined.", "readoutUnitID");
+                        }
+                        OneTakesAllGroupsCfg.GetOneTakesAllGroupID(oneTakesAllGroupName);
+                    }
+                }
+            }
+            if (OneTakesAllGroupsCfg != null)
+            {
+                //Check at least two readout units within the group
+                foreach (string name in (from Group in OneTakesAllGroupsCfg.OneTakesAllGroupCfgCollection select Group.Name))
+                {
+                    if (GetOneTakesAllGroupMemberRUnitIndexes(name).Count < 2)
+                    {
+                        throw new ArgumentException($"One Takes All group name {name} has less than 2 member readout units.", "One Takes All group");
                     }
                 }
             }
             return;
-        }
-
-        /// <summary>
-        /// Return network configurations associated with readout unit or default network configurations if no specific network configurations.
-        /// </summary>
-        /// <param name="readoutUnitIndex">Index of the readout unit</param>
-        /// <returns></returns>
-        public List<INonRecurrentNetworkSettings> GetReadoutUnitNetworksCollection(int readoutUnitIndex)
-        {
-            if (ReadoutUnitsCfg.ReadoutUnitCfgCollection[readoutUnitIndex].TaskCfg.NetworkCfgCollection.Count > 0)
-            {
-                return ReadoutUnitsCfg.ReadoutUnitCfgCollection[readoutUnitIndex].TaskCfg.NetworkCfgCollection;
-            }
-            else
-            {
-                return ClusterCfg.DefaultNetworksCfg.GetTaskNetworksCfgs(ReadoutUnitsCfg.ReadoutUnitCfgCollection[readoutUnitIndex].TaskCfg.Type);
-            }
         }
 
         /// <inheritdoc />
@@ -143,11 +234,11 @@ namespace RCNet.Neural.Network.SM.Readout
         /// <inheritdoc />
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
-            XElement rootElem = new XElement(rootElemName, ClusterCfg.GetXml(suppressDefaults));
+            XElement rootElem = new XElement(rootElemName, TaskDefaultsCfg.GetXml(suppressDefaults));
             rootElem.Add(ReadoutUnitsCfg.GetXml(suppressDefaults));
-            if (OneWinnerDecisionMakerCfg != null)
+            if (OneTakesAllGroupsCfg != null)
             {
-                rootElem.Add(OneWinnerDecisionMakerCfg.GetXml(suppressDefaults));
+                rootElem.Add(OneTakesAllGroupsCfg.GetXml(suppressDefaults));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;

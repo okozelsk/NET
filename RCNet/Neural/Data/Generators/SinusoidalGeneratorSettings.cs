@@ -5,55 +5,55 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Data.Generators
 {
     /// <summary>
-    /// Configuration of the SinusoidalGenerator
+    /// Configuration of the SinusoidalGenerator.
     /// </summary>
     [Serializable]
     public class SinusoidalGeneratorSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "SinusoidalGeneratorType";
         //Default values
         /// <summary>
-        /// Default value of phase argument
+        /// The default value of the phase shift.
         /// </summary>
         public const double DefaultPhase = 0d;
         /// <summary>
-        /// Default value of freq argument
+        /// The default value of the frequency.
         /// </summary>
         public const double DefaultFreq = 1d;
         /// <summary>
-        /// Default value of ampl argument
+        /// The default value of the amplitude.
         /// </summary>
         public const double DefaultAmpl = 1d;
 
 
         //Attribute properties
         /// <summary>
-        /// Phase shift
+        /// The phase shift.
         /// </summary>
         public double Phase { get; }
 
         /// <summary>
-        /// Frequency coefficient
+        /// The frequency.
         /// </summary>
         public double Freq { get; }
 
         /// <summary>
-        /// Amplitude coefficient
+        /// The amplitude.
         /// </summary>
         public double Ampl { get; }
 
 
         //Constructors
         /// <summary>
-        /// Constructs an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="phase">Phase shift</param>
-        /// <param name="freq">Frequency coefficient</param>
-        /// <param name="ampl">Amplitude coefficient</param>
+        /// <param name="phase">The phase shift.</param>
+        /// <param name="freq">The frequency.</param>
+        /// <param name="ampl">The amplitude.</param>
         public SinusoidalGeneratorSettings(double phase = DefaultPhase,
                                            double freq = DefaultFreq,
                                            double ampl = DefaultAmpl
@@ -67,11 +67,11 @@ namespace RCNet.Neural.Data.Generators
         }
 
         /// <summary>
-        /// Deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public SinusoidalGeneratorSettings(SinusoidalGeneratorSettings source)
-            :this(source.Phase, source.Freq, source.Ampl)
+            : this(source.Phase, source.Freq, source.Ampl)
         {
             return;
         }
@@ -79,7 +79,7 @@ namespace RCNet.Neural.Data.Generators
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public SinusoidalGeneratorSettings(XElement elem)
         {
             //Validation
@@ -94,17 +94,17 @@ namespace RCNet.Neural.Data.Generators
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultPhase { get { return (Phase == DefaultPhase); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultFreq { get { return (Freq == DefaultFreq); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultAmpl { get { return (Ampl == DefaultAmpl); } }
 

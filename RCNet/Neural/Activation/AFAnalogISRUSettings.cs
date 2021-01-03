@@ -1,49 +1,48 @@
-﻿using System;
+﻿using RCNet.RandomValue;
+using System;
 using System.Xml.Linq;
-using RCNet.RandomValue;
 
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Configuration of the AFAnalogISRU activation function.
-    /// Arguments are in RandomValue form to allow their dynamic random initialization within the specified ranges.
+    /// Configuration of the ISRU (Inverse Square Root Unit) activation function.
     /// </summary>
     [Serializable]
     public class AFAnalogISRUSettings : RCNetBaseSettings, IActivationSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "ActivationISRUType";
 
         //Typical values
         /// <summary>
-        /// Typical alpha value
+        /// The typical alpha value.
         /// </summary>
         public const double TypicalAlpha = 1;
 
         //Attribute properties
         /// <summary>
-        /// The Alpha
+        /// The Alpha.
         /// </summary>
         public URandomValueSettings Alpha { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="alpha">The Alpha</param>
+        /// <param name="alpha">The Alpha.</param>
         public AFAnalogISRUSettings(URandomValueSettings alpha = null)
         {
-            Alpha = URandomValueSettings.CloneOrDefault(alpha, TypicalAlpha);
+            Alpha = URandomValueSettings.CloneOrCreate(alpha, TypicalAlpha);
             return;
         }
 
         /// <summary>
-        /// Copy constructor
+        /// The copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public AFAnalogISRUSettings(AFAnalogISRUSettings source)
         {
             Alpha = (URandomValueSettings)source.Alpha.DeepClone();
@@ -51,15 +50,15 @@ namespace RCNet.Neural.Activation
         }
 
         /// <summary>
-        /// Creates an instance and initializes it from given xml element.
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// Creates an initialized instance.
+        /// <param name="elem">A xml element containing the configuration data.</param>
         /// </summary>
         public AFAnalogISRUSettings(XElement elem)
         {
             //Validation
             XElement activationSettingsElem = Validate(elem, XsdTypeName);
             //Parsing
-            Alpha = URandomValueSettings.LoadOrDefault(activationSettingsElem, "alpha", TypicalAlpha);
+            Alpha = URandomValueSettings.LoadOrCreate(activationSettingsElem, "alpha", TypicalAlpha);
             return;
         }
 
@@ -68,7 +67,7 @@ namespace RCNet.Neural.Activation
         public ActivationType TypeOfActivation { get { return ActivationType.Analog; } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultAlpha { get { return (Alpha.Min == TypicalAlpha && Alpha.Max == TypicalAlpha && Alpha.DistrType == RandomCommon.DistributionType.Uniform); } }
 

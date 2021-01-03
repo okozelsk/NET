@@ -1,6 +1,5 @@
 ﻿using RCNet.Extensions;
 using RCNet.MathTools;
-using RCNet.MathTools.Hurst;
 using RCNet.Neural.Activation;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 using RCNet.Queue;
@@ -10,8 +9,11 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 {
     /// <summary>
-    /// Implements the hidden neuron
+    /// Implements the hidden neuron.
     /// </summary>
+    /// <remarks>
+    /// Supports engagement of both analog and spiking activation functions and provides unified set of available predictors.
+    /// </remarks>
     [Serializable]
     public class HiddenNeuron : INeuron
     {
@@ -31,51 +33,28 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         public NeuronOutputData OutputData { get; }
 
         //Attributes
-        /// <summary>
-        /// Neuron's activation function
-        /// </summary>
-        private readonly IActivation _activation;
-
-        /// <summary>
-        /// Analog firing
-        /// </summary>
+        private readonly IActivation _activationFn;
+        private readonly PredictorsProvider _predictorsProvider;
         private readonly double _analogFiringThreshold;
         private readonly SimpleQueue<double> _histActivationsQueue;
-
-        /// <summary>
-        /// Retainment
-        /// </summary>
         private readonly double _analogRetainmentStrength;
-
-        /// <summary>
-        /// Stimulation
-        /// </summary>
         private double _iStimuli;
         private double _rStimuli;
         private double _tStimuli;
-
-        /// <summary>
-        /// Activation state
-        /// </summary>
         private double _activationState;
-
-        /// <summary>
-        /// Predictors
-        /// </summary>
-        private readonly PredictorsProvider _predictors;
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance of hidden neuron having spiking activation
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="location">Information about a neuron location within the neural preprocessor</param>
-        /// <param name="spikingActivation">Instantiated activation function.</param>
-        /// <param name="bias">Constant bias to be applied.</param>
-        /// <param name="predictorsCfg">Configuration of neuron's predictors</param>
+        /// <param name="location">The neuron's location.</param>
+        /// <param name="spikingActivation">The instance of a spiking activation function.</param>
+        /// <param name="bias">The constant bias.</param>
+        /// <param name="predictorsProviderCfg">The configuration of the predictors provider.</param>
         public HiddenNeuron(NeuronLocation location,
                             AFSpikingBase spikingActivation,
                             double bias,
-                            PredictorsProviderSettings predictorsCfg
+                            PredictorsProviderSettings predictorsProviderCfg
                             )
         {
             Location = location;
@@ -85,13 +64,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
             if (spikingActivation.TypeOfActivation == ActivationType.Analog)
             {
                 //Spiking
-                throw new InvalidOperationException($"Called wrong type of hidden neuron constructor for spiking activation.");
+                throw new ArgumentException($"Wrong type of the activation function.", "spikingActivation");
             }
-            _activation = spikingActivation;
+            _activationFn = spikingActivation;
             _analogFiringThreshold = 0;
             _histActivationsQueue = null;
             _analogRetainmentStrength = 0;
-            _predictors = predictorsCfg != null ? new PredictorsProvider(predictorsCfg) : null;
+            _predictorsProvider = predictorsProviderCfg != null ? new PredictorsProvider(predictorsProviderCfg) : null;
             OutputData = new NeuronOutputData();
             Reset(false);
             return;
@@ -99,22 +78,22 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance of hidden neuron having analog activation
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="location">Information about a neuron location within the neural preprocessor</param>
-        /// <param name="analogActivation">Instantiated activation function.</param>
-        /// <param name="bias">Constant bias to be applied.</param>
-        /// <param name="firingThreshold">A number between 0 and 1 (LT1). Every time the new activation value is higher than the previous activation value by at least the threshold, it is evaluated as a firing event.</param>
-        /// <param name="thresholdMaxRefDeepness">Maximum deepness of historical normalized activation value to be compared with current normalized activation value when evaluating firing event.</param>
-        /// <param name="retainmentStrength">Strength of the analog neuron's retainment property.</param>
-        /// <param name="predictorsCfg">Configuration of neuron's predictors</param>
+        /// <param name="location">The neuron's location.</param>
+        /// <param name="analogActivation">The instance of an analog activation function.</param>
+        /// <param name="bias">The constant bias.</param>
+        /// <param name="firingThreshold">The firing threshold value. It must be GE0 and LT1. Every time the current normalized activation is higher than the normalized past reference activation by at least this threshold, it is evaluated as a firing event.</param>
+        /// <param name="firingThresholdMaxRefDeepness">Maximum age of the past activation for the evaluation of the firing event.</param>
+        /// <param name="retainmentStrength">The strength of the analog neuron's retainment property. It enables the leaky integrator feature of the neuron.</param>
+        /// <param name="predictorsProviderCfg">The configuration of the predictors provider.</param>
         public HiddenNeuron(NeuronLocation location,
                             AFAnalogBase analogActivation,
                             double bias,
                             double firingThreshold,
-                            int thresholdMaxRefDeepness,
+                            int firingThresholdMaxRefDeepness,
                             double retainmentStrength,
-                            PredictorsProviderSettings predictorsCfg
+                            PredictorsProviderSettings predictorsProviderCfg
                             )
         {
             Location = location;
@@ -123,13 +102,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
             //Activation check
             if (analogActivation.TypeOfActivation == ActivationType.Spiking)
             {
-                throw new InvalidOperationException($"Called wrong type of hidden neuron constructor for analog activation.");
+                throw new ArgumentException($"Wrong type of the activation function.", "analogActivation");
             }
-            _activation = analogActivation;
+            _activationFn = analogActivation;
             _analogFiringThreshold = firingThreshold;
-            _histActivationsQueue = thresholdMaxRefDeepness < 2 ? null : new SimpleQueue<double>(thresholdMaxRefDeepness);
+            _histActivationsQueue = firingThresholdMaxRefDeepness < 2 ? null : new SimpleQueue<double>(firingThresholdMaxRefDeepness);
             _analogRetainmentStrength = retainmentStrength;
-            _predictors = predictorsCfg != null ? new PredictorsProvider(predictorsCfg) : null;
+            _predictorsProvider = predictorsProviderCfg != null ? new PredictorsProvider(predictorsProviderCfg) : null;
             OutputData = new NeuronOutputData();
             Reset(false);
             return;
@@ -140,30 +119,30 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 
         //Properties
         /// <inheritdoc/>
-        public NeuronCommon.NeuronType Type { get { return NeuronCommon.NeuronType.Hidden; } }
+        public NeuronType Type { get { return NeuronType.Hidden; } }
 
         /// <inheritdoc/>
-        public ActivationType TypeOfActivation { get { return _activation.TypeOfActivation; } }
+        public ActivationType TypeOfActivation { get { return _activationFn.TypeOfActivation; } }
 
         /// <summary>
-        /// Number of computation cycles necessary to make neuron and its predictors fully operating
+        /// The number of computation cycles necessary to make the neuron and its predictors fully operable.
         /// </summary>
-        public int RequiredHistLength { get { return _predictors == null ? 1 : _predictors.RequiredHistLength; } }
+        public int RequiredHistLength { get { return _predictorsProvider == null ? 1 : _predictorsProvider.RequiredHistLength; } }
 
         /// <summary>
-        /// Number of provided predictors
+        /// The number of provided predictors.
         /// </summary>
-        public int NumOfProvidedPredictors { get { return _predictors == null ? 0 : _predictors.NumOfProvidedPredictors; } }
+        public int NumOfProvidedPredictors { get { return _predictorsProvider == null ? 0 : _predictorsProvider.NumOfProvidedPredictors; } }
 
         //Methods
         /// <inheritdoc/>
         public void Reset(bool statistics)
         {
-            if (_activation.TypeOfActivation == ActivationType.Spiking)
+            if (_activationFn.TypeOfActivation == ActivationType.Spiking)
             {
-                ((AFSpikingBase)_activation).Reset();
+                ((AFSpikingBase)_activationFn).Reset();
             }
-            _predictors?.Reset();
+            _predictorsProvider?.Reset();
             _iStimuli = 0;
             _rStimuli = 0;
             _tStimuli = 0;
@@ -199,10 +178,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
             ++OutputData._spikeLeak;
 
             double normalizedActivation;
-            if (_activation.TypeOfActivation == ActivationType.Spiking)
+            if (_activationFn.TypeOfActivation == ActivationType.Spiking)
             {
                 //Spiking activation
-                AFSpikingBase af = (AFSpikingBase)_activation;
+                AFSpikingBase af = (AFSpikingBase)_activationFn;
                 OutputData._spikingSignal = af.Compute(_tStimuli);
                 //OutputData._analogSignal = OutputData._spikingSignal;
                 _activationState = af.InternalState;
@@ -212,8 +191,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
             else
             {
                 //Analog activation
-                _activationState = (_analogRetainmentStrength * _activationState) + (1d - _analogRetainmentStrength) * _activation.Compute(_tStimuli);
-                normalizedActivation = OutputRange.Rescale(_activationState, _activation.OutputRange).Bound(OutputRange.Min, OutputRange.Max);
+                _activationState = (_analogRetainmentStrength * _activationState) + (1d - _analogRetainmentStrength) * _activationFn.Compute(_tStimuli);
+                normalizedActivation = OutputRange.Rescale(_activationState, _activationFn.OutputRange).Bound(OutputRange.Min, OutputRange.Max);
                 double activationDifference = _histActivationsQueue == null ? ((normalizedActivation - OutputData._analogSignal)) : (_histActivationsQueue.Full ? (normalizedActivation - _histActivationsQueue.Dequeue()) : (normalizedActivation - 0.5d));
                 //Firing event decision
                 bool firingEvent = activationDifference > _analogFiringThreshold;
@@ -224,7 +203,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
                 OutputData._spikingSignal = firingEvent ? 1d : 0d;
             }
             //Update predictors
-            _predictors?.Update(_activationState, normalizedActivation, (OutputData._spikingSignal > 0));
+            _predictorsProvider?.Update(_activationState, normalizedActivation, (OutputData._spikingSignal > 0));
             //Update statistics
             if (collectStatistics)
             {
@@ -234,36 +213,37 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
         }
 
         /// <summary>
-        /// Copies values of enabled predictors to a given buffer starting from specified position (idx)
+        /// Copies the computed predictors into a buffer starting from the specified position.
         /// </summary>
-        /// <param name="predictors">Buffer where to be copied enabled predictors</param>
-        /// <param name="idx">Starting position index</param>
-        public int CopyPredictorsTo(double[] predictors, int idx)
+        /// <param name="buffer">The buffer.</param>
+        /// <param name="idx">The zero-based starting position.</param>
+        /// <returns>The number of copied values.</returns>
+        public int CopyPredictorsTo(double[] buffer, int idx)
         {
-            if (_predictors == null)
+            if (_predictorsProvider == null)
             {
                 return 0;
             }
             else
             {
-                return _predictors.CopyPredictorsTo(predictors, idx);
+                return _predictorsProvider.CopyPredictorsTo(buffer, idx);
             }
         }
 
         /// <summary>
-        /// Returns array containing values of enabled predictors
+        /// Gets the array of computed predictors.
         /// </summary>
         public double[] GetPredictors()
         {
-            return _predictors?.GetPredictors();
+            return _predictorsProvider?.GetPredictors();
         }
 
         /// <summary>
-        /// Returns identifiers of provided predictors in the same order as is used in the methods CopyPredictorsTo and GetPredictors
+        /// Gets the identifiers of provided predictors in the same order as in the methods CopyPredictorsTo and GetPredictors.
         /// </summary>
         public List<PredictorsProvider.PredictorID> GetPredictorsIDs()
         {
-            return _predictors?.GetIDs();
+            return _predictorsProvider?.GetIDs();
         }
 
 

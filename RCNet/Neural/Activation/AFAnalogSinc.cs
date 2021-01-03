@@ -5,7 +5,7 @@ using System;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Implements the Sinc activation function
+    /// Implements the Sinc activation function.
     /// </summary>
     [Serializable]
     public class AFAnalogSinc : AFAnalogBase
@@ -15,7 +15,7 @@ namespace RCNet.Neural.Activation
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         public AFAnalogSinc()
             : base(_sincOutputRange)

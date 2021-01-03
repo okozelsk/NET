@@ -5,87 +5,88 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.NonRecurrent.FF
 {
     /// <summary>
-    /// Configuration of the RPropTrainer
+    /// Configuration of the RPropTrainer.
     /// </summary>
     [Serializable]
     public class RPropTrainerSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "FFNetRPropTrainerType";
+        //Default values
         /// <summary>
-        /// A default absolute value that is still considered as zero
+        /// A default absolute value that is still considered as zero.
         /// </summary>
         public const double DefaultZeroTolerance = 1E-17d;
         /// <summary>
-        /// Default positive Eta
+        /// The default positive Eta.
         /// </summary>
         public const double DefaultPositiveEta = 1.2d;
         /// <summary>
-        /// Default negative Eta
+        /// The default negative Eta.
         /// </summary>
         public const double DefaultNegativeEta = 0.5d;
         /// <summary>
-        /// Delta default initialization value
+        /// The default initialization Delta value.
         /// </summary>
         public const double DefaultIniDelta = 0.1d;
         /// <summary>
-        /// Delta default minimum value
+        /// The default minimum Delta value.
         /// </summary>
         public const double DefaultMinDelta = 1E-6d;
         /// <summary>
-        /// Delta default maximum value
+        /// The default maximum Delta value.
         /// </summary>
         public const double DefaultMaxDelta = 50d;
 
         //Attribute properties
         /// <summary>
-        /// Number of attempts
+        /// The number of attempts.
         /// </summary>
         public int NumOfAttempts { get; }
         /// <summary>
-        /// Number of attempt epochs
+        /// The number of attempt epochs.
         /// </summary>
         public int NumOfAttemptEpochs { get; }
         /// <summary>
-        /// An absolute value that is still considered as zero
+        /// An absolute value that is still considered as zero.
         /// </summary>
         public double ZeroTolerance { get; }
         /// <summary>
-        /// Positive Eta
+        /// The positive Eta.
         /// </summary>
         public double PositiveEta { get; }
         /// <summary>
-        /// Negative Eta
+        /// The negative Eta.
         /// </summary>
         public double NegativeEta { get; }
         /// <summary>
-        /// Delta initial value
+        /// The initial Delta.
         /// </summary>
         public double IniDelta { get; }
         /// <summary>
-        /// Delta minimum value
+        /// The minimum Delta.
         /// </summary>
         public double MinDelta { get; }
         /// <summary>
-        /// Delta maximum value
+        /// The maximum Delta.
         /// </summary>
         public double MaxDelta { get; }
 
         //Constructors
         /// <summary>
-        /// Constructs an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="numOfAttempts">Number of attempts</param>
-        /// <param name="numOfAttemptEpochs">Number of attempt epochs</param>
-        /// <param name="zeroTolerance">An absolute value that is still considered as zero</param>
-        /// <param name="positiveEta">Positive Eta</param>
-        /// <param name="negativeEta">Negative Eta</param>
-        /// <param name="iniDelta">Delta initial value</param>
-        /// <param name="minDelta">Delta minimum value</param>
-        /// <param name="maxDelta">Delta maximum value</param>
+        /// <param name="numOfAttempts">The number of attempts.</param>
+        /// <param name="numOfAttemptEpochs">The number of attempt epochs.</param>
+        /// <param name="zeroTolerance">An absolute value that is still considered as zero.</param>
+        /// <param name="positiveEta">The positive Eta.</param>
+        /// <param name="negativeEta">The negative Eta.</param>
+        /// <param name="iniDelta">The initial Delta.</param>
+        /// <param name="minDelta">The minimum Delta.</param>
+        /// <param name="maxDelta">The maximum Delta.</param>
         public RPropTrainerSettings(int numOfAttempts,
                                     int numOfAttemptEpochs,
                                     double zeroTolerance = DefaultZeroTolerance,
@@ -109,9 +110,9 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         }
 
         /// <summary>
-        /// Deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public RPropTrainerSettings(RPropTrainerSettings source)
         {
             NumOfAttempts = source.NumOfAttempts;
@@ -128,7 +129,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml data containing resilient propagation trainer settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public RPropTrainerSettings(XElement elem)
         {
             //Validation
@@ -148,44 +149,40 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultZeroTolerance { get { return (ZeroTolerance == DefaultZeroTolerance); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultPositiveEta { get { return (PositiveEta == DefaultPositiveEta); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultNegativeEta { get { return (NegativeEta == DefaultNegativeEta); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultIniDelta { get { return (IniDelta == DefaultIniDelta); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultMinDelta { get { return (MinDelta == DefaultMinDelta); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultMaxDelta { get { return (MaxDelta == DefaultMaxDelta); } }
 
-        /// <summary>
-        /// Identifies settings containing only default values
-        /// </summary>
+        /// <inheritdoc/>
         public override bool ContainsOnlyDefaults { get { return false; } }
 
         //Methods
-        /// <summary>
-        /// Checks consistency
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Check()
         {
             if (NumOfAttempts < 1)
@@ -227,20 +224,13 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             return;
         }
 
-        /// <summary>
-        /// Creates the deep copy instance of this instance
-        /// </summary>
+        /// <inheritdoc/>
         public override RCNetBaseSettings DeepClone()
         {
             return new RPropTrainerSettings(this);
         }
 
-        /// <summary>
-        /// Generates xml element containing the settings.
-        /// </summary>
-        /// <param name="rootElemName">Name to be used as a name of the root element.</param>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(string rootElemName, bool suppressDefaults)
         {
             XElement rootElem = new XElement(rootElemName, new XAttribute("attempts", NumOfAttempts.ToString(CultureInfo.InvariantCulture)),
@@ -273,11 +263,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             return rootElem;
         }
 
-        /// <summary>
-        /// Generates default named xml element containing the settings.
-        /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc/>
         public override XElement GetXml(bool suppressDefaults)
         {
             return GetXml("resPropTrainer", suppressDefaults);

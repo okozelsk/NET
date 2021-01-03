@@ -5,22 +5,22 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {
     /// <summary>
-    /// Configuration of synapse constant dynamics (no short-term plasticity)
+    /// Configuration of the synapse's constant efficacy dynamics.
     /// </summary>
     [Serializable]
     public abstract class ConstantDynamicsSettings : RCNetBaseSettings, IDynamicsSettings
     {
         //Attribute properties
         /// <summary>
-        /// Synapse's constant efficacy
+        /// The synapse's constant efficacy.
         /// </summary>
         public double Efficacy { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="efficacy">Synapse's constant efficacy</param>
+        /// <param name="efficacy">The synapse's constant efficacy.</param>
         public ConstantDynamicsSettings(double efficacy)
         {
             Efficacy = efficacy;
@@ -31,7 +31,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <summary>
         /// The deep copy constructor
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public ConstantDynamicsSettings(ConstantDynamicsSettings source)
             : this(source.Efficacy)
         {
@@ -41,7 +41,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         /// <param name="xsdTypeName">Name of the associated type defined in xsd</param>
         public ConstantDynamicsSettings(XElement elem, string xsdTypeName)
         {

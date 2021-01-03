@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Implements the "two input fields (a*X + b*Y) linear" transformation
+    /// Implements the linear transformation. Uses the values of the two input fields and computes (a*X + b*Y).
     /// </summary>
     [Serializable]
     public class LinearTransformer : ITransformer
@@ -13,19 +13,19 @@ namespace RCNet.Neural.Data.Transformers
         //Attributes
         private readonly int _xFieldIdx;
         private readonly int _yFieldIdx;
-        private readonly LinearTransformerSettings _settings;
+        private readonly LinearTransformerSettings _cfg;
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="availableFieldNames">Collection of names of all available input fields</param>
-        /// <param name="settings">Configuration</param>
+        /// <param name="availableFieldNames">The collection of names of all available input fields.</param>
+        /// <param name="settings">The configuration.</param>
         public LinearTransformer(List<string> availableFieldNames, LinearTransformerSettings settings)
         {
-            _settings = (LinearTransformerSettings)settings.DeepClone();
-            _xFieldIdx = availableFieldNames.IndexOf(_settings.XInputFieldName);
-            _yFieldIdx = availableFieldNames.IndexOf(_settings.YInputFieldName);
+            _cfg = (LinearTransformerSettings)settings.DeepClone();
+            _xFieldIdx = availableFieldNames.IndexOf(_cfg.XInputFieldName);
+            _yFieldIdx = availableFieldNames.IndexOf(_cfg.YInputFieldName);
             return;
         }
 
@@ -47,7 +47,7 @@ namespace RCNet.Neural.Data.Transformers
             {
                 throw new InvalidOperationException($"Invalid data value at input field index {_yFieldIdx} (NaN).");
             }
-            return _settings.A * data[_xFieldIdx] + _settings.B * data[_yFieldIdx];
+            return _cfg.A * data[_xFieldIdx] + _cfg.B * data[_yFieldIdx];
         }
 
     }//LinearTransformer

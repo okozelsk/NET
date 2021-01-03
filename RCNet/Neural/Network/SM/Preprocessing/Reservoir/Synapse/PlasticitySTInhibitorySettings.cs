@@ -5,26 +5,26 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {
     /// <summary>
-    /// Synapse's plasticity configuration (inhibitory spiking to hidden spiking neuron)
+    /// Configuration of the efficacy's dynamics of an inhibitory synapse connecting presynaptic hidden spiking neuron and postsynaptic hidden spiking neuron.
     /// </summary>
     [Serializable]
     public class PlasticitySTInhibitorySettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "SynapsePlasticitySTInhibitoryType";
 
         //Attribute properties
         /// <summary>
-        /// Synapse's dynamics configuration
+        /// The configuration of the synapse's efficacy dynamics.
         /// </summary>
         public IDynamicsSettings DynamicsCfg { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         public PlasticitySTInhibitorySettings(IDynamicsSettings dynamicsCfg = null)
         {
@@ -46,7 +46,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <summary>
         /// The deep copy constructor
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public PlasticitySTInhibitorySettings(PlasticitySTInhibitorySettings source)
             : this(source.DynamicsCfg)
         {
@@ -56,7 +56,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public PlasticitySTInhibitorySettings(XElement elem)
         {
             //Validation

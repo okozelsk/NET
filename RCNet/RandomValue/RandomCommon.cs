@@ -4,39 +4,39 @@ using System.Xml.Linq;
 namespace RCNet.RandomValue
 {
     /// <summary>
-    /// Helper class supporting random values concept
+    /// Implements the enumerations and helper methods related to random values.
     /// </summary>
     public static class RandomCommon
     {
         //Enums
         /// <summary>
-        /// Type of the random distribution
+        /// The type of random distribution.
         /// </summary>
         public enum DistributionType
         {
             /// <summary>
-            /// Uniform distribution
+            /// The uniform distribution.
             /// </summary>
             Uniform,
             /// <summary>
-            /// Gaussian distribution
+            /// The gaussian distribution.
             /// </summary>
             Gaussian,
             /// <summary>
-            /// Exponential distribution
+            /// The exponential distribution.
             /// </summary>
             Exponential,
             /// <summary>
-            /// Gamma distribution
+            /// The gamma distribution.
             /// </summary>
             Gamma
         }
 
         //Static methods
         /// <summary>
-        /// Returns default name of the xml element containing settings for given distribution type
+        /// Gets the default name of a xml element holding the configuration of specified distribution type.
         /// </summary>
-        /// <param name="distrType">Distribution type</param>
+        /// <param name="distrType">The distribution type.</param>
         public static string GetDistrElemName(DistributionType distrType)
         {
             switch (distrType)
@@ -55,11 +55,10 @@ namespace RCNet.RandomValue
         }
 
         /// <summary>
-        /// Creates appropriate instance of DistributionSettings based on given xml element
+        /// Loads the configuration of random distribution.
         /// </summary>
-        /// <param name="elem">Xml element containing distribution settings</param>
-        /// <returns>Appropriate instance of DistributionSettings</returns>
-        public static IDistrSettings CreateDistrSettings(XElement elem)
+        /// <param name="elem">A xml element containing the configuration data.</param>
+        public static IDistrSettings LoadDistrCfg(XElement elem)
         {
             switch (elem.Name.LocalName)
             {
@@ -72,16 +71,15 @@ namespace RCNet.RandomValue
                 case "gammaDistr":
                     return new GammaDistrSettings(elem);
                 default:
-                    throw new InvalidOperationException($"Unexpected element {elem.Name.LocalName}");
+                    throw new ArgumentException($"Unexpected element name {elem.Name.LocalName}.", "elem");
             }
         }
 
         /// <summary>
-        /// Creates appropriate instance of DistributionSettings based on given xml element (unsigned)
+        /// Loads the configuration of random distribution (unsigned version).
         /// </summary>
-        /// <param name="elem">Xml element containing distribution settings</param>
-        /// <returns>Appropriate instance of DistributionSettings</returns>
-        public static IDistrSettings CreateUDistrSettings(XElement elem)
+        /// <param name="elem">A xml element containing the configuration data.</param>
+        public static IDistrSettings LoadUDistrCfg(XElement elem)
         {
             switch (elem.Name.LocalName)
             {
@@ -94,7 +92,7 @@ namespace RCNet.RandomValue
                 case "gammaDistr":
                     return new GammaDistrSettings(elem);
                 default:
-                    throw new InvalidOperationException($"Unexpected element {elem.Name.LocalName}");
+                    throw new ArgumentException($"Unexpected element name {elem.Name.LocalName}.", "elem");
             }
         }
 

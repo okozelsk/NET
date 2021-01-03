@@ -1,26 +1,26 @@
-﻿using System;
-using RCNet.Extensions;
+﻿using RCNet.Extensions;
 using RCNet.MathTools;
+using System;
 
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Implements the ISRU (Inverse Square Root Unit) activation function
+    /// Implements the ISRU (Inverse Square Root Unit) activation function.
     /// </summary>
     [Serializable]
     public class AFAnalogISRU : AFAnalogBase
     {
         //Attribute properties
         /// <summary>
-        /// The Alpha
+        /// The Alpha.
         /// </summary>
         public double Alpha { get; }
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="alpha">The Alpha</param>
+        /// <param name="alpha">The Alpha.</param>
         public AFAnalogISRU(double alpha)
             : base(null)
         {

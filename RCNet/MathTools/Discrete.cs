@@ -3,7 +3,7 @@
 namespace RCNet.MathTools
 {
     /// <summary>
-    /// Discrete mathematics
+    /// Implements some helper functions from the discrete math.
     /// </summary>
     public static class Discrete
     {
@@ -18,7 +18,7 @@ namespace RCNet.MathTools
 
         //Static constructor
         /// <summary>
-        /// Prepares static members
+        /// Static constructor. Prepares the factorial cache.
         /// </summary>
         static Discrete()
         {
@@ -33,25 +33,27 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Returns n!. Product of all positive integers less than or equal to n (n has to be LE Factorial.FactorialMaxArgument).
+        /// Computes the factorial.
         /// </summary>
-        /// <param name="n">Factorial argument</param>
+        /// <param name="n">An argument (it has to be LE to FactorialMaxArgument).</param>
         public static ulong Factorial(uint n)
         {
             if (n > FactorialMaxArgument)
             {
-                throw (new ArgumentException($"Argument is bigger than FactorialMaxArgument {FactorialMaxArgument}"));
+                throw (new ArgumentException($"Argument is bigger than the FactorialMaxArgument {FactorialMaxArgument}"));
             }
             return _factorialResultCache[n];
         }
 
         /// <summary>
-        /// Computes product of integers LE than n and GE than ((n - steps) + 1)
-        /// Example: n = 50 and steps = 3 computes 50*49*48
+        /// Computes the product of integers LE to n and GE to ((n - steps) + 1).
         /// </summary>
-        /// <param name="n">Starting number</param>
-        /// <param name="steps">Number of backward multiplication steps</param>
-        public static ulong PartialReversalFactorial(uint n, uint steps)
+        /// <remarks>
+        /// For n = 50 and steps = 3, it computes 50 * 49 * 48 = 117600.
+        /// </remarks>
+        /// <param name="n">The starting integer.</param>
+        /// <param name="steps">The number of backward multiplication steps.</param>
+        public static ulong PartialReversalProduct(uint n, uint steps)
         {
             if (steps < 1) return 0;
             if (n == 0) return 1;
@@ -65,7 +67,7 @@ namespace RCNet.MathTools
                 ctrlResult *= n;
                 if (Math.Floor(ctrlResult) > result)
                 {
-                    throw (new Exception("Result is too big"));
+                    throw (new InvalidOperationException("Result is too big."));
                 }
                 ctrlResult = result;
             }
@@ -74,16 +76,16 @@ namespace RCNet.MathTools
 
         //Methods
         /// <summary>
-        /// Computes greatest common divisor
+        /// Computes the greatest common divisor.
         /// </summary>
-        /// <param name="n1">Number 1</param>
-        /// <param name="n2">Number 2</param>
-        /// <returns>Greatest common divisor</returns>
+        /// <param name="n1">An integer n1.</param>
+        /// <param name="n2">An integer n2.</param>
+        /// <returns>The greatest common divisor.</returns>
         public static int GCD(int n1, int n2)
         {
             //Checks
-            if (n1 < 1) throw new ArgumentException($"n1={n1} is less than 1");
-            if (n2 < 1) throw new ArgumentException($"n2={n2} is less than 1");
+            if (n1 < 1) throw new ArgumentException($"n1={n1} is less than 1", "n1");
+            if (n2 < 1) throw new ArgumentException($"n2={n2} is less than 1", "n2");
             while (n2 != 0)
             {
                 int tmp = n1;
@@ -94,12 +96,12 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Computes lowest common multiplier
+        /// Computes the lowest common multiplier.
         /// </summary>
-        /// <param name="n1">Number 1</param>
-        /// <param name="n2">Number 2</param>
-        /// <param name="gcd">Computed greatest common divisor</param>
-        /// <returns>Lowest common multiplier</returns>
+        /// <param name="n1">An integer n1.</param>
+        /// <param name="n2">An integer n2.</param>
+        /// <param name="gcd">The computed greatest common divisor.</param>
+        /// <returns>The lowest common multiplier.</returns>
         public static int LCM(int n1, int n2, out int gcd)
         {
             gcd = GCD(n1, n2);
@@ -107,10 +109,12 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Tests if n is prime number.
-        /// Implements basic test unefficient for large numbers.
+        /// Tests whether the integer is the prime number.
         /// </summary>
-        /// <param name="n">Number to be tested</param>
+        /// <remarks>
+        /// Implements only a basic test that is inefficient for large numbers.
+        /// </remarks>
+        /// <param name="n">An integer to be tested.</param>
         public static bool IsPrime(int n)
         {
             if (n <= 1) return false;

@@ -9,52 +9,52 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
     /// <summary>
-    /// Configuration of the generated input field
+    /// Configuration of the generated input field.
     /// </summary>
     [Serializable]
     public class GeneratedFieldSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "NPGeneratedInpFieldType";
         //Default values
         /// <summary>
-        /// Default value of parameter specifying if to route generated field to readout layer together with other predictors 
+        /// The default value of the parameter specifying whether to route the generated field to the readout layer.
         /// </summary>
         public const bool DefaultRouteToReadout = false;
 
         //Attribute properties
         /// <summary>
-        /// Generated field name
+        /// The name of the generated field.
         /// </summary>
         public string Name { get; }
 
         /// <summary>
-        /// Configuration of associated generator
+        /// The configuration of an associated generator.
         /// </summary>
         public RCNetBaseSettings GeneratorCfg { get; }
 
         /// <summary>
-        /// Specifies whether to route generated field to readout layer together with other predictors
+        /// Specifies whether to route the generated field to the readout layer.
         /// </summary>
         public bool RouteToReadout { get; }
 
         /// <summary>
-        /// Configuration of real feature filter
+        /// The configuration of the real feature filter.
         /// </summary>
         public RealFeatureFilterSettings FeatureFilterCfg { get; }
 
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="name">Generated field name</param>
-        /// <param name="generatorCfg">Configuration of associated generator</param>
-        /// <param name="routeToReadout">Specifies whether to route generated field to readout layer together with other predictors</param>
-        /// <param name="featureFilterCfg">Configuration of real feature filter</param>
+        /// <param name="name">The name of the generated field.</param>
+        /// <param name="generatorCfg">The configuration of an associated generator.</param>
+        /// <param name="routeToReadout">Specifies whether to route the generated field to the readout layer.</param>
+        /// <param name="featureFilterCfg">The configuration of the real feature filter.</param>
         public GeneratedFieldSettings(string name,
                                       RCNetBaseSettings generatorCfg,
                                       bool routeToReadout = DefaultRouteToReadout,
@@ -70,9 +70,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Copy constructor
+        /// The copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public GeneratedFieldSettings(GeneratedFieldSettings source)
             : this(source.Name, source.GeneratorCfg, source.RouteToReadout, source.FeatureFilterCfg)
         {
@@ -82,7 +82,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml data containing the settings.</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public GeneratedFieldSettings(XElement elem)
         {
             //Validation
@@ -100,7 +100,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultRouteToReadout { get { return (RouteToReadout == DefaultRouteToReadout); } }
 

@@ -1,9 +1,7 @@
-﻿using System.Xml.Linq;
-
-namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
+﻿namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 {
     /// <summary>
-    /// Common interface of the predictors configurations
+    /// The common interface of the predictors configurations.
     /// </summary>
     public interface IPredictorSettings
     {
@@ -12,22 +10,22 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         PredictorsProvider.PredictorID ID { get; }
 
         /// <summary>
-        /// Specifies necessary size of the windowed history of activations
+        /// Specifies the necessary size of the windowed history of the activations.
         /// </summary>
         int RequiredWndSizeOfActivations { get; }
 
         /// <summary>
-        /// Specifies necessary size of the windowed history of firings
+        /// Specifies the necessary size of the windowed history of the firings.
         /// </summary>
         int RequiredWndSizeOfFirings { get; }
 
         /// <summary>
-        /// Indicates use of continuous stat of activations
+        /// Indicates the use of the continuous statistics of the activation.
         /// </summary>
         bool NeedsContinuousActivationStat { get; }
 
         /// <summary>
-        /// Indicates use of continuous stat of activation differences
+        /// Indicates the use of the continuous statistics of the activation difference.
         /// </summary>
         bool NeedsContinuousActivationDiffStat { get; }
 

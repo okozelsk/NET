@@ -4,7 +4,7 @@ using RCNet.Neural.Network.SM.Preprocessing.Neuron;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {
     /// <summary>
-    /// Implements the linear efficacy computer
+    /// Implements the efficacy computer having the linear dynamics.
     /// </summary>
     public class LinearEfficacy : IEfficacy
     {
@@ -15,10 +15,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="presynapticNeuron">Presynaptic neuron</param>
-        /// <param name="dynamicsCfg">Dynamics configuration</param>
+        /// <param name="presynapticNeuron">The presynaptic neuron.</param>
+        /// <param name="dynamicsCfg">The configuration of the dynamics.</param>
         public LinearEfficacy(INeuron presynapticNeuron, LinearDynamicsSettings dynamicsCfg)
         {
             _presynapticNeuronOutputData = presynapticNeuron.OutputData;

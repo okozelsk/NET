@@ -1,5 +1,4 @@
-﻿using System;
-using RCNet.Neural.Activation;
+﻿using RCNet.Neural.Activation;
 using RCNet.Neural.Data.Filter;
 using RCNet.Neural.Network.NonRecurrent;
 using RCNet.Neural.Network.SM;
@@ -7,11 +6,12 @@ using RCNet.Neural.Network.SM.Preprocessing;
 using RCNet.Neural.Network.SM.Preprocessing.Input;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 using RCNet.Neural.Network.SM.Readout;
+using System;
 
 namespace Demo.DemoConsoleApp.Examples
 {
     /// <summary>
-    /// Example code shows how to setup StateMachine as a pure ESN for multivariate timeseries classification using StateMachineDesigner.
+    /// Example code shows how to use StateMachineDesigner and setup StateMachine as a pure ESN for multivariate timeseries classification.
     /// Example uses LibrasMovement_train.csv and LibrasMovement_verify.csv from ./Data subfolder.
     /// The dataset is from "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
     /// https://timeseriesclassification.com/description.php?Dataset=Libras
@@ -44,9 +44,9 @@ namespace Demo.DemoConsoleApp.Examples
                                                                                 );
             //Simplified readout layer configuration
             ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateClassificationReadoutCfg(new CrossvalidationSettings(0.0825d, CrossvalidationSettings.AutoFolds, 1),
-                                                                                                  StateMachineDesigner.CreateSingleLayerRegrNet(new AFAnalogIdentitySettings(), 5, 400),
+                                                                                                  StateMachineDesigner.CreateSingleLayerFFNetCfg(new AFAnalogIdentitySettings(), 5, 400),
+                                                                                                  1,
                                                                                                   "Hand movement",
-                                                                                                  new NetworkClusterSecondLevelCompSettings(new CrossvalidationSettings(0.25d, CrossvalidationSettings.AutoFolds, 2), StateMachineDesigner.CreateMultiLayerRegrNet(10, new AFAnalogLeakyReLUSettings(), 1, 5, 400)),
                                                                                                   "curved swing",
                                                                                                   "horizontal swing",
                                                                                                   "vertical swing",

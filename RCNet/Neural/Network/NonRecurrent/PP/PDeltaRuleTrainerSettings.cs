@@ -5,79 +5,79 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.NonRecurrent.PP
 {
     /// <summary>
-    /// Configuration of the PDeltaRuleTrainer
+    /// Configuration of the PDeltaRuleTrainer.
     /// </summary>
     [Serializable]
     public class PDeltaRuleTrainerSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "PPNetPDeltaRuleTrainerType";
-
+        //Default values
         /// <summary>
-        /// Default initial learning rate
+        /// The default initial learning rate.
         /// </summary>
         public const double DefaultIniLR = 0.01d;
         /// <summary>
-        /// Default learning rate increase
+        /// The default learning rate increment.
         /// </summary>
         public const double DefaultIncLR = 1.1d;
         /// <summary>
-        /// Default learning rate decrease
+        /// The default learning rate decrement.
         /// </summary>
         public const double DefaultDecLR = 0.5d;
         /// <summary>
-        /// Default learning min rate
+        /// The default learning min rate.
         /// </summary>
         public const double DefaultMinLR = 1E-4;
         /// <summary>
-        /// Default learning max rate
+        /// The default learning max rate.
         /// </summary>
         public const double DefaultMaxLR = 0.1d;
 
         //Attribute properties
         /// <summary>
-        /// Number of attempts
+        /// The number of attempts.
         /// </summary>
         public int NumOfAttempts { get; }
         /// <summary>
-        /// Number of attempt epochs
+        /// The number of attempt epochs.
         /// </summary>
         public int NumOfAttemptEpochs { get; }
         /// <summary>
-        /// Initial learning rate
+        /// The initial learning rate.
         /// </summary>
         public double IniLR { get; }
         /// <summary>
-        /// Learning rate increase
+        /// The learning rate increment.
         /// </summary>
         public double IncLR { get; }
         /// <summary>
-        /// Learning rate decrease
+        /// The learning rate decrement.
         /// </summary>
         public double DecLR { get; }
         /// <summary>
-        /// Learning rate minimum
+        /// The min learning rate.
         /// </summary>
         public double MinLR { get; }
         /// <summary>
-        /// Learning rate maximum
+        /// The max learning rate.
         /// </summary>
         public double MaxLR { get; }
 
         //Constructors
         /// <summary>
-        /// Constructs an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="numOfAttempts">Number of attempts</param>
-        /// <param name="numOfAttemptEpochs">Number of attempt epochs</param>
-        /// <param name="iniLR">Initial learning rate</param>
-        /// <param name="incLR">Learning rate increase</param>
-        /// <param name="decLR">Learning rate decrease</param>
-        /// <param name="minLR">Learning rate minimum</param>
-        /// <param name="maxLR">Learning rate maximum</param>
+        /// <param name="numOfAttempts">The number of attempts.</param>
+        /// <param name="numOfAttemptEpochs">The number of attempt epochs.</param>
+        /// <param name="iniLR">The initial learning rate.</param>
+        /// <param name="incLR">The learning rate increment.</param>
+        /// <param name="decLR">The learning rate decrement.</param>
+        /// <param name="minLR">The min learning rate.</param>
+        /// <param name="maxLR">The max learning rate.</param>
         public PDeltaRuleTrainerSettings(int numOfAttempts,
                                          int numOfAttemptEpochs,
                                          double iniLR = DefaultIniLR,
@@ -99,9 +99,9 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         }
 
         /// <summary>
-        /// Deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public PDeltaRuleTrainerSettings(PDeltaRuleTrainerSettings source)
         {
             NumOfAttempts = source.NumOfAttempts;
@@ -117,7 +117,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public PDeltaRuleTrainerSettings(XElement elem)
         {
             //Validation
@@ -136,27 +136,27 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultIniLR { get { return (IniLR == DefaultIniLR); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultIncLR { get { return (IncLR == DefaultIncLR); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultDecLR { get { return (DecLR == DefaultDecLR); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultMinLR { get { return (MinLR == DefaultMinLR); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultMaxLR { get { return (MaxLR == DefaultMaxLR); } }
 

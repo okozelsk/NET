@@ -5,7 +5,7 @@ using System;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Implements the Soft Exponential activation function
+    /// Implements the Soft Exponential activation function.
     /// </summary>
     [Serializable]
     public class AFAnalogSoftExponential : AFAnalogBase
@@ -17,9 +17,9 @@ namespace RCNet.Neural.Activation
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="alpha">alpha</param>
+        /// <param name="alpha">The alpha.</param>
         public AFAnalogSoftExponential(double alpha)
             : base(Interval.IntNIPI)
         {

@@ -1,19 +1,17 @@
-﻿using RCNet.Extensions;
-using RCNet.MathTools;
+﻿using RCNet.MathTools;
 using RCNet.Neural.Data;
 using RCNet.Neural.Data.Filter;
 using RCNet.Neural.Network.NonRecurrent;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace RCNet.Neural.Network.SM.Readout
 {
     /// <summary>
-    /// Class implements the common readout layer for the reservoir computing methods
+    /// Implements the readout layer consisting of trained readout units.
     /// </summary>
     [Serializable]
     public class ReadoutLayer
@@ -23,42 +21,31 @@ namespace RCNet.Neural.Network.SM.Readout
         /// This informative event occurs every time the regression epoch is done
         /// </summary>
         [field: NonSerialized]
-        public event TrainedNetworkBuilder.RegressionEpochDoneHandler RegressionEpochDone;
+        public event TNRNetBuilder.EpochDoneHandler EpochDone;
 
         //Attribute properties
         /// <summary>
-        /// Indicates whether the readout layer is trained
+        /// Indicates whether the readout layer is trained.
         /// </summary>
         public bool Trained { get; private set; }
+
         /// <summary>
-        /// Readout layer configuration
+        /// The readout layer configuration.
         /// </summary>
         public ReadoutLayerSettings ReadoutLayerCfg { get; }
 
         //Attributes
-        /// <summary>
-        /// Collection of feature filters of input predictors
-        /// </summary>
         private FeatureFilterBase[] _predictorFeatureFilterCollection;
-        /// <summary>
-        /// Collection of feature filters of output values
-        /// </summary>
         private FeatureFilterBase[] _outputFeatureFilterCollection;
-        /// <summary>
-        /// Mapping of specific predictors to readout units
-        /// </summary>
         private PredictorsMapper _predictorsMapper;
-        /// <summary>
-        /// Collection of trained readout units.
-        /// </summary>
         private ReadoutUnit[] _readoutUnitCollection;
-
+        private OneTakesAllGroup[] _oneTakesAllGroupCollection;
 
         //Constructor
         /// <summary>
-        /// Creates an uninitialized instance
+        /// Creates an uninitialized instance.
         /// </summary>
-        /// <param name="readoutLayerCfg">Readout layer configuration</param>
+        /// <param name="readoutLayerCfg">The readout layer configuration.</param>
         public ReadoutLayer(ReadoutLayerSettings readoutLayerCfg)
         {
             ReadoutLayerCfg = (ReadoutLayerSettings)readoutLayerCfg.DeepClone();
@@ -68,28 +55,22 @@ namespace RCNet.Neural.Network.SM.Readout
 
         //Static properties
         /// <summary>
-        /// Input and output data will be normalized to this range before the usage
+        /// Input and output data is normalized to this range.
         /// </summary>
         private static Interval InternalDataRange { get { return Interval.IntN1P1; } }
 
-        /// <summary>
-        /// Binary border for classification purposes
-        /// </summary>
-        private static double InternalBinBorder { get { return InternalDataRange.Mid; } }
-
         //Properties
         /// <summary>
-        /// Cluster error statistics of readout units
+        /// Gets the cloned error statistics of the readout units.
         /// </summary>
-        public List<TrainedNetworkCluster.ClusterErrStatistics> ReadoutUnitErrStatCollection
+        public List<TNRNetCluster.ClusterErrStatistics> ReadoutUnitErrStatCollection
         {
             get
             {
-                //Create and return the deep clone
-                List<TrainedNetworkCluster.ClusterErrStatistics> clonedStatisticsCollection = new List<TrainedNetworkCluster.ClusterErrStatistics>(_readoutUnitCollection.Length);
+                List<TNRNetCluster.ClusterErrStatistics> clonedStatisticsCollection = new List<TNRNetCluster.ClusterErrStatistics>(_readoutUnitCollection.Length);
                 foreach (ReadoutUnit ru in _readoutUnitCollection)
                 {
-                    clonedStatisticsCollection.Add(ru.NetworkCluster.ErrorStats.DeepClone());
+                    clonedStatisticsCollection.Add(ru.GetErrStat());
                 }
                 return clonedStatisticsCollection;
             }
@@ -97,7 +78,7 @@ namespace RCNet.Neural.Network.SM.Readout
 
         //Methods
         /// <summary>
-        /// Resets readout layer to its initial untrained state
+        /// Resets the readout layer to its initial untrained state.
         /// </summary>
         public void Reset()
         {
@@ -105,43 +86,56 @@ namespace RCNet.Neural.Network.SM.Readout
             _outputFeatureFilterCollection = null;
             _predictorsMapper = null;
             _readoutUnitCollection = new ReadoutUnit[ReadoutLayerCfg.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count];
-            _readoutUnitCollection.Populate(null);
+            for (int i = 0; i < ReadoutLayerCfg.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count; i++)
+            {
+                ReadoutUnitSettings cfg = ReadoutLayerCfg.ReadoutUnitsCfg.ReadoutUnitCfgCollection[i];
+                _readoutUnitCollection[i] = new ReadoutUnit(i, cfg, ReadoutLayerCfg.TaskDefaultsCfg);
+            }
+            _oneTakesAllGroupCollection = null;
+            if (ReadoutLayerCfg.OneTakesAllGroupsCfg != null)
+            {
+                _oneTakesAllGroupCollection = new OneTakesAllGroup[ReadoutLayerCfg.OneTakesAllGroupsCfg.OneTakesAllGroupCfgCollection.Count];
+                for (int i = 0; i < ReadoutLayerCfg.OneTakesAllGroupsCfg.OneTakesAllGroupCfgCollection.Count; i++)
+                {
+                    OneTakesAllGroupSettings cfg = ReadoutLayerCfg.OneTakesAllGroupsCfg.OneTakesAllGroupCfgCollection[i];
+                    _oneTakesAllGroupCollection[i] = new OneTakesAllGroup(i, cfg, ReadoutLayerCfg.GetOneTakesAllGroupMemberRUnitIndexes(cfg.Name));
+                }
+            }
             Trained = false;
             return;
         }
 
-        private void OnRegressionEpochDone(TrainedNetworkBuilder.BuildingState buildingState, bool foundBetter)
+        private void OnRegressionEpochDone(TNRNetBuilder.BuildProgress buildProgress, bool foundBetter)
         {
             //Only raise up
-            RegressionEpochDone(buildingState, foundBetter);
+            EpochDone(buildProgress, foundBetter);
             return;
         }
 
         /// <summary>
         /// Builds trained readout layer.
         /// </summary>
-        /// <param name="dataBundle">Collection of input predictors and associated desired output values</param>
-        /// <param name="predictorsMapper">Optional specific mapping of predictors to readout units</param>
-        /// <param name="controller">Optional external regression controller</param>
-        /// <param name="randomizerSeek">
-        /// Specifies random number generator's initial seek.
-        /// A value greater than or equal to 0 will always ensure the same initialization of the internal
-        /// random number generator and therefore also the same internal configuration each time the StateMachine to be instantiated.
-        /// A value less than 0 causes different internal configuration each time the ReadoutLayer to be Built.
-        ///</param>
-        /// <returns>Results of the regression</returns>
+        /// <param name="dataBundle">The data to be used for training.</param>
+        /// <param name="predictorsMapper">The mapper of specific predictors to readout units (optional).</param>
+        /// <param name="controller">The build process controller (optional).</param>
+        /// <param name="randomizerSeek">Specifies the random number generator initial seek (optional). A value greater than or equal to 0 will always ensure the same initialization.</param>
+        /// <returns>The results of training.</returns>
         public RegressionOverview Build(VectorBundle dataBundle,
                                         PredictorsMapper predictorsMapper = null,
-                                        TrainedNetworkBuilder.RegressionControllerDelegate controller = null,
+                                        TNRNetBuilder.BuildControllerDelegate controller = null,
                                         int randomizerSeek = 0
                                         )
         {
+            if (Trained)
+            {
+                throw new InvalidOperationException("Readout layer is already built.");
+            }
             //Basic checks
             int numOfPredictors = dataBundle.InputVectorCollection[0].Length;
             int numOfOutputs = dataBundle.OutputVectorCollection[0].Length;
             if (numOfPredictors == 0)
             {
-                throw new InvalidOperationException($"Number of predictors must be greater tham 0.");
+                throw new InvalidOperationException($"Number of predictors must be greater than 0.");
             }
             if (numOfOutputs != ReadoutLayerCfg.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count)
             {
@@ -208,6 +202,16 @@ namespace RCNet.Neural.Network.SM.Readout
             VectorBundle shuffledData = new VectorBundle(normalizedPredictorsCollection, normalizedIdealOutputsCollection);
             shuffledData.Shuffle(rand);
 
+            //"One Takes All" groups input data space initialization
+            List<CompositeResult[]> allReadoutUnitResults = new List<CompositeResult[]>(shuffledData.InputVectorCollection.Count);
+            if (_oneTakesAllGroupCollection != null)
+            {
+                for (int i = 0; i < shuffledData.InputVectorCollection.Count; i++)
+                {
+                    allReadoutUnitResults.Add(new CompositeResult[ReadoutLayerCfg.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count]);
+                }
+            }
+
             //Building of readout units
             for (int unitIdx = 0; unitIdx < ReadoutLayerCfg.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count; unitIdx++)
             {
@@ -221,28 +225,40 @@ namespace RCNet.Neural.Network.SM.Readout
                 }
                 List<double[]> readoutUnitInputVectorCollection = _predictorsMapper.CreateVectorCollection(ReadoutLayerCfg.ReadoutUnitsCfg.ReadoutUnitCfgCollection[unitIdx].Name, shuffledData.InputVectorCollection);
                 VectorBundle readoutUnitDataBundle = new VectorBundle(readoutUnitInputVectorCollection, idealValueCollection);
-                TrainedNetworkClusterBuilder readoutUnitBuilder = new TrainedNetworkClusterBuilder(ReadoutLayerCfg.ReadoutUnitsCfg.ReadoutUnitCfgCollection[unitIdx].Name,
-                                                                                                   ReadoutLayerCfg.GetReadoutUnitNetworksCollection(unitIdx),
-                                                                                                   InternalDataRange,
-                                                                                                   ReadoutLayerCfg.ReadoutUnitsCfg.ReadoutUnitCfgCollection[unitIdx].TaskCfg.Type == ReadoutUnit.TaskType.Classification ? InternalBinBorder : double.NaN,
-                                                                                                   rand,
-                                                                                                   controller,
-                                                                                                   ReadoutLayerCfg.ClusterCfg.SecondLevelCompCfg
-                                                                                                   );
-                //Register notification
-                readoutUnitBuilder.RegressionEpochDone += OnRegressionEpochDone;
-                //Build trained readout unit. Trained unit becomes to be the predicting cluster member
-                _readoutUnitCollection[unitIdx] = new ReadoutUnit(unitIdx,
-                                                                  readoutUnitBuilder.Build(readoutUnitDataBundle,
-                                                                                           ReadoutLayerCfg.ClusterCfg.CrossvalidationCfg,
-                                                                                           _outputFeatureFilterCollection[unitIdx]
-                                                                                           )
-                                                                  );
+                _readoutUnitCollection[unitIdx].EpochDone += OnRegressionEpochDone;
+                _readoutUnitCollection[unitIdx].Build(readoutUnitDataBundle,
+                                                      _outputFeatureFilterCollection[unitIdx],
+                                                      rand,
+                                                      controller
+                                                      );
+                //Add unit's all computed results into the input data for "One Takes All" groups
+                if (_oneTakesAllGroupCollection != null)
+                {
+                    for (int sampleIdx = 0; sampleIdx < readoutUnitDataBundle.InputVectorCollection.Count; sampleIdx++)
+                    {
+                        allReadoutUnitResults[sampleIdx][unitIdx] = _readoutUnitCollection[unitIdx].Compute(readoutUnitDataBundle.InputVectorCollection[sampleIdx]);
+                    }
+                }
             }//unitIdx
 
-            //TODO Train One Winner Groups decision makers if defined
-
-
+            //One Takes All groups build
+            if (_oneTakesAllGroupCollection != null)
+            {
+                foreach (OneTakesAllGroup group in _oneTakesAllGroupCollection)
+                {
+                    //Only the group having inner probabilistic cluster has to be built
+                    if (group.DecisionMethod == OneTakesAllGroup.OneTakesAllDecisionMethod.ClusterChain)
+                    {
+                        BinFeatureFilter[] groupFilters = new BinFeatureFilter[group.NumOfMemberClasses];
+                        for (int i = 0; i < group.NumOfMemberClasses; i++)
+                        {
+                            groupFilters[i] = (BinFeatureFilter)_outputFeatureFilterCollection[group.MemberReadoutUnitIndexCollection[i]];
+                        }
+                        group.RegressionEpochDone += OnRegressionEpochDone;
+                        group.Build(allReadoutUnitResults, shuffledData.OutputVectorCollection, groupFilters, rand, controller);
+                    }
+                }
+            }
 
             //Readout layer is trained and ready
             Trained = true;
@@ -250,11 +266,11 @@ namespace RCNet.Neural.Network.SM.Readout
         }
 
         /// <summary>
-        /// Creates report of predicted values
+        /// Creates the text report of predicted values.
         /// </summary>
-        /// <param name="predictedValues">Vector of computed values.</param>
-        /// <param name="margin">Specifies how many spaces should be at the begining of each row.</param>
-        /// <returns>Built text report</returns>
+        /// <param name="predictedValues">The computed vector.</param>
+        /// <param name="margin">Specifies the left margin of the text.</param>
+        /// <returns>The built text report.</returns>
         public string GetForecastReport(double[] predictedValues, int margin)
         {
             string leftMargin = margin == 0 ? string.Empty : new string(' ', margin);
@@ -268,9 +284,9 @@ namespace RCNet.Neural.Network.SM.Readout
         }
 
         /// <summary>
-        /// Normalizes predictors vector
+        /// Normalizes the vector of predictors.
         /// </summary>
-        /// <param name="predictors">Predictors vector</param>
+        /// <param name="predictors">The predictors vector.</param>
         private double[] NormalizePredictors(double[] predictors)
         {
             //Check
@@ -287,9 +303,9 @@ namespace RCNet.Neural.Network.SM.Readout
         }
 
         /// <summary>
-        /// Naturalizes output values vector
+        /// Naturalizes the output values.
         /// </summary>
-        /// <param name="outputs">Output values vector</param>
+        /// <param name="outputs">The output values vector.</param>
         private double[] NaturalizeOutputs(double[] outputs)
         {
             double[] natOutputs = new double[outputs.Length];
@@ -301,244 +317,304 @@ namespace RCNet.Neural.Network.SM.Readout
         }
 
         /// <summary>
-        /// Computes readout layer output vector
+        /// Computes the readout units.
         /// </summary>
-        private double[] ComputeInternal(double[] predictors, out List<double[]> unitsAllSubResults)
+        private CompositeResult[] ComputeReadoutUnits(double[] predictors, out double[] outputVector)
         {
-            unitsAllSubResults = new List<double[]>(ReadoutLayerCfg.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count);
-            double[] outputVector = new double[_readoutUnitCollection.Length];
+            CompositeResult[] unitsResults = new CompositeResult[_readoutUnitCollection.Length];
+            outputVector = new double[_readoutUnitCollection.Length];
             for (int unitIdx = 0; unitIdx < _readoutUnitCollection.Length; unitIdx++)
             {
                 double[] readoutUnitInputVector = _predictorsMapper.CreateVector(ReadoutLayerCfg.ReadoutUnitsCfg.ReadoutUnitCfgCollection[unitIdx].Name, predictors);
-                outputVector[unitIdx] = _readoutUnitCollection[unitIdx].NetworkCluster.Compute(readoutUnitInputVector, out double[] memberOutputCollection);
-                unitsAllSubResults.Add(memberOutputCollection);
+                CompositeResult unitResult = _readoutUnitCollection[unitIdx].Compute(readoutUnitInputVector);
+                outputVector[unitIdx] = unitResult.Result[0];
+                unitsResults[unitIdx] = unitResult;
             }
-            return outputVector;
+            return unitsResults;
         }
 
         /// <summary>
-        /// Computes readout layer output vector
+        /// Computes the readout layer.
         /// </summary>
-        /// <param name="predictors">The predictors</param>
-        /// <param name="unitsAllSubResults">All sub-predictions</param>
-        public double[] Compute(double[] predictors, out List<double[]> unitsAllSubResults)
+        /// <param name="predictors">The predictors.</param>
+        /// <param name="readoutData">The detailed computed data.</param>
+        /// <returns>An output vector of the computed and naturalized values.</returns>
+        public double[] Compute(double[] predictors, out ReadoutData readoutData)
         {
             //Check readyness
             if (!Trained)
             {
                 throw new InvalidOperationException($"Readout layer is not trained. Build function has to be called before Compute function can be used.");
             }
+            //Normalize predictors
             double[] nrmPredictors = NormalizePredictors(predictors);
-            double[] outputVector = ComputeInternal(nrmPredictors, out unitsAllSubResults);
-            //Denormalization
-            double[] natOuputVector = NaturalizeOutputs(outputVector);
-            //Return result
-            return natOuputVector;
-        }
-
-        /// <summary>
-        /// Decides what readout unit within the "one winner" group is winning
-        /// </summary>
-        /// <param name="oneWinnerGroupName">Name of One Winner group</param>
-        /// <param name="dataVector">Vector of values corresponding to layer's readout units</param>
-        /// <param name="memberReadoutUnitIndexes">Out indexes of the readout units belonging to a specified "one winner" group</param>
-        /// <param name="memberProbabilities">Out predicted probabilities of a specified "one winner" group member units (in the same order as out indexes)</param>
-        /// <param name="memberWinningGroupIndex">Out index of the winning member within the "one winner" group</param>
-        /// <returns>Winning readout unit index within the all readout layer readout units</returns>
-        public int DecideOneWinner(string oneWinnerGroupName,
-                                   double[] dataVector,
-                                   out int[] memberReadoutUnitIndexes,
-                                   out double[] memberProbabilities,
-                                   out int memberWinningGroupIndex
-                                   )
-        {
-            //Obtain group members indexes
-            memberReadoutUnitIndexes = (from member in ReadoutLayerCfg.ReadoutUnitsCfg.OneWinnerGroupCollection[oneWinnerGroupName].Members select ReadoutLayerCfg.ReadoutUnitsCfg.GetReadoutUnitID(member.Name)).ToArray();
-            //Pick up the members's predictions
-            memberProbabilities = new double[memberReadoutUnitIndexes.Length];
-            for (int i = 0; i < memberReadoutUnitIndexes.Length; i++)
+            //Compute all readout units
+            CompositeResult[] unitsResults = ComputeReadoutUnits(nrmPredictors, out double[] nrmOutputVector);
+            //Build readout units results
+            ReadoutData.ReadoutUnitData[] readoutUnitsData = new ReadoutData.ReadoutUnitData[unitsResults.Length];
+            for (int unitIdx = 0; unitIdx < readoutUnitsData.Length; unitIdx++)
             {
-                memberProbabilities[i] = dataVector[memberReadoutUnitIndexes[i]];
-            }
-            //Find the highest probability member
-            memberWinningGroupIndex = -1;
-            for (int i = 0; i < memberProbabilities.Length; i++)
-            {
-                if (memberWinningGroupIndex == -1 || memberProbabilities[i] > memberProbabilities[memberWinningGroupIndex])
+                readoutUnitsData[unitIdx] = new ReadoutData.ReadoutUnitData()
                 {
-                    memberWinningGroupIndex = i;
+                    Name = _readoutUnitCollection[unitIdx].Name,
+                    Index = _readoutUnitCollection[unitIdx].Index,
+                    Task = _readoutUnitCollection[unitIdx].Task,
+                    CompResult = unitsResults[unitIdx],
+                    RawNrmDataValue = nrmOutputVector[unitIdx],
+                    RawNatDataValue = _outputFeatureFilterCollection[unitIdx].ApplyReverse(nrmOutputVector[unitIdx]),
+                    FinalNatDataValue = _outputFeatureFilterCollection[unitIdx].ApplyReverse(nrmOutputVector[unitIdx])
+                };
+            }
+
+            //Compute all "One Takes All" groups
+            ReadoutData.OneTakesAllGroupData[] groupsData = null;
+            if (_oneTakesAllGroupCollection != null)
+            {
+                groupsData = new ReadoutData.OneTakesAllGroupData[_oneTakesAllGroupCollection.Length];
+                for (int groupIdx = 0; groupIdx < _oneTakesAllGroupCollection.Length; groupIdx++)
+                {
+
+                    int groupInnerWinnerIdx = _oneTakesAllGroupCollection[groupIdx].Compute(unitsResults, out CompositeResult groupResult, out double[] groupOutputVector);
+                    int layerWinnerIdx = _oneTakesAllGroupCollection[groupIdx].MemberReadoutUnitIndexCollection[groupInnerWinnerIdx];
+                    groupsData[groupIdx] = new ReadoutData.OneTakesAllGroupData()
+                    {
+                        GroupName = _oneTakesAllGroupCollection[groupIdx].Name,
+                        WinningReadoutUnitName = _readoutUnitCollection[layerWinnerIdx].Name,
+                        WinningReadoutUnitIndex = layerWinnerIdx,
+                        MemberWinningGroupIndex = groupInnerWinnerIdx,
+                        MemberReadoutUnitIndexes = _oneTakesAllGroupCollection[groupIdx].MemberReadoutUnitIndexCollection.ToArray(),
+                        CompResult = groupResult,
+                        MemberProbabilities = groupOutputVector
+                    };
+                    //Update nrmOuputVector
+                    for (int i = 0; i < _oneTakesAllGroupCollection[groupIdx].MemberReadoutUnitIndexCollection.Count; i++)
+                    {
+                        if (i == groupInnerWinnerIdx)
+                        {
+                            nrmOutputVector[_oneTakesAllGroupCollection[groupIdx].MemberReadoutUnitIndexCollection[i]] = InternalDataRange.Max;
+                        }
+                        else
+                        {
+                            nrmOutputVector[_oneTakesAllGroupCollection[groupIdx].MemberReadoutUnitIndexCollection[i]] = InternalDataRange.Min;
+                        }
+                        //nrmOutputVector[_oneTakesAllGroupCollection[groupIdx].MemberReadoutUnitIndexCollection[i]] = groupOutputVector[i];
+                    }
                 }
             }
-            return memberReadoutUnitIndexes[memberWinningGroupIndex];
-        }
-
-        /// <summary>
-        /// Computes readout layer and returns rich output data
-        /// </summary>
-        /// <param name="predictors">The predictors</param>
-        public ReadoutData ComputeReadoutData(double[] predictors)
-        {
-            return new ReadoutData(Compute(predictors, out List<double[]> unitsAllSubResults), unitsAllSubResults, this);
+            //Output data finalization
+            double[] natOuputVector = NaturalizeOutputs(nrmOutputVector);
+            for (int unitIdx = 0; unitIdx < readoutUnitsData.Length; unitIdx++)
+            {
+                readoutUnitsData[unitIdx].FinalNatDataValue = natOuputVector[unitIdx];
+            }
+            readoutData = new ReadoutData(nrmOutputVector, natOuputVector, readoutUnitsData, groupsData);
+            return natOuputVector;
         }
 
         //Inner classes
         /// <summary>
-        /// Encapsulates readout layer data
+        /// Implements the holder of detailed computed data.
         /// </summary>
         [Serializable]
         public class ReadoutData
         {
             /// <summary>
-            /// Vector of values corresponding to readout units
+            /// The vector of normalized output values.
             /// </summary>
-            public double[] DataVector { get; }
+            public double[] NrmDataVector { get; }
             /// <summary>
-            /// Dictionary of readout units data.
+            /// The vector of naturalized output values.
             /// </summary>
-            public Dictionary<string, ReadoutUnitData> ReadoutUnitDataCollection { get; }
+            public double[] NatDataVector { get; }
             /// <summary>
-            /// Dictionary of one-winner groups data.
+            /// The collection of readout units data.
             /// </summary>
-            public Dictionary<string, OneWinnerGroupData> OneWinnerDataCollection { get; }
+            public List<ReadoutUnitData> ReadoutUnitDataCollection { get; }
+            /// <summary>
+            /// The collection of one-takes-all groups data.
+            /// </summary>
+            public List<OneTakesAllGroupData> OneTakesAllGroupDataCollection { get; }
 
             //Constructor
             /// <summary>
-            /// Creates an initialized instance
+            /// Creates an initialized instance.
             /// </summary>
-            /// <param name="dataVector">Vector of values corresponding to readout units</param>
-            /// <param name="unitsAllSubResults">All sub-predictions</param>
-            /// <param name="rl">Readout layer object</param>
-            public ReadoutData(double[] dataVector, List<double[]> unitsAllSubResults, ReadoutLayer rl)
+            /// <param name="nrmDataVector">The vector of normalized output values.</param>
+            /// <param name="natDataVector">The vector of naturalized output values.</param>
+            /// <param name="unitsResults">The collection of readout units data.</param>
+            /// <param name="oneTakesAllGroupsResults">The collection of one-takes-all groups data.</param>
+            public ReadoutData(double[] nrmDataVector,
+                               double[] natDataVector,
+                               ReadoutUnitData[] unitsResults,
+                               OneTakesAllGroupData[] oneTakesAllGroupsResults
+                               )
             {
-                //Alone units
-                DataVector = dataVector;
-                ReadoutUnitDataCollection = new Dictionary<string, ReadoutUnitData>();
-                for (int i = 0; i < rl.ReadoutLayerCfg.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count; i++)
+                NrmDataVector = nrmDataVector;
+                NatDataVector = natDataVector;
+                ReadoutUnitDataCollection = new List<ReadoutUnitData>();
+                foreach (ReadoutUnitData unitResult in unitsResults)
                 {
-                    ReadoutUnitSettings rus = rl.ReadoutLayerCfg.ReadoutUnitsCfg.ReadoutUnitCfgCollection[i];
-                    ReadoutUnitDataCollection.Add(rus.Name, new ReadoutUnitData()
-                    {
-                        Name = rus.Name,
-                        Index = i,
-                        Task = rus.TaskCfg.Type,
-                        SubPredictions = unitsAllSubResults[i],
-                        DataValue = DataVector[i]
-                    });
+                    ReadoutUnitDataCollection.Add(unitResult);
                 }
-                //One Winner groups
-                OneWinnerDataCollection = new Dictionary<string, OneWinnerGroupData>();
-                foreach (string oneWinnerGroupName in rl.ReadoutLayerCfg.ReadoutUnitsCfg.OneWinnerGroupCollection.Keys)
+                //One Takes All groups
+                OneTakesAllGroupDataCollection = new List<OneTakesAllGroupData>();
+                if (oneTakesAllGroupsResults != null)
                 {
-                    //There is One Winner group
-                    int winningUnitIndex = rl.DecideOneWinner(oneWinnerGroupName,
-                                                              dataVector,
-                                                              out int[] memberReadoutUnitIndexes,
-                                                              out double[] memberProbabilities,
-                                                              out int memberWinningGroupIndex
-                                                              );
-                    OneWinnerDataCollection.Add(oneWinnerGroupName, new OneWinnerGroupData()
+                    foreach (OneTakesAllGroupData groupResult in oneTakesAllGroupsResults)
                     {
-                        GroupName = oneWinnerGroupName,
-                        WinningReadoutUnitName = rl.ReadoutLayerCfg.ReadoutUnitsCfg.ReadoutUnitCfgCollection[winningUnitIndex].Name,
-                        WinningReadoutUnitIndex = winningUnitIndex,
-                        MemberWinningGroupIndex = memberWinningGroupIndex,
-                        MemberReadoutUnitIndexes = memberReadoutUnitIndexes,
-                        MemberProbabilities = memberProbabilities
-                    });
+                        OneTakesAllGroupDataCollection.Add(groupResult);
+                    }
                 }
                 return;
             }
 
+            /// <summary>
+            /// Gets the one-takes-all group data by the group name.
+            /// </summary>
+            /// <param name="groupName">The name of the one-takes-all group.</param>
+            /// <returns>The group data or null if not found.</returns>
+            public OneTakesAllGroupData GetOneTakesAllGroupData(string groupName)
+            {
+                foreach (OneTakesAllGroupData groupData in OneTakesAllGroupDataCollection)
+                {
+                    if (groupData.GroupName == groupName)
+                    {
+                        return groupData;
+                    }
+                }
+                return null;
+            }
+
+            /// <summary>
+            /// Gets the readout unit data by the readout unit name.
+            /// </summary>
+            /// <param name="readoutUnitName">The name of the readout unit.</param>
+            /// <returns>The readout unit data or null if not found.</returns>
+            public ReadoutUnitData GetReadoutUnitData(string readoutUnitName)
+            {
+                foreach (ReadoutUnitData readoutUnitData in ReadoutUnitDataCollection)
+                {
+                    if (readoutUnitData.Name == readoutUnitName)
+                    {
+                        return readoutUnitData;
+                    }
+                }
+                return null;
+            }
+
             //Inner classes
             /// <summary>
-            /// Encapsulates single unit data
+            /// Implements the holder of the readout unit results.
             /// </summary>
             [Serializable]
             public class ReadoutUnitData
             {
                 /// <summary>
-                /// Name of the readout unit
+                /// The name of the readout unit.
                 /// </summary>
                 public string Name { get; set; }
+
                 /// <summary>
-                /// Zero-based index of the readout unit
+                /// The zero-based index of the readout unit.
                 /// </summary>
                 public int Index { get; set; }
-                /// <summary>
-                /// Neural task
-                /// </summary>
+
+                /// <inheritdoc cref="ReadoutUnit.TaskType"/>
                 public ReadoutUnit.TaskType Task { get; set; }
+
                 /// <summary>
-                /// All involved sub-predictions
+                /// The composite result.
                 /// </summary>
-                public double[] SubPredictions { get; set; }
+                public CompositeResult CompResult { get; set; }
+
                 /// <summary>
-                /// Data value
+                /// The normalized output data value computed by the unit.
                 /// </summary>
-                public double DataValue { get; set; }
+                public double RawNrmDataValue { get; set; }
+
+                /// <summary>
+                /// The naturalized output data value computed by the unit.
+                /// </summary>
+                public double RawNatDataValue { get; set; }
+
+                /// <summary>
+                /// The naturalized final output data value.
+                /// </summary>
+                public double FinalNatDataValue { get; set; }
 
             }//ReadoutUnitData
 
             /// <summary>
-            /// Encapsulates one-winner group data
+            /// Implements the holder of the "One Takes All" group result.
             /// </summary>
             [Serializable]
-            public class OneWinnerGroupData
+            public class OneTakesAllGroupData
             {
                 /// <summary>
-                /// Name of the one-winner group
+                /// The name of the "One Takes All" group.
                 /// </summary>
                 public string GroupName { get; set; }
+
                 /// <summary>
-                /// Name of the winning readout unit (class)
+                /// The name of the winning readout unit (class).
                 /// </summary>
                 public string WinningReadoutUnitName { get; set; }
+
                 /// <summary>
-                /// Zero-based index of the winning readout unit
+                /// The zero-based index of the winning readout unit.
                 /// </summary>
                 public int WinningReadoutUnitIndex { get; set; }
+
                 /// <summary>
-                /// Zero-based index of the winning member within the group
+                /// The zero-based index of the winning member within the group.
                 /// </summary>
                 public int MemberWinningGroupIndex { get; set; }
+
                 /// <summary>
-                /// Indexes of readout units belonging into the group
+                /// The indexes of readout units belonging to the group.
                 /// </summary>
                 public int[] MemberReadoutUnitIndexes { get; set; }
+
                 /// <summary>
-                /// Computed probabilities by group member readout units (in the same order as MemberReadoutUnitsIndexes)
+                /// The composite result (always in 0...1 range).
+                /// </summary>
+                public CompositeResult CompResult { get; set; }
+
+                /// <summary>
+                /// The probabilities of the group members (probabilities are in common range).
                 /// </summary>
                 public double[] MemberProbabilities { get; set; }
-            }//OneWinnerGroupData
+
+            }//OneTakesAllGroupData
 
         }//ReadoutData
 
         /// <summary>
-        /// Contains results of readout layer training (regression)
+        /// Implements the holder of the readout layer training (regression) results.
         /// </summary>
         [Serializable]
         public class RegressionOverview
         {
             /// <summary>
-            /// Collection of error statistics related to readout units
+            /// The collection of error statistics of the readout units.
             /// </summary>
-            public List<TrainedNetworkCluster.ClusterErrStatistics> ReadoutUnitErrStatCollection { get; }
+            public List<TNRNetCluster.ClusterErrStatistics> ReadoutUnitErrStatCollection { get; }
 
             /// <summary>
-            /// Creates an initialized instance
+            /// Creates an initialized instance.
             /// </summary>
-            /// <param name="readoutUnitErrStatCollection">Collection of error statistics related to readout units</param>
-            public RegressionOverview(List<TrainedNetworkCluster.ClusterErrStatistics> readoutUnitErrStatCollection)
+            /// <param name="readoutUnitErrStatCollection">The collection of error statistics of the readout units.</param>
+            public RegressionOverview(List<TNRNetCluster.ClusterErrStatistics> readoutUnitErrStatCollection)
             {
                 ReadoutUnitErrStatCollection = readoutUnitErrStatCollection;
                 return;
             }
 
             //Methods
-            private string BuildErrStatReport(string leftMargin, TrainedNetworkCluster.ClusterErrStatistics ces)
+            private string BuildErrStatReport(string leftMargin, TNRNetCluster.ClusterErrStatistics ces)
             {
                 StringBuilder sb = new StringBuilder();
-                if (ces.BinaryOutput)
+                if (ces.BinaryErrStat != null)
                 {
                     //Classification task report
                     sb.Append(leftMargin + $"  Classification of negative samples" + Environment.NewLine);
@@ -570,16 +646,16 @@ namespace RCNet.Neural.Network.SM.Readout
             }
 
             /// <summary>
-            /// Returns report of the readout layer training (regression)
+            /// Returns the text report of the readout layer training (regression).
             /// </summary>
-            /// <param name="margin">Specifies how many spaces should be at the begining of each row.</param>
-            /// <returns>Built report</returns>
+            /// <param name="margin">Specifies the left margin of the text.</param>
+            /// <returns>The built text report.</returns>
             public string GetTrainingResultsReport(int margin)
             {
                 string leftMargin = margin == 0 ? string.Empty : new string(' ', margin);
                 StringBuilder sb = new StringBuilder();
                 //Training results of readout units
-                foreach (TrainedNetworkCluster.ClusterErrStatistics ces in ReadoutUnitErrStatCollection)
+                foreach (TNRNetCluster.ClusterErrStatistics ces in ReadoutUnitErrStatCollection)
                 {
                     sb.Append(leftMargin + $"Output field [{ces.ClusterName}]" + Environment.NewLine);
                     sb.Append(BuildErrStatReport(leftMargin, ces));

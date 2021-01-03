@@ -3,7 +3,7 @@
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
     /// <summary>
-    /// Common interface of the input feeding configurations
+    /// The common interface of the input feeding configurations.
     /// </summary>
     public interface IFeedingSettings
     {

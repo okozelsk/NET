@@ -1,20 +1,20 @@
-﻿using System;
+﻿using RCNet.MathTools;
+using System;
 using System.Runtime.CompilerServices;
-using RCNet.MathTools;
 
 namespace RCNet.Extensions
 {
     /// <summary>
-    /// Useful extensions of Array of double
+    /// Implements useful extensions of an array of doubles.
     /// </summary>
     public static class DoubleArrayExtensions
     {
 
         //Methods
         /// <summary>
-        /// Multiplicates all array values by the given coefficient
+        /// Multiplicates the array values by the specified coefficient.
         /// </summary>
-        /// <param name="coeff">Coefficient</param>
+        /// <param name="coeff">The coefficient.</param>
         /// <param name="array"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Scale(this double[] array, double coeff)
@@ -27,9 +27,9 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Rescales all array elements to the new range
+        /// Rescales the array values to the new range.
         /// </summary>
-        /// <param name="newRange">New range (min max interval)</param>
+        /// <param name="newRange">The new range (min max interval).</param>
         /// <param name="array"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Rescale(this double[] array, Interval newRange = null)
@@ -50,7 +50,7 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Returns the max value within an array
+        /// Returns the max value within the array.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double Max(this double[] array)
@@ -67,7 +67,7 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Returns an index of the max value within an array
+        /// Returns an index of the max value within the array.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int MaxIdx(this double[] array)
@@ -86,7 +86,7 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Returns the min value within an array
+        /// Returns the min value within the array.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double Min(this double[] array)
@@ -103,7 +103,7 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Returns an index of the min value within an array
+        /// Returns an index of the min value within the array.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int MinIdx(this double[] array)
@@ -122,7 +122,7 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Returns sum of values within an array
+        /// Returns the sum of the values within the array.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double Sum(this double[] array)
@@ -137,10 +137,10 @@ namespace RCNet.Extensions
 
 
         /// <summary>
-        /// Scales members in the way the sum equals to new desired value.
+        /// Scales the values within the array in the way their sum equals to the specified value.
         /// </summary>
-        /// <param name="array">Array of doubles.</param>
-        /// <param name="newSum">New sum to be ensured.</param>
+        /// <param name="newSum">The new sum value.</param>
+        /// <param name="array"></param>
         public static void ScaleToNewSum(this double[] array, double newSum = 1d)
         {
             double sum = Sum(array);
@@ -152,7 +152,7 @@ namespace RCNet.Extensions
                 }
                 else
                 {
-                    for(int i = 0; i < array.Length; i++)
+                    for (int i = 0; i < array.Length; i++)
                     {
                         array[i] += newSum / array.Length;
                     }
@@ -162,13 +162,13 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Makes min is max and others proportionally
+        /// Changes the values within an array proportionally according to the rule that the new min is original max and the new max is the original min.
         /// </summary>
-        public static void RevertMeaning(this double[] array)
+        public static void RevertMinMax(this double[] array)
         {
             double max = array.Max();
             double min = array.Min();
-            if(min != max)
+            if (min != max)
             {
                 array.Rescale();
                 for (int i = 0; i < array.Length; i++)
@@ -180,7 +180,7 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Applies softmax
+        /// Applies the softmax.
         /// </summary>
         public static void Softmax(this double[] array)
         {

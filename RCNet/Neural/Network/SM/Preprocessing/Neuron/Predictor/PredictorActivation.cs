@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using RCNet.MathTools;
+﻿using RCNet.MathTools;
 using RCNet.Queue;
+using System;
 
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 {
     /// <summary>
-    /// Result of the activation function
+    /// Implements the "Activation" predictor computer.
     /// </summary>
+    /// <remarks>
+    /// The predictor value is simply the value of the current activation.
+    /// </remarks>
     [Serializable]
     public class PredictorActivation : IPredictor
     {
@@ -18,9 +19,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="cfg">Configuration of the predictor</param>
+        /// <param name="cfg">The configuration of the predictor.</param>
         public PredictorActivation(PredictorActivationSettings cfg)
         {
             Cfg = cfg;

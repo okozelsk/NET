@@ -6,48 +6,47 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.NonRecurrent.PP
 {
     /// <summary>
-    /// Configuration of the ParallelPerceptron
+    /// Configuration of the ParallelPerceptron.
     /// </summary>
     [Serializable]
     public class ParallelPerceptronSettings : RCNetBaseSettings, INonRecurrentNetworkSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "PPNetType";
-
         //Default values
         /// <summary>
-        /// Default number of treshold gates inside the parallel perceptron
+        /// The default number of the threshold gates.
         /// </summary>
         public const int DefaultGates = 3;
         /// <summary>
-        /// Default output resolution (2 means binary output)
+        /// The default output resolution (2 means the binary output).
         /// </summary>
         public const int DefaultResolution = 2;
 
         //Attribute properties
         /// <summary>
-        /// Number of treshold gates inside the parallel perceptron
+        /// The number of the threshold gates.
         /// </summary>
         public int Gates { get; }
         /// <summary>
-        /// Requiered output resolution (2 means binary output)
+        /// The output resolution.
         /// </summary>
         public int Resolution { get; }
         /// <summary>
-        /// Startup parameters for the parallel perceptron p-delta rule trainer
+        /// The configuration of the p-delta rule trainer.
         /// </summary>
         public PDeltaRuleTrainerSettings PDeltaRuleTrainerCfg { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="gates">Number of gates</param>
-        /// <param name="resolution">Output resolution</param>
-        /// <param name="trainerCfg">Trainer configuration</param>
+        /// <param name="gates">The number of the threshold gates.</param>
+        /// <param name="resolution">The output resolution.</param>
+        /// <param name="trainerCfg">The configuration of the p-delta rule trainer.</param>
         public ParallelPerceptronSettings(int gates,
                                           int resolution,
                                           PDeltaRuleTrainerSettings trainerCfg
@@ -61,11 +60,11 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         }
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public ParallelPerceptronSettings(ParallelPerceptronSettings source)
-            :this(source.Gates, source.Resolution, source.PDeltaRuleTrainerCfg)
+            : this(source.Gates, source.Resolution, source.PDeltaRuleTrainerCfg)
         {
             return;
         }
@@ -73,7 +72,7 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public ParallelPerceptronSettings(XElement elem)
         {
             //Validation
@@ -89,12 +88,12 @@ namespace RCNet.Neural.Network.NonRecurrent.PP
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultGates { get { return (Gates == DefaultGates); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultResolution { get { return (Resolution == DefaultResolution); } }
 

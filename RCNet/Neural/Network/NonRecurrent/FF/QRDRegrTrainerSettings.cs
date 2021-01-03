@@ -1,4 +1,4 @@
-﻿using RCNet.MathTools.PS;
+﻿using RCNet.MathTools;
 using System;
 using System.Globalization;
 using System.Linq;
@@ -7,97 +7,98 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.NonRecurrent.FF
 {
     /// <summary>
-    /// Configuration of the QRDRegrTrainer
+    /// Configuration of the QRDRegrTrainer.
     /// </summary>
     [Serializable]
     public class QRDRegrTrainerSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "FFNetQRDRegrTrainerType";
+        //Default values
         /// <summary>
-        /// Default margin of noise values from zero
+        /// The default zero-margin of the noise.
         /// </summary>
         public const double DefaultNoiseZeroMargin = 0.75;
         /// <summary>
-        /// Seeker's default min noise intensity
+        /// The default min noise intensity.
         /// </summary>
         public const double DefaultMinNoise = 0;
         /// <summary>
-        /// Seeker's default max noise intensity
+        /// The default max noise intensity.
         /// </summary>
         public const double DefaultMaxNoise = 0.1;
         /// <summary>
-        /// Seeker's default number of steps within the interval
+        /// The default number of steps within the interval.
         /// </summary>
         public const int DefaultSteps = 10;
 
         //Attribute properties
         /// <summary>
-        /// Number of attempts
+        /// The number of attempts.
         /// </summary>
         public int NumOfAttempts { get; }
         /// <summary>
-        /// Number of attempt epochs
+        /// The number of attempt epochs.
         /// </summary>
         public int NumOfAttemptEpochs { get; }
         /// <summary>
-        /// Margin of noise values from zero
+        /// The zero-margin of the noise.
         /// </summary>
         public double NoiseZeroMargin { get; }
         /// <summary>
-        /// Configuration of seeker of Noise hyperparameter value
+        /// The configuration of the noise parameter value finder.
         /// </summary>
-        public ParamSeekerSettings NoiseSeekerCfg { get; }
+        public ParamValFinderSettings NoiseFinderCfg { get; }
 
         //Constructors
         /// <summary>
-        /// Constructs an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="numOfAttempts">Number of attempts</param>
-        /// <param name="numOfAttemptEpochs">Number of attempt epochs</param>
-        /// <param name="noiseZeroMargin">Margin of noise values from zero</param>
-        /// <param name="noiseSeekerCfg">Configuration of seeker of MaxNoise hyperparameter value</param>
+        /// <param name="numOfAttempts">The number of attempts.</param>
+        /// <param name="numOfAttemptEpochs">The number of attempt epochs.</param>
+        /// <param name="noiseZeroMargin">The zero-margin of the noise.</param>
+        /// <param name="noiseFinderCfg">The configuration of the noise parameter value finder.</param>
         public QRDRegrTrainerSettings(int numOfAttempts,
                                       int numOfAttemptEpochs,
                                       double noiseZeroMargin = DefaultNoiseZeroMargin,
-                                      ParamSeekerSettings noiseSeekerCfg = null
+                                      ParamValFinderSettings noiseFinderCfg = null
                                       )
         {
             NumOfAttempts = numOfAttempts;
             NumOfAttemptEpochs = numOfAttemptEpochs;
             NoiseZeroMargin = noiseZeroMargin;
-            if (noiseSeekerCfg == null)
+            if (noiseFinderCfg == null)
             {
-                NoiseSeekerCfg = new ParamSeekerSettings(DefaultMinNoise, DefaultMaxNoise, DefaultSteps);
+                NoiseFinderCfg = new ParamValFinderSettings(DefaultMinNoise, DefaultMaxNoise, DefaultSteps);
             }
             else
             {
-                NoiseSeekerCfg = (ParamSeekerSettings)noiseSeekerCfg.DeepClone();
+                NoiseFinderCfg = (ParamValFinderSettings)noiseFinderCfg.DeepClone();
             }
             Check();
             return;
         }
 
         /// <summary>
-        /// Deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public QRDRegrTrainerSettings(QRDRegrTrainerSettings source)
         {
             NumOfAttempts = source.NumOfAttempts;
             NumOfAttemptEpochs = source.NumOfAttemptEpochs;
             NoiseZeroMargin = source.NoiseZeroMargin;
-            NoiseSeekerCfg = (ParamSeekerSettings)source.NoiseSeekerCfg.DeepClone();
+            NoiseFinderCfg = (ParamValFinderSettings)source.NoiseFinderCfg.DeepClone();
             return;
         }
 
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml data containing trainer settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public QRDRegrTrainerSettings(XElement elem)
         {
             //Validation
@@ -109,11 +110,11 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             XElement noiseSeekerSettingsElem = settingsElem.Elements("noise").FirstOrDefault();
             if (noiseSeekerSettingsElem != null)
             {
-                NoiseSeekerCfg = new ParamSeekerSettings(noiseSeekerSettingsElem);
+                NoiseFinderCfg = new ParamValFinderSettings(noiseSeekerSettingsElem);
             }
             else
             {
-                NoiseSeekerCfg = new ParamSeekerSettings(DefaultMinNoise, DefaultMaxNoise, DefaultSteps);
+                NoiseFinderCfg = new ParamValFinderSettings(DefaultMinNoise, DefaultMaxNoise, DefaultSteps);
             }
             Check();
             return;
@@ -121,14 +122,14 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultNoiseZeroMargin { get { return (NoiseZeroMargin == DefaultNoiseZeroMargin); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
-        public bool IsDefaultNoiseSeeker { get { return (NoiseSeekerCfg.Min == DefaultMinNoise && NoiseSeekerCfg.Max == DefaultMaxNoise && NoiseSeekerCfg.NumOfSubIntervals == DefaultSteps); } }
+        public bool IsDefaultNoiseSeeker { get { return (NoiseFinderCfg.Min == DefaultMinNoise && NoiseFinderCfg.Max == DefaultMaxNoise && NoiseFinderCfg.NumOfSubIntervals == DefaultSteps); } }
 
         /// <inheritdoc/>
         public override bool ContainsOnlyDefaults { get { return false; } }
@@ -170,7 +171,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
             }
             if (!suppressDefaults || !IsDefaultNoiseSeeker)
             {
-                rootElem.Add(NoiseSeekerCfg.GetXml("noise", suppressDefaults));
+                rootElem.Add(NoiseFinderCfg.GetXml("noise", suppressDefaults));
             }
             Validate(rootElem, XsdTypeName);
             return rootElem;

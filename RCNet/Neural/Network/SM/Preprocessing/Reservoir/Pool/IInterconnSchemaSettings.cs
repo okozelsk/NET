@@ -8,12 +8,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
     public interface IInterconnSchemaSettings
     {
         /// <summary>
-        /// Specifies whether the connections of this schema will replace existing connections
+        /// Specifies whether the connections of this schema will replace the existing connections.
         /// </summary>
         bool ReplaceExistingConnections { get; }
 
         /// <summary>
-        /// Number of applications of this schema
+        /// The number of applications of this schema.
         /// </summary>
         int Repetitions { get; }
 

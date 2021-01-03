@@ -5,60 +5,60 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
     /// <summary>
-    /// Configuration of the Resampling
+    /// Configuration of the input data resampling.
     /// </summary>
     [Serializable]
     public class ResamplingSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "NPResamplingType";
         /// <summary>
-        /// Automatic number of time-points of the resampled pattern (code)
+        /// The string code of the automatic number of target time-points.
         /// </summary>
         public const string AutoTargetTimePointsCode = "Auto";
         /// <summary>
-        /// Automatic number of time-points of the resampled pattern (num)
+        /// The numeric code of the automatic number of target time-points.
         /// </summary>
         public const int AutoTargetTimePointsNum = -1;
         //Default values
         /// <summary>
-        /// Default threshold of signal begin detection
+        /// The default threshold of signal begin detection.
         /// </summary>
         public const double DefaultSignalBeginThreshold = 0d;
         /// <summary>
-        /// Default threshold of signal end detection
+        /// The default threshold of signal end detection.
         /// </summary>
         public const double DefaultSignalEndThreshold = 0d;
         /// <summary>
-        /// Default value of the parameter specifying if to keep the same time scale over all input patterns
+        /// The default value of the parameter specifying whether all the variables in the input pattern should have the same signal begin/end.
         /// </summary>
         public const bool DefaultUniformTimeScale = true;
         /// <summary>
-        /// Default value of parameter specifying number of time-points of the resampled pattern (resampled pattern length)
+        /// The default value of the parameter specifying whether the input pattern variable's data will be upsampled and/or downsampled to have specified fixed length (GT 0).
         /// </summary>
         public const int DefaultTargetTimePoints = AutoTargetTimePointsNum;
 
         //Attribute properties
         /// <summary>
-        /// Threshold of signal begin detection
+        /// The threshold of the signal begin detection.
         /// </summary>
         public double SignalBeginThreshold { get; }
 
         /// <summary>
-        /// Threshold of signal end detection
+        /// The threshold of the signal end detection.
         /// </summary>
         public double SignalEndThreshold { get; }
 
         /// <summary>
-        /// Specifies whether to keep the same time scale over all input patterns
+        /// Specifies whether all the variables in the input pattern should have the same signal begin/end.
         /// </summary>
         public bool UniformTimeScale { get; }
 
         /// <summary>
-        /// Number of time-points of the resampled pattern (resampled pattern length)
+        /// Specifies whether the input pattern variable's data will be upsampled and/or downsampled to have specified fixed length (GT 0).
         /// </summary>
         public int TargetTimePoints { get; }
 
@@ -66,10 +66,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Creates an itialized instance.
         /// </summary>
-        /// <param name="signalBeginThreshold">Threshold of signal begin detection</param>
-        /// <param name="signalEndThreshold">Threshold of signal end detection</param>
-        /// <param name="uniformTimeScale">Specifies whether to keep the same time scale over all input patterns</param>
-        /// <param name="targetTimePoints">Number of time-points of the resampled pattern (resampled pattern length)</param>
+        /// <param name="signalBeginThreshold">The threshold of the signal begin detection.</param>
+        /// <param name="signalEndThreshold">The threshold of the signal end detection.</param>
+        /// <param name="uniformTimeScale">Specifies whether all the variables in the input pattern should have the same signal begin/end.</param>
+        /// <param name="targetTimePoints">Specifies whether the input pattern variable's data will be upsampled and/or downsampled to have specified fixed length (GT 0).</param>
         public ResamplingSettings(double signalBeginThreshold = DefaultSignalBeginThreshold,
                                   double signalEndThreshold = DefaultSignalEndThreshold,
                                   bool uniformTimeScale = DefaultUniformTimeScale,
@@ -87,7 +87,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public ResamplingSettings(ResamplingSettings source)
             : this(source.SignalBeginThreshold, source.SignalEndThreshold, source.UniformTimeScale, source.TargetTimePoints)
         {
@@ -95,9 +95,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Creates an initialized instance from the given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public ResamplingSettings(XElement elem)
         {
             //Validation
@@ -114,22 +114,22 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultSignalBeginThreshold { get { return (SignalBeginThreshold == DefaultSignalBeginThreshold); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultSignalEndThreshold { get { return (SignalEndThreshold == DefaultSignalEndThreshold); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultUniformTimeScale { get { return (UniformTimeScale == DefaultUniformTimeScale); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultTargetTimePoints { get { return (TargetTimePoints == DefaultTargetTimePoints); } }
 

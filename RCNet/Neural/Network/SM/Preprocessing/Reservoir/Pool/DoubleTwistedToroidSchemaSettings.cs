@@ -5,50 +5,50 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
 {
     /// <summary>
-    /// Configuration of the Double Twisted Toroid schema of the pool's neurons interconnection
+    /// Configuration of the Double Twisted Toroid interconnection schema of the pool's neurons.
     /// </summary>
     [Serializable]
     public class DoubleTwistedToroidSchemaSettings : RCNetBaseSettings, IInterconnSchemaSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "PoolInterconnectionDoubleTwistedToroidSchemaType";
         //Default values
         /// <summary>
-        /// Default ratio of involved neurons
+        /// The default value of the ratio of involved neurons.
         /// </summary>
         public const double DefaultRatio = 1d;
         /// <summary>
-        /// Default left diagonal self connections
+        /// The default value of the parameter specifying whether the left diagonal neurons to be self connected.
         /// </summary>
         public const bool DefaultLDiagonalSelf = false;
         /// <summary>
-        /// Default right diagonal self connections
+        /// The default value of the parameter specifying whether the right diagonal neurons to be self connected.
         /// </summary>
         public const bool DefaultRDiagonalSelf = false;
         /// <summary>
-        /// Default replacement of existing connections
+        /// The default value of the parameter specifying whether the connections of this schema will replace the existing connections.
         /// </summary>
         public const bool DefaultReplaceExistingConnections = true;
         /// <summary>
-        /// Default number of schema repetitions
+        /// The default number of applications of this schema.
         /// </summary>
         public const int DefaultRepetitions = 1;
 
 
         //Attribute properties
         /// <summary>
-        /// Ratio of involved neurons.
+        /// The ratio of involved neurons.
         /// </summary>
         public double Ratio { get; }
         /// <summary>
-        /// Specifies whether the left diagonal neurons to be self connected
+        /// Specifies whether the left diagonal neurons to be self connected.
         /// </summary>
         public bool LDiagonalSelf { get; }
         /// <summary>
-        /// Specifies whether the right diagonal neurons to be self connected
+        /// Specifies whether the right diagonal neurons to be self connected.
         /// </summary>
         public bool RDiagonalSelf { get; }
         /// <inheritdoc/>
@@ -58,13 +58,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="ratio">Ratio of involved neurons</param>
-        /// <param name="lDiagonalSelf">Specifies whether the left diagonal neurons to be self connected</param>
-        /// <param name="rDiagonalSelf">Specifies whether the right diagonal neurons to be self connected</param>
-        /// <param name="replaceExistingConnections">Specifies whether the connections of this schema will replace existing connections</param>
-        /// <param name="repetitions">Number of applications of this schema</param>
+        /// <param name="ratio">The ratio of involved neurons.</param>
+        /// <param name="lDiagonalSelf">Specifies whether the left diagonal neurons to be self connected.</param>
+        /// <param name="rDiagonalSelf">Specifies whether the right diagonal neurons to be self connected.</param>
+        /// <param name="replaceExistingConnections">Specifies whether the connections of this schema will replace the existing connections.</param>
+        /// <param name="repetitions">The number of applications of this schema.</param>
         public DoubleTwistedToroidSchemaSettings(double ratio = DefaultRatio,
                                                  bool lDiagonalSelf = DefaultLDiagonalSelf,
                                                  bool rDiagonalSelf = DefaultRDiagonalSelf,
@@ -82,9 +82,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         }
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public DoubleTwistedToroidSchemaSettings(DoubleTwistedToroidSchemaSettings source)
             : this(source.Ratio, source.LDiagonalSelf, source.RDiagonalSelf, source.ReplaceExistingConnections, source.Repetitions)
         {
@@ -94,7 +94,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public DoubleTwistedToroidSchemaSettings(XElement elem)
         {
             //Validation
@@ -115,27 +115,27 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultRatio { get { return (Ratio == DefaultRatio); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultLDiagonalSelf { get { return (LDiagonalSelf == DefaultLDiagonalSelf); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultRDiagonalSelf { get { return (RDiagonalSelf == DefaultRDiagonalSelf); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultReplaceExistingConnections { get { return (ReplaceExistingConnections == DefaultReplaceExistingConnections); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultRepetitions { get { return (Repetitions == DefaultRepetitions); } }
 

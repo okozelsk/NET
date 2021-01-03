@@ -7,16 +7,15 @@ using System.IO;
 namespace Demo.DemoConsoleApp
 {
     /// <summary>
-    /// A tool for generating some frequently used time series and saving them to a csv file
+    /// Implements the helper methods to generate some frequently used time series and store them as a csv.
     /// </summary>
     public static class TimeSeriesGenerator
     {
         /// <summary>
-        /// Generates time series of specified length based on specified signal generator.
+        /// Generates the time series of specified length using specified generator.
         /// </summary>
-        /// <param name="generator">One of the implemented generators</param>
-        /// <param name="length">Time series target length</param>
-        /// <returns></returns>
+        /// <param name="generator">The generator to be used.</param>
+        /// <param name="length">The length.</param>
         public static List<double> GenTimeSeries(IGenerator generator, int length)
         {
             List<double> dataCollection = new List<double>(length);
@@ -28,14 +27,13 @@ namespace Demo.DemoConsoleApp
         }
 
         /// <summary>
-        /// Generates a random time series of the numbers between 0 and 1.
+        /// Generates a time series of random numbers between 0 and 1.
         /// </summary>
-        /// <param name="length">The required length</param>
+        /// <param name="length">The required length.</param>
         /// <param name="seek">
-        /// Initial seek of the random generator.
+        /// The initial seek of the random generator.
         /// Specify seek less than 0 to obtain different initialization each time this function is invoked.
         /// </param>
-        /// <returns>A collection of random values</returns>
         public static List<double> GenRandomTimeSeries(int length, int seek = -1)
         {
             RandomValueSettings settings = new RandomValueSettings(0, 1, false);
@@ -44,13 +42,12 @@ namespace Demo.DemoConsoleApp
         }
 
         /// <summary>
-        /// Generates a sinusoidal time series
+        /// Generates a sinusoidal time series.
         /// </summary>
-        /// <param name="length">The required length</param>
-        /// <param name="phase">Phase shift</param>
-        /// <param name="freq">Frequency coefficient</param>
-        /// <param name="ampl">Amplitude coefficient</param>
-        /// <returns>A collection of sinusoidal values</returns>
+        /// <param name="length">The required length.</param>
+        /// <param name="phase">The phase shift.</param>
+        /// <param name="freq">The frequency coefficient.</param>
+        /// <param name="ampl">The amplitude coefficient.</param>
         public static List<double> GenSinusoidTimeSeries(int length, double phase = 0d, double freq = 1d, double ampl = 1d)
         {
             SinusoidalGeneratorSettings settings = new SinusoidalGeneratorSettings(phase, freq, ampl);
@@ -61,11 +58,10 @@ namespace Demo.DemoConsoleApp
         /// <summary>
         /// Generates the Mackey-Glass time series
         /// </summary>
-        /// <param name="length">The required length</param>
-        /// <param name="tau">Tau (backward deepness 2-18)</param>
-        /// <param name="b">b coefficient</param>
-        /// <param name="c">c coefficient</param>
-        /// <returns>A collection of Mackey-Glass values</returns>
+        /// <param name="length">The required length.</param>
+        /// <param name="tau">The tau (backward deepness 2-18).</param>
+        /// <param name="b">The b coefficient.</param>
+        /// <param name="c">The c coefficient.</param>
         public static List<double> GenMackeyGlassTimeSeries(int length, int tau = 18, double b = 0.1, double c = 0.2)
         {
             MackeyGlassGeneratorSettings settings = new MackeyGlassGeneratorSettings(tau, b, c);
@@ -74,12 +70,12 @@ namespace Demo.DemoConsoleApp
         }
 
         /// <summary>
-        /// Function saves given time series in a csv file.
+        /// Stores the time series in a csv file.
         /// </summary>
-        /// <param name="fileName">Name of the output csv file.</param>
-        /// <param name="valueColumnName">Name of the value column</param>
-        /// <param name="dataCollection">Data</param>
-        /// <param name="cultureInfo">Culture info to be used</param>
+        /// <param name="fileName">The name of the output csv file.</param>
+        /// <param name="valueColumnName">The name of the value column.</param>
+        /// <param name="dataCollection">The data.</param>
+        /// <param name="cultureInfo">The culture info object to be used.</param>
         public static void SaveTimeSeriesToCsvFile(string fileName, string valueColumnName, List<double> dataCollection, CultureInfo cultureInfo)
         {
             using (StreamWriter streamWriter = new StreamWriter(new FileStream(fileName, FileMode.Create)))
@@ -90,21 +86,6 @@ namespace Demo.DemoConsoleApp
                     streamWriter.WriteLine(value.ToString("F20", cultureInfo));
                 }
             }
-            return;
-        }
-
-        /// <summary>
-        /// Function generates and saves three types of time series in csv format for demo purposes.
-        /// (Random, Sinusoid and Mackey Glass)
-        /// </summary>
-        /// <param name="dir">The output directory</param>
-        /// <param name="cultureInfo">The culture info object to be used</param>
-        /// <param name="timeSeriesLength">The required length of the generated time series</param>
-        public static void PrepareDemoTimeSeriesCsvFiles(string dir, CultureInfo cultureInfo, int timeSeriesLength = 10000)
-        {
-            SaveTimeSeriesToCsvFile(Path.Combine(dir, "Random.csv"), "Value", GenRandomTimeSeries(timeSeriesLength), cultureInfo);
-            SaveTimeSeriesToCsvFile(Path.Combine(dir, "Sinusoid.csv"), "Value", GenSinusoidTimeSeries(timeSeriesLength), cultureInfo);
-            SaveTimeSeriesToCsvFile(Path.Combine(dir, "MackeyGlass.csv"), "Value", GenMackeyGlassTimeSeries(timeSeriesLength), cultureInfo);
             return;
         }
 

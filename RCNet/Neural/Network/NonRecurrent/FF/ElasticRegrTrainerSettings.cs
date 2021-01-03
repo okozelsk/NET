@@ -5,47 +5,47 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.NonRecurrent.FF
 {
     /// <summary>
-    /// Configuration of the ElasticRegrTrainer
+    /// Configuration of the ElasticRegrTrainer.
     /// </summary>
     [Serializable]
     public class ElasticRegrTrainerSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "FFNetElasticRegrTrainerType";
         //Default values
         /// <summary>
-        /// Default value of lambda argument
+        /// The default value of the lambda.
         /// </summary>
         public const double DefaultLambda = 1e-6d;
         /// <summary>
-        /// Default value of alpha argument
+        /// The default value of the alpha.
         /// </summary>
         public const double DefaultAlpha = 0.5d;
 
         //Attribute properties
         /// <summary>
-        /// Number of attempt epochs
+        /// The number of attempt epochs.
         /// </summary>
         public int NumOfAttemptEpochs { get; }
         /// <summary>
-        /// Ridge lambda hyperparameter
+        /// The ridge lambda hyperparameter.
         /// </summary>
         public double Lambda { get; }
         /// <summary>
-        /// Trade-off ratio between Ridge (0) and Lasso (1) approach
+        /// The trade-off ratio between the Ridge (0) and the Lasso (1) approach.
         /// </summary>
         public double Alpha { get; }
 
         //Constructors
         /// <summary>
-        /// Constructs an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="numOfAttemptEpochs">Number of attempt epochs</param>
-        /// <param name="lambda">L1 (lasso) hyperparameter</param>
-        /// <param name="alpha">L2 (ridge) hyperparameter</param>
+        /// <param name="numOfAttemptEpochs">The number of attempt epochs.</param>
+        /// <param name="lambda">The ridge lambda hyperparameter.</param>
+        /// <param name="alpha">The trade-off ratio between the Ridge (0) and the Lasso (1) approach.</param>
         public ElasticRegrTrainerSettings(int numOfAttemptEpochs,
                                           double lambda = DefaultLambda,
                                           double alpha = DefaultAlpha
@@ -59,9 +59,9 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         }
 
         /// <summary>
-        /// Deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public ElasticRegrTrainerSettings(ElasticRegrTrainerSettings source)
         {
             NumOfAttemptEpochs = source.NumOfAttemptEpochs;
@@ -93,12 +93,12 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         public int NumOfAttempts { get { return 1; } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultLambda { get { return (Lambda == DefaultLambda); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultAlpha { get { return (Alpha == DefaultAlpha); } }
 

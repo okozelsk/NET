@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace RCNet.Extensions
 {
     /// <summary>
-    /// Useful extensions of Random class
+    /// Implements useful extensions of the Random class.
     /// </summary>
     public static class RandomExtensions
     {
@@ -15,9 +15,12 @@ namespace RCNet.Extensions
         private static readonly double GammaAlgConst = 1d + Math.Log(4.5d);
 
         /// <summary>
-        /// Randomly shuffles an array of objects
+        /// Randomly shuffles the elements within an array.
         /// </summary>
-        /// <param name="array">Array of objects to be randomly shuffled</param>
+        /// <remarks>
+        /// Follows the Uniform distribution.
+        /// </remarks>
+        /// <param name="array">The array to be shuffled.</param>
         /// <param name="rand"></param>
         public static void Shuffle<T>(this Random rand, T[] array)
         {
@@ -33,9 +36,12 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Randomly shuffles a list of objects
+        /// Randomly shuffles the elements within a list.
         /// </summary>
-        /// <param name="list">List of objects to be randomly shuffled</param>
+        /// <remarks>
+        /// Follows the Uniform distribution.
+        /// </remarks>
+        /// <param name="list">A list to be shuffled.</param>
         /// <param name="rand"></param>
         public static void Shuffle<T>(this Random rand, List<T> list)
         {
@@ -51,29 +57,34 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Returns 1 or -1
+        /// Returns the random sign (values 1 or -1).
         /// </summary>
+        /// <remarks>
+        /// Follows the Uniform distribution.
+        /// </remarks>
         /// <param name="rand"></param>
         public static double NextSign(this Random rand)
         {
             return rand.NextDouble() >= 0.5 ? 1d : -1d;
         }
 
-        /// <summary>
-        /// Returns random double between 0 (inclusive) and 1 (exclusive) following the Uniform distribution.
-        /// Equals to Random.NextDouble() method.
-        /// </summary>
-        /// <param name="rand"></param>
+        /// <inheritdoc cref="Random.NextDouble"/>
+        /// <remarks>
+        /// Follows the Uniform distribution.
+        /// </remarks>
         public static double NextUniformDouble(this Random rand)
         {
             return rand.NextDouble();
         }
 
         /// <summary>
-        /// Returns random double within specified range following the Uniform distribution.
+        /// Returns a random double within the specified range.
         /// </summary>
-        /// <param name="min">Min target value (inclusive)</param>
-        /// <param name="max">Max target value (exclusive)</param>
+        /// <remarks>
+        /// Follows the Uniform distribution.
+        /// </remarks>
+        /// <param name="min">The min value (inclusive).</param>
+        /// <param name="max">The max value (exclusive).</param>
         /// <param name="rand"></param>
         public static double NextRangedUniformDouble(this Random rand, double min = -1, double max = 1)
         {
@@ -92,10 +103,35 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Returns random double following the Gaussian distribution.
+        /// Fills an array with random double values within the specified range.
         /// </summary>
-        /// <param name="mean">Required target mean</param>
-        /// <param name="stdDev">Required target standard deviation</param>
+        /// <remarks>
+        /// <para>
+        /// Follows the Uniform distribution.
+        /// </para>
+        /// </remarks>
+        /// <param name="array">An array to be filled.</param>
+        /// <param name="min">The min value (inclusive).</param>
+        /// <param name="max">The max value (exclusive).</param>
+        /// <param name="randomSign">Specifies whether to randomize sign.</param>
+        /// <param name="rand"></param>
+        public static void FillUniform(this Random rand, double[] array, double min, double max, bool randomSign)
+        {
+            for (int i = 0; i < array.Length; i++)
+            {
+                array[i] = rand.NextRangedUniformDouble(min, max) * (randomSign ? rand.NextSign() : 1d);
+            }
+            return;
+        }
+
+        /// <summary>
+        /// Returns a random double value.
+        /// </summary>
+        /// <remarks>
+        /// Follows the Gaussian distribution.
+        /// </remarks>
+        /// <param name="mean">Required mean.</param>
+        /// <param name="stdDev">Required standard deviation.</param>
         /// <param name="rand"></param>
         public static double NextGaussianDouble(this Random rand, double mean = 0, double stdDev = 1)
         {
@@ -107,48 +143,60 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Returns random double following the Gaussian distribution.
+        /// Returns a random double value.
         /// </summary>
+        /// <remarks>
+        /// Follows the Gaussian distribution.
+        /// </remarks>
+        /// <param name="distrCfg">Configuration of the Gaussian distribution.</param>
         /// <param name="rand"></param>
-        /// <param name="distrParams">Gaussian distribution parameters</param>
-        public static double NextGaussianDouble(this Random rand, GaussianDistrSettings distrParams)
+        public static double NextGaussianDouble(this Random rand, GaussianDistrSettings distrCfg)
         {
-            return NextGaussianDouble(rand, distrParams.Mean, distrParams.StdDev);
+            return NextGaussianDouble(rand, distrCfg.Mean, distrCfg.StdDev);
         }
 
         /// <summary>
-        /// Returns random double following the Gaussian distribution.
+        /// Returns a random double value.
         /// </summary>
+        /// <remarks>
+        /// Follows the Gaussian distribution.
+        /// </remarks>
+        /// <param name="distrCfg">Configuration of the unsigned Gaussian distribution.</param>
         /// <param name="rand"></param>
-        /// <param name="distrParams">Gaussian distribution parameters</param>
-        public static double NextGaussianDouble(this Random rand, UGaussianDistrSettings distrParams)
+        public static double NextGaussianDouble(this Random rand, UGaussianDistrSettings distrCfg)
         {
-            return NextGaussianDouble(rand, distrParams.Mean, distrParams.StdDev);
+            return NextGaussianDouble(rand, distrCfg.Mean, distrCfg.StdDev);
         }
 
         /// <summary>
-        /// Returns random double following the Gaussian distribution and belonging to a specified range.
-        /// Warning: due to applied range filterring, this function can lead to a bad performance. Performance depends on parameters.
+        /// Returns a random double value within the specified range.
         /// </summary>
-        /// <param name="mean">Required target mean</param>
-        /// <param name="stdDev">Required target standard deviation</param>
-        /// <param name="min">Required target min value</param>
-        /// <param name="max">Required target max value</param>
+        /// <remarks>
+        /// <para>
+        /// Follows the Gaussian distribution.
+        /// </para>
+        ///  <para>
+        /// Warning: due to application of the filtering loop to get values belonging into the specified range, this function can lead to a bad performance. The performance strongly depends on specified parameters.
+        /// </para>
+        /// </remarks>
+        /// <param name="mean">Required mean.</param>
+        /// <param name="stdDev">Required standard deviation.</param>
+        /// <param name="min">The min value (inclusive).</param>
+        /// <param name="max">The max value (inclusive).</param>
         /// <param name="rand"></param>
-        /// <returns></returns>
-        public static double NextFilterredGaussianDouble(this Random rand, double mean, double stdDev, double min, double max)
+        public static double NextRangedGaussianDouble(this Random rand, double mean, double stdDev, double min, double max)
         {
-            //Check for randomness suppression
+            //Check the randomness suppression
             if (min == max)
             {
                 return min;
             }
-            //Arguments validations
+            //Validations
             if (min > max)
             {
-                throw new ArgumentException($"Min is greater than max", "min");
+                throw new ArgumentException($"Min is greater than max.", "min and max");
             }
-            //Filterring loop
+            //Filtering loop
             double result;
             do
             {
@@ -158,9 +206,12 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Returns random double following the Exponential distribution.
+        /// Returns a random double value.
         /// </summary>
-        /// <param name="mean">Required target mean</param>
+        /// <remarks>
+        /// Follows the Exponential distribution.
+        /// </remarks>
+        /// <param name="mean">Required mean.</param>
         /// <param name="rand"></param>
         public static double NextExponentialDouble(this Random rand, double mean)
         {
@@ -176,47 +227,60 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Returns random double following the Exponential distribution.
+        /// Returns a random double value.
         /// </summary>
+        /// <remarks>
+        /// Follows the Gaussian distribution.
+        /// </remarks>
+        /// <param name="distrCfg">Configuration of the Exponential distribution.</param>
         /// <param name="rand"></param>
-        /// <param name="distrParams">Exponential distribution parameters</param>
-        public static double NextExponentialDouble(this Random rand, ExponentialDistrSettings distrParams)
+        public static double NextExponentialDouble(this Random rand, ExponentialDistrSettings distrCfg)
         {
-            return NextExponentialDouble(rand, distrParams.Mean);
+            return NextExponentialDouble(rand, distrCfg.Mean);
         }
 
         /// <summary>
-        /// Returns random double following the Exponential distribution.
+        /// Returns a random double value.
         /// </summary>
+        /// <remarks>
+        /// Follows the Gaussian distribution.
+        /// </remarks>
+        /// <param name="distrCfg">Configuration of the unsigned Exponential distribution.</param>
         /// <param name="rand"></param>
-        /// <param name="distrParams">Exponential distribution parameters</param>
-        public static double NextExponentialDouble(this Random rand, UExponentialDistrSettings distrParams)
+        public static double NextExponentialDouble(this Random rand, UExponentialDistrSettings distrCfg)
         {
-            return NextExponentialDouble(rand, distrParams.Mean);
+            return NextExponentialDouble(rand, distrCfg.Mean);
         }
 
+
         /// <summary>
-        /// Returns random double following the Exponential distribution and belonging to a specified range.
-        /// Warning: due to applied range filterring, this function can lead to a bad performance. Performance depends on parameters.
+        /// Returns a random double value within the specified range.
         /// </summary>
-        /// <param name="mean">Required target mean</param>
-        /// <param name="min">Required target min value</param>
-        /// <param name="max">Required target max value</param>
+        /// <remarks>
+        /// <para>
+        /// Follows the Exponential distribution.
+        /// </para>
+        ///  <para>
+        /// Warning: due to application of the filtering loop to get values belonging into the specified range, this function can lead to a bad performance. The performance strongly depends on specified parameters.
+        /// </para>
+        /// </remarks>
+        /// <param name="mean">Required mean.</param>
+        /// <param name="min">The min value (inclusive).</param>
+        /// <param name="max">The max value (inclusive).</param>
         /// <param name="rand"></param>
-        /// <returns></returns>
-        public static double NextFilterredExponentialDouble(this Random rand, double mean, double min, double max)
+        public static double NextRangedExponentialDouble(this Random rand, double mean, double min, double max)
         {
-            //Check for randomness suppression
+            //Check the randomness suppression
             if (min == max)
             {
                 return min;
             }
-            //Arguments validations
+            //Validations
             if (min > max)
             {
-                throw new ArgumentException($"Min is greater than max", "min");
+                throw new ArgumentException($"Min is greater than max.", "min and max");
             }
-            //Filterring loop
+            //Filtering loop
             double result;
             do
             {
@@ -226,14 +290,20 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Returns positive random double following the Gamma distribution.
-        /// Both alpha and beta parameters must be GT 0.
-        /// Note that Mean tends to alpha/beta and StdDev tends to Sqrt(alpha/(beta*beta)).
-        /// 
-        /// (implementation converted from Python)
+        /// Returns a random double value.
         /// </summary>
-        /// <param name="alpha">Shape parameter</param>
-        /// <param name="beta">Rate parameter</param>
+        /// <remarks>
+        /// <para>
+        /// Follows the Gaussian distribution.
+        /// </para>
+        /// <para>
+        /// Implementation is converted from Python.
+        /// Note that Mean tends to alpha/beta and StdDev tends to Sqrt(alpha/(beta*beta)).
+        /// Generated number is always positive.
+        /// </para>
+        /// </remarks>
+        /// <param name="alpha">The shape parameter (must be greater than 0).</param>
+        /// <param name="beta">The rate parameter (must be greater than 0).</param>
         /// <param name="rand"></param>
         public static double NextGammaDouble(this Random rand, double alpha, double beta)
         {
@@ -302,26 +372,48 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Returns positive random double following the Gamma distribution.
+        /// Returns a random double value.
         /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Follows the Gaussian distribution.
+        /// </para>
+        /// <para>
+        /// Implementation is converted from Python.
+        /// Note that Mean tends to alpha/beta and StdDev tends to Sqrt(alpha/(beta*beta)).
+        /// Generated number is always positive.
+        /// </para>
+        /// </remarks>
+        /// <param name="distrCfg">Configuration of the Gamma distribution.</param>
         /// <param name="rand"></param>
-        /// <param name="distrParams">Gamma distribution parameters</param>
-        public static double NextGammaDouble(this Random rand, GammaDistrSettings distrParams)
+        public static double NextGammaDouble(this Random rand, GammaDistrSettings distrCfg)
         {
-            return NextGammaDouble(rand, distrParams.Alpha, distrParams.Beta);
+            return NextGammaDouble(rand, distrCfg.Alpha, distrCfg.Beta);
         }
 
+
         /// <summary>
-        /// Returns random double following the Gamma distribution and belonging to a specified range.
-        /// Warning: due to applied range filterring, this function can lead to a bad performance. Performance depends on parameters.
+        /// Returns a random double value within the specified range.
         /// </summary>
-        /// <param name="alpha">Shape parameter</param>
-        /// <param name="beta">Rate parameter</param>
-        /// <param name="min">Required target min value</param>
-        /// <param name="max">Required target max value</param>
+        /// <remarks>
+        /// <para>
+        /// Follows the Gamma distribution.
+        /// </para>
+        ///  <para>
+        /// Warning: due to application of the filtering loop to get values belonging into the specified range, this function can lead to a bad performance. The performance strongly depends on specified parameters.
+        /// </para>
+        /// <para>
+        /// Implementation is converted from Python.
+        /// Note that Mean tends to alpha/beta and StdDev tends to Sqrt(alpha/(beta*beta)).
+        /// Generated number is always positive.
+        /// </para>
+        /// </remarks>
+        /// <param name="alpha">The shape parameter (must be greater than 0).</param>
+        /// <param name="beta">The rate parameter (must be greater than 0).</param>
+        /// <param name="min">The min value (inclusive, must be greater than 0).</param>
+        /// <param name="max">The max value (inclusive, must be greater than 0).</param>
         /// <param name="rand"></param>
-        /// <returns></returns>
-        public static double NextFilterredGammaDouble(this Random rand, double alpha, double beta, double min, double max)
+        public static double NextRangedGammaDouble(this Random rand, double alpha, double beta, double min, double max)
         {
             //Check for randomness suppression
             if (min == max)
@@ -346,58 +438,57 @@ namespace RCNet.Extensions
             return result;
         }
 
-
         /// <summary>
-        /// Returns random double according to specified settings.
+        /// Returns a random double value according to the specified configuration.
         /// </summary>
+        /// <param name="randomValueCfg">The random value configuration.</param>
         /// <param name="rand"></param>
-        /// <param name="settings">Encapsulated settings</param>
-        public static double NextDouble(this Random rand, RandomValueSettings settings)
+        public static double NextDouble(this Random rand, RandomValueSettings randomValueCfg)
         {
 
             double value;
-            switch (settings.DistrType)
+            switch (randomValueCfg.DistrType)
             {
                 case RandomCommon.DistributionType.Uniform:
-                    value = rand.NextRangedUniformDouble(settings.Min, settings.Max);
+                    value = rand.NextRangedUniformDouble(randomValueCfg.Min, randomValueCfg.Max);
                     break;
                 case RandomCommon.DistributionType.Gaussian:
-                    if (settings.DistrCfg != null)
+                    if (randomValueCfg.DistrCfg != null)
                     {
-                        GaussianDistrSettings gaussianCfg = settings.DistrCfg as GaussianDistrSettings;
-                        value = rand.NextFilterredGaussianDouble(gaussianCfg.Mean, gaussianCfg.StdDev, settings.Min, settings.Max);
+                        GaussianDistrSettings gaussianCfg = randomValueCfg.DistrCfg as GaussianDistrSettings;
+                        value = rand.NextRangedGaussianDouble(gaussianCfg.Mean, gaussianCfg.StdDev, randomValueCfg.Min, randomValueCfg.Max);
                     }
                     else
                     {
-                        throw new InvalidOperationException($"Configuration of Gaussian distribution is missing");
+                        throw new ArgumentException($"A specific configuration of the Gaussian distribution is missing.", "randomValueCfg");
                     }
                     break;
                 case RandomCommon.DistributionType.Exponential:
-                    if (settings.DistrCfg != null)
+                    if (randomValueCfg.DistrCfg != null)
                     {
-                        ExponentialDistrSettings exponentialCfg = settings.DistrCfg as ExponentialDistrSettings;
-                        value = rand.NextFilterredExponentialDouble(exponentialCfg.Mean, settings.Min, settings.Max);
+                        ExponentialDistrSettings exponentialCfg = randomValueCfg.DistrCfg as ExponentialDistrSettings;
+                        value = rand.NextRangedExponentialDouble(exponentialCfg.Mean, randomValueCfg.Min, randomValueCfg.Max);
                     }
                     else
                     {
-                        throw new InvalidOperationException($"Configuration of Exponential distribution is missing");
+                        throw new ArgumentException($"A specific configuration of the Exponential distribution is missing.", "randomValueCfg");
                     }
                     break;
                 case RandomCommon.DistributionType.Gamma:
-                    if (settings.DistrCfg != null)
+                    if (randomValueCfg.DistrCfg != null)
                     {
-                        GammaDistrSettings gammaCfg = settings.DistrCfg as GammaDistrSettings;
-                        value = rand.NextFilterredGammaDouble(gammaCfg.Alpha, gammaCfg.Beta, settings.Min, settings.Max);
+                        GammaDistrSettings gammaCfg = randomValueCfg.DistrCfg as GammaDistrSettings;
+                        value = rand.NextRangedGammaDouble(gammaCfg.Alpha, gammaCfg.Beta, randomValueCfg.Min, randomValueCfg.Max);
                     }
                     else
                     {
-                        throw new InvalidOperationException($"Configuration of Gamma distribution is missing");
+                        throw new ArgumentException($"A specific configuration of the Gamma distribution is missing.", "randomValueCfg");
                     }
                     break;
                 default:
-                    throw new InvalidOperationException($"Unknown distribution type {settings.DistrType}.");
+                    throw new ArgumentException($"Unknown distribution type: {randomValueCfg.DistrType}.", "randomValueCfg");
             }
-            if (settings.RandomSign)
+            if (randomValueCfg.RandomSign)
             {
                 value *= rand.NextSign();
             }
@@ -405,109 +496,56 @@ namespace RCNet.Extensions
         }
 
         /// <summary>
-        /// Returns random unsigned double according to specified settings.
+        /// Returns a random double value according to the specified configuration.
         /// </summary>
+        /// <param name="randomValueCfg">The random unsigned value configuration.</param>
         /// <param name="rand"></param>
-        /// <param name="settings">Encapsulated settings</param>
-        public static double NextDouble(this Random rand, URandomValueSettings settings)
+        public static double NextDouble(this Random rand, URandomValueSettings randomValueCfg)
         {
 
             double value;
-            switch (settings.DistrType)
+            switch (randomValueCfg.DistrType)
             {
                 case RandomCommon.DistributionType.Uniform:
-                    value = rand.NextRangedUniformDouble(settings.Min, settings.Max);
+                    value = rand.NextRangedUniformDouble(randomValueCfg.Min, randomValueCfg.Max);
                     break;
                 case RandomCommon.DistributionType.Gaussian:
-                    if (settings.DistrCfg != null)
+                    if (randomValueCfg.DistrCfg != null)
                     {
-                        UGaussianDistrSettings gaussianCfg = settings.DistrCfg as UGaussianDistrSettings;
-                        value = rand.NextFilterredGaussianDouble(gaussianCfg.Mean, gaussianCfg.StdDev, settings.Min, settings.Max);
+                        UGaussianDistrSettings gaussianCfg = randomValueCfg.DistrCfg as UGaussianDistrSettings;
+                        value = rand.NextRangedGaussianDouble(gaussianCfg.Mean, gaussianCfg.StdDev, randomValueCfg.Min, randomValueCfg.Max);
                     }
                     else
                     {
-                        throw new InvalidOperationException($"Configuration of Gaussian distribution is missing");
+                        throw new ArgumentException($"A specific configuration of the Gaussian distribution is missing.", "randomValueCfg");
                     }
                     break;
                 case RandomCommon.DistributionType.Exponential:
-                    if (settings.DistrCfg != null)
+                    if (randomValueCfg.DistrCfg != null)
                     {
-                        UExponentialDistrSettings exponentialCfg = settings.DistrCfg as UExponentialDistrSettings;
-                        value = rand.NextFilterredExponentialDouble(exponentialCfg.Mean, settings.Min, settings.Max);
+                        UExponentialDistrSettings exponentialCfg = randomValueCfg.DistrCfg as UExponentialDistrSettings;
+                        value = rand.NextRangedExponentialDouble(exponentialCfg.Mean, randomValueCfg.Min, randomValueCfg.Max);
                     }
                     else
                     {
-                        throw new InvalidOperationException($"Configuration of Exponential distribution is missing");
+                        throw new ArgumentException($"A specific configuration of the Exponential distribution is missing.", "randomValueCfg");
                     }
                     break;
                 case RandomCommon.DistributionType.Gamma:
-                    if (settings.DistrCfg != null)
+                    if (randomValueCfg.DistrCfg != null)
                     {
-                        GammaDistrSettings gammaCfg = settings.DistrCfg as GammaDistrSettings;
-                        value = rand.NextFilterredGammaDouble(gammaCfg.Alpha, gammaCfg.Beta, settings.Min, settings.Max);
+                        GammaDistrSettings gammaCfg = randomValueCfg.DistrCfg as GammaDistrSettings;
+                        value = rand.NextRangedGammaDouble(gammaCfg.Alpha, gammaCfg.Beta, randomValueCfg.Min, randomValueCfg.Max);
                     }
                     else
                     {
-                        throw new InvalidOperationException($"Configuration of Gamma distribution is missing");
+                        throw new ArgumentException($"A specific configuration of the Gamma distribution is missing.", "randomValueCfg");
                     }
                     break;
                 default:
-                    throw new InvalidOperationException($"Unknown distribution type {settings.DistrType}.");
+                    throw new ArgumentException($"Unknown distribution type: {randomValueCfg.DistrType}.", "randomValueCfg");
             }
             return value;
-        }
-
-        /// <summary>
-        /// Fills given array with random values following the Uniform distribution.
-        /// </summary>
-        /// <param name="rand"></param>
-        /// <param name="array">Array to be filled</param>
-        /// <param name="min">Min value</param>
-        /// <param name="max">Max value</param>
-        /// <param name="randomSign">Specifies whether to randomize sign</param>
-        /// <param name="count">Specifies how many elements of Array to be filled</param>
-        public static void FillUniform(this Random rand, double[] array, double min, double max, bool randomSign, int count = -1)
-        {
-            if (count < 0) count = array.Length;
-            for (int i = 0; i < count; i++)
-            {
-                array[i] = rand.NextRangedUniformDouble(min, max) * (randomSign ? rand.NextSign() : 1d);
-            }
-            return;
-        }
-
-        /// <summary>
-        /// Fills given array with random doubles.
-        /// </summary>
-        /// <param name="rand"></param>
-        /// <param name="array">Array to be filled</param>
-        /// <param name="settings">Encapsulated settings</param>
-        /// <param name="count">Specifies how many elements of Array to be filled</param>
-        public static void Fill(this Random rand, double[] array, RandomValueSettings settings, int count = -1)
-        {
-            if (count < 0) count = array.Length;
-            for (int i = 0; i < count; i++)
-            {
-                array[i] = rand.NextDouble(settings);
-            }
-            return;
-        }
-
-        /// <summary>
-        /// Fills given array with random unsigned doubles.
-        /// </summary>
-        /// <param name="rand"></param>
-        /// <param name="array">Array to be filled</param>
-        /// <param name="settings">Encapsulated settings</param>
-        /// <param name="count">Specifies how many elements of Array to be filled</param>
-        public static void Fill(this Random rand, double[] array, URandomValueSettings settings, int count = -1)
-        {
-            if (count < 0) count = array.Length;
-            for (int i = 0; i < count; i++)
-            {
-                array[i] = rand.NextDouble(settings);
-            }
-            return;
         }
 
     }//RandomExtensions

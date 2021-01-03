@@ -8,9 +8,11 @@ using System.Threading.Tasks;
 namespace RCNet.MathTools.MatrixMath
 {
     /// <summary>
-    /// Class represents the mathematical matrix of double values.
-    /// Class does not support the sparse matrix format.
+    /// Implements the real matrix.
     /// </summary>
+    /// <remarks>
+    /// It does not support the sparse matrix format.
+    /// </remarks>
     [Serializable]
     public class Matrix
     {
@@ -23,11 +25,11 @@ namespace RCNet.MathTools.MatrixMath
 
         //Constructors
         /// <summary>
-        /// Instantiates the matrix.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="numOfRows">Number of rows</param>
-        /// <param name="numOfCols">Number of columns</param>
-        /// <param name="flatData">Optional. The data to be copied into the matrix (in the flat form)</param>
+        /// <param name="numOfRows">The number of rows.</param>
+        /// <param name="numOfCols">The number of columns.</param>
+        /// <param name="flatData">The data to be copied into the matrix (optional). If used, data must be in a flat format.</param>
         public Matrix(int numOfRows, int numOfCols, double[] flatData = null)
         {
             _data = new double[numOfRows][];
@@ -44,41 +46,41 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// The deep copy constructor
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="sourceMatrix"></param>
-        public Matrix(Matrix sourceMatrix)
-            : this(sourceMatrix._data)
-        {
-            return;
-        }
-
-        /// <summary>
-        /// Instantiates matrix based on dimensions of given array of arrays and copies the data into the new matrix.
-        /// </summary>
-        /// <param name="data">Matrix data</param>
-        /// <param name="copy">Specifies whether to create copy of the data or adopt given instance</param>
+        /// <param name="data">The matrix data.</param>
+        /// <param name="copy">Specifies whether to use a copy of the data or whether to use the data directly.</param>
         public Matrix(double[][] data, bool copy = true)
         {
             _data = copy ? data.Clone2D() : data;
             return;
         }
 
+        /// <summary>
+        /// The deep copy constructor.
+        /// </summary>
+        /// <param name="sourceMatrix">The source matrix.</param>
+        public Matrix(Matrix sourceMatrix)
+            : this(sourceMatrix._data, true)
+        {
+            return;
+        }
+
         //Properties
         /// <summary>
-        /// Matrix data
+        /// The matrix data.
         /// </summary>
         public double[][] Data { get { return _data; } }
         /// <summary>
-        /// Number of matrix rows
+        /// The number of matrix rows.
         /// </summary>
         public int NumOfRows { get { return _data.Length; } }
         /// <summary>
-        /// Number of matrix columns
+        /// The number of matrix columns.
         /// </summary>
         public int NumOfCols { get { return _data[0].Length; } }
         /// <summary>
-        /// Size of the matrix = (NumOfRows * NumOfCols)
+        /// The size of the matrix = (NumOfRows * NumOfCols)
         /// </summary>
         public int Size { get { return NumOfRows * NumOfCols; } }
         /// <summary>
@@ -107,9 +109,9 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Checkes if the matrix is squared (equal number of rows and columns)
+        /// Indicates the matrix is the square matrix.
         /// </summary>
-        public bool IsSquared
+        public bool IsSquareMatrix
         {
             get
             {
@@ -120,9 +122,11 @@ namespace RCNet.MathTools.MatrixMath
         //Methods
         //Static methods
         /// <summary>
-        /// Calculates hypotenuse.
-        /// https://en.wikipedia.org/wiki/Hypot
+        /// Calculates the hypotenuse.
         /// </summary>
+        /// <remarks>
+        /// https://en.wikipedia.org/wiki/Hypot
+        /// </remarks>
         /// <param name="x">The x value.</param>
         /// <param name="y">The y value.</param>
         public static double Hypotenuse(double x, double y)
@@ -140,9 +144,9 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Creates a matrix that has data.Length rows and one column.
+        /// Creates the matrix having the single column and multiple rows.
         /// </summary>
-        /// <param name="data">Column values</param>
+        /// <param name="data">The values.</param>
         public static Matrix CreateSingleColumnMatrix(double[] data)
         {
             Matrix result = new Matrix(data.Length, 1);
@@ -151,21 +155,21 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Creates a matrix that has one row and data.Length columns.
+        /// Creates the matrix having the single row and multiple columns.
         /// </summary>
-        /// <param name="data">Row values</param>
+        /// <param name="data">The values.</param>
         public static Matrix CreateSingleRowMatrix(double[] data)
         {
             Matrix result = new Matrix(1, data.Length);
-            result.SetRow(0, data);
+            result.SetRowValues(0, data);
             return result;
         }
 
         //Instance methods
         /// <summary>
-        /// Fills the whole matrix with given value
+        /// Fills the whole matrix with specified value.
         /// </summary>
-        /// <param name="value">Value</param>
+        /// <param name="value">The value to be filled in.</param>
         public void Set(double value = 0)
         {
             _data.Populate(value);
@@ -173,9 +177,9 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Fills the whole matrix with the values from given 1D array (flat format)
+        /// Fills the whole matrix with data stored in the 1D array (the flat format is required).
         /// </summary>
-        /// <param name="flatData">Data in the flat format</param>
+        /// <param name="flatData">The data in a flat format.</param>
         public void Set(double[] flatData)
         {
             int dataIndex = 0;
@@ -190,9 +194,9 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Copies all values from the source matrix into the this matrix.
+        /// Copies all data from the source matrix.
         /// </summary>
-        /// <param name="source">Source matrix</param>
+        /// <param name="source">The source matrix.</param>
         public void Set(Matrix source)
         {
             Parallel.For(0, NumOfRows, i =>
@@ -206,32 +210,32 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Fills specified row with given value
+        /// Fills the specified row with the constant value.
         /// </summary>
-        /// <param name="row">Matrix row</param>
-        /// <param name="value">Value</param>
-        public void SetRow(int row, double value = 0)
+        /// <param name="row">The row index.</param>
+        /// <param name="value">The value to be set.</param>
+        public void SetRowValues(int row, double value = 0)
         {
             _data[row].Populate(value);
             return;
         }
 
         /// <summary>
-        /// Copies values from the given array into the specified matrix row.
+        /// Copies the values from an array into the specified matrix row.
         /// </summary>
-        /// <param name="row">Matrix row</param>
-        /// <param name="data">Data</param>
-        public void SetRow(int row, double[] data)
+        /// <param name="row">The row index.</param>
+        /// <param name="data">The array.</param>
+        public void SetRowValues(int row, double[] data)
         {
             data.CopyTo(_data[row], 0);
             return;
         }
 
         /// <summary>
-        /// Fills specified matrix column with the specified value.
+        /// Fills the specified column with the constant value.
         /// </summary>
-        /// <param name="col">Matrix column</param>
-        /// <param name="value">Value</param>
+        /// <param name="col">The column index.</param>
+        /// <param name="value">The value to be set.</param>
         public void SetCol(int col, double value = 0)
         {
             for (int i = 0; i < _data.Length; i++)
@@ -242,10 +246,10 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Copies values from the given array into the specified matrix column.
+        /// Copies the values from an array into the specified matrix column.
         /// </summary>
-        /// <param name="col">Matrix column</param>
-        /// <param name="data">Data</param>
+        /// <param name="col">The column index.</param>
+        /// <param name="data">The array.</param>
         public void SetCol(int col, double[] data)
         {
             for (int i = 0; i < data.Length; i++)
@@ -256,11 +260,11 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Copies values from the source matrix into the this matrix starting from specified row and col position.
+        /// Copies all data from the source matrix starting at the specified upper left corner row and col position.
         /// </summary>
-        /// <param name="fromRow">Initial row index</param>
-        /// <param name="fromCol">Initial column index</param>
-        /// <param name="source">Source matrix</param>
+        /// <param name="fromRow">The upper left row index.</param>
+        /// <param name="fromCol">The upper left column index.</param>
+        /// <param name="source">The source matrix.</param>
         public void SetSubMatrix(int fromRow, int fromCol, Matrix source)
         {
             for (int i = 0; i <= source.NumOfRows; i++)
@@ -274,10 +278,10 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Copies data of this matrix into the 1D array of double values (flat format)
+        /// Copies all data into the 1D array in a flat format.
         /// </summary>
-        /// <param name="flatData">Array to be filled</param>
-        public void GetFlatData(double[] flatData)
+        /// <param name="flatData">The array to be data copied in.</param>
+        public void CopyFlatData(double[] flatData)
         {
             int dataIndex = 0;
             for (int i = 0; i < NumOfRows; i++)
@@ -291,55 +295,23 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Converts data of this matrix into the 1D array of double values (flat format)
+        /// Gets the data in a flat format.
         /// </summary>
         public double[] GetFlatData()
         {
             double[] flatData = new double[Size];
-            GetFlatData(flatData);
+            CopyFlatData(flatData);
             return flatData;
         }
 
         /// <summary>
-        /// Creates a matrix having the same number of rows as this matrix and one column.
-        /// Column values are copied from the specified column of this matrix.
+        /// Creates a submatrix.
         /// </summary>
-        /// <param name="col">This matrix column index</param>
-        public Matrix GetColSubMatrix(int col)
-        {
-            double[][] colMatrixData = new double[NumOfRows][];
-            for (int row = 0; row < NumOfRows; row++)
-            {
-                colMatrixData[row] = new double[1];
-                colMatrixData[row][0] = _data[row][col];
-            }
-            return new Matrix(colMatrixData);
-        }
-
-        /// <summary>
-        /// Creates a matrix having the same number of columns as this matrix and one row.
-        /// Row values are copied from the specified row of this matrix.
-        /// </summary>
-        /// <param name="row">This matrix row index</param>
-        public Matrix GetRowSubMatrix(int row)
-        {
-            double[][] rowMatrixData = new double[1][];
-            rowMatrixData[0] = new double[NumOfCols];
-            for (int col = 0; col < NumOfCols; col++)
-            {
-                rowMatrixData[0][col] = _data[row][col];
-            }
-            return new Matrix(rowMatrixData);
-        }
-
-        /// <summary>
-        /// Creates a submatrix of this matrix.
-        /// </summary>
-        /// <param name="fromRow">Initial row index.</param>
-        /// <param name="toRow">Final row index.</param>
-        /// <param name="fromCol">Initial column index.</param>
-        /// <param name="toCol">Final column index.</param>
-        public Matrix GetSubMatrix(int fromRow, int toRow, int fromCol, int toCol)
+        /// <param name="fromRow">The start row index.</param>
+        /// <param name="toRow">The end row index.</param>
+        /// <param name="fromCol">The start column index.</param>
+        /// <param name="toCol">The end column index.</param>
+        public Matrix CreateSubMatrix(int fromRow, int toRow, int fromCol, int toCol)
         {
             Matrix resultMatrix = new Matrix(toRow - fromRow + 1, toCol - fromCol + 1);
             for (int i = fromRow; i <= toRow; i++)
@@ -353,7 +325,7 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Returns clone of the internal array of arrays.
+        /// Gets a clone of the inner data.
         /// </summary>
         public double[][] GetDataClone()
         {
@@ -361,24 +333,20 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Creates the deep copy
+        /// Creates the deep copy.
         /// </summary>
         public Matrix DeepClone()
         {
             return new Matrix(this);
         }
 
-        /// <summary>
-        /// See the base.
-        /// </summary>
+        /// <inheritdoc/>
         public override int GetHashCode()
         {
             return base.GetHashCode();
         }
 
-        /// <summary>
-        /// See the base.
-        /// </summary>
+        /// <inheritdoc/>
         public override bool Equals(object obj)
         {
             if (obj == null) return false;
@@ -402,11 +370,11 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Computes A + B
+        /// Computes A + B.
         /// </summary>
-        /// <param name="A">Matrix A</param>
-        /// <param name="B">Matrix B</param>
-        /// <returns>Resulting matrix</returns>
+        /// <param name="A">The matrix A.</param>
+        /// <param name="B">The matrix B.</param>
+        /// <returns>The resulting matrix.</returns>
         public static Matrix Add(Matrix A, Matrix B)
         {
             int rowsA = A.NumOfRows;
@@ -415,7 +383,7 @@ namespace RCNet.MathTools.MatrixMath
             int colsB = B.NumOfCols;
             if (colsA != colsB || rowsA != rowsB)
             {
-                throw new InvalidOperationException($"Dimensions of A must equal to dimensions of B");
+                throw new InvalidOperationException($"Dimensions of A must equal to dimensions of B.");
             }
             double[][] resultData = new double[rowsA][];
             var rangePartitioner = Partitioner.Create(0, rowsA);
@@ -437,28 +405,23 @@ namespace RCNet.MathTools.MatrixMath
             return new Matrix(resultData, false);
         }
 
-        /// <summary>
-        /// Computes A + B
-        /// </summary>
-        /// <param name="A">Matrix A</param>
-        /// <param name="B">Matrix B</param>
-        /// <returns>Resulting matrix</returns>
+        /// <inheritdoc cref="Add(Matrix, Matrix)"/>
         public static Matrix operator +(Matrix A, Matrix B)
         {
             return Add(A, B);
         }
 
         /// <summary>
-        /// Adds matrix B
+        /// Adds the matrix B.
         /// </summary>
-        /// <param name="B">Matrix B</param>
+        /// <param name="B">The matrix B.</param>
         public void Add(Matrix B)
         {
             int rowsB = B.NumOfRows;
             int colsB = B.NumOfCols;
             if (NumOfCols != colsB || NumOfRows != rowsB)
             {
-                throw new InvalidOperationException($"Dimensions of B must equal to dimensions of this matrix");
+                throw new InvalidOperationException($"Dimensions of B must equal to dimensions of this matrix.");
             }
             var rangePartitioner = Partitioner.Create(0, rowsB);
             Parallel.ForEach(rangePartitioner, range =>
@@ -478,18 +441,18 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Adds scalar value s to main diagonal of square matrix A.
+        /// Adds a scalar to main diagonal of the square matrix A.
         /// </summary>
-        /// <param name="A">Matrix A</param>
-        /// <param name="s">Scalar value</param>
-        /// <returns>Resulting matrix</returns>
+        /// <param name="A">The matrix.</param>
+        /// <param name="s">The scalar.</param>
+        /// <returns>The resulting matrix.</returns>
         public static Matrix AddScalarToDiagonal(Matrix A, double s)
         {
             int rowsA = A.NumOfRows;
             int colsA = A.NumOfCols;
             if (rowsA != colsA)
             {
-                throw new InvalidOperationException($"Matrix A must be a square matrix (rows dimension = columns dimension)");
+                throw new InvalidOperationException($"Matrix A must be a square matrix (rows dimension = columns dimension).");
             }
             double[][] resultData = new double[rowsA][];
             var rangePartitioner = Partitioner.Create(0, rowsA);
@@ -505,12 +468,12 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Adds scalar value to main diagonal of this square matrix.
+        /// Adds a scalar to main diagonal.
         /// </summary>
-        /// <param name="s">Scalar value</param>
+        /// <param name="s">The scalar.</param>
         public void AddScalarToDiagonal(double s)
         {
-            if (!IsSquared)
+            if (!IsSquareMatrix)
             {
                 throw new InvalidOperationException($"Matrix must be a square matrix (rows dimension = columns dimension)");
             }
@@ -526,11 +489,11 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Computes A - B
+        /// Computes A - B.
         /// </summary>
-        /// <param name="A">Matrix A</param>
-        /// <param name="B">Matrix B</param>
-        /// <returns>Resulting matrix</returns>
+        /// <param name="A">The matrix A.</param>
+        /// <param name="B">The matrix B.</param>
+        /// <returns>The resulting matrix.</returns>
         public static Matrix Substract(Matrix A, Matrix B)
         {
             int rowsA = A.NumOfRows;
@@ -561,21 +524,16 @@ namespace RCNet.MathTools.MatrixMath
             return new Matrix(resultData, false);
         }
 
-        /// <summary>
-        /// Computes A - B
-        /// </summary>
-        /// <param name="A">Matrix A</param>
-        /// <param name="B">Matrix B</param>
-        /// <returns>Resulting matrix</returns>
+        /// <inheritdoc cref="Substract(Matrix, Matrix)"/>
         public static Matrix operator -(Matrix A, Matrix B)
         {
             return Substract(A, B);
         }
 
         /// <summary>
-        /// Substracts matrix B from this matrix
+        /// Substracts the matrix B.
         /// </summary>
-        /// <param name="B">Matrix B</param>
+        /// <param name="B">The matrix B.</param>
         public void Substract(Matrix B)
         {
             int rowsB = B.NumOfRows;
@@ -602,42 +560,11 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Multiplies matrix A and matrix B.
-        /// Function is single-threaded.
+        /// Computes A * B.
         /// </summary>
-        /// <param name="A">Matrix A</param>
-        /// <param name="B">Matrix B</param>
-        /// <returns>Resulting matrix</returns>
-        public static Matrix ST_Multiply(Matrix A, Matrix B)
-        {
-            int rowsA = A.NumOfRows;
-            int colsA = A.NumOfCols;
-            int rowsB = B.NumOfRows;
-            int colsB = B.NumOfCols;
-            if (colsA != rowsB)
-            {
-                throw new InvalidOperationException($"Number of columns of A must be equal to number of rows of B");
-            }
-            Matrix R = new Matrix(rowsA, colsB);
-            for (int i = 0; i < rowsA; i++)
-            {
-                for (int j = 0; j < colsB; j++)
-                {
-                    for (int k = 0; k < rowsB; k++)
-                    {
-                        R._data[i][j] += A._data[i][k] * B._data[k][j];
-                    }
-                }
-            }
-            return R;
-        }
-
-        /// <summary>
-        /// Multiplies matrix A and matrix B
-        /// </summary>
-        /// <param name="A">Matrix A</param>
-        /// <param name="B">Matrix B</param>
-        /// <returns>Resulting matrix</returns>
+        /// <param name="A">The matrix A.</param>
+        /// <param name="B">The matrix B.</param>
+        /// <returns>The resulting matrix.</returns>
         public static Matrix Multiply(Matrix A, Matrix B)
         {
             int rowsA = A.NumOfRows;
@@ -646,7 +573,7 @@ namespace RCNet.MathTools.MatrixMath
             int colsB = B.NumOfCols;
             if (colsA != rowsB)
             {
-                throw new InvalidOperationException($"Number of columns of A must be equal to number of rows of B");
+                throw new InvalidOperationException($"Number of columns of A must be equal to number of rows of B.");
             }
             var rangePartitioner = Partitioner.Create(0, rowsA);
             double[][] resultData = new double[rowsA][];
@@ -673,30 +600,25 @@ namespace RCNet.MathTools.MatrixMath
             return new Matrix(resultData, false);
         }
 
-        /// <summary>
-        /// Multiplies matrix A and matrix B
-        /// </summary>
-        /// <param name="A">Matrix A</param>
-        /// <param name="B">Matrix B</param>
-        /// <returns>Resulting matrix</returns>
+        /// <inheritdoc cref="Multiply(Matrix, Matrix)"/>
         public static Matrix operator *(Matrix A, Matrix B)
         {
             return Multiply(A, B);
         }
 
         /// <summary>
-        /// Multiplies matrix A and vector v.
+        /// Multiplies a matrix by the vector.
         /// </summary>
-        /// <param name="A">Matrix A</param>
-        /// <param name="v">Vector</param>
-        /// <returns>Resulting vector</returns>
+        /// <param name="A">The matrix.</param>
+        /// <param name="v">The vector.</param>
+        /// <returns>The resulting vector.</returns>
         public static Vector Multiply(Matrix A, Vector v)
         {
             int rowsA = A.NumOfRows;
             int colsA = A.NumOfCols;
             if (colsA != v.Length)
             {
-                throw new InvalidOperationException($"Number of columns of A must be equal to length of vector v");
+                throw new InvalidOperationException($"Number of columns of A must be equal to length of vector v.");
             }
             double[] resultData = new double[rowsA];
             double[] vData = v.Data;
@@ -718,54 +640,22 @@ namespace RCNet.MathTools.MatrixMath
             return new Vector(resultData, false);
         }
 
-        /// <summary>
-        /// Multiplies matrix A and vector v.
-        /// Function is single-threaded.
-        /// </summary>
-        /// <param name="A">Matrix A</param>
-        /// <param name="v">Vector</param>
-        /// <returns>Resulting vector</returns>
-        public static Vector ST_Multiply(Matrix A, Vector v)
-        {
-            int rowsA = A.NumOfRows;
-            int colsA = A.NumOfCols;
-            if (colsA != v.Length)
-            {
-                throw new InvalidOperationException($"Number of columns of A must be equal to length of vector v");
-            }
-            double[] resultData = new double[rowsA];
-            resultData.Populate(0);
-            for (int i = 0; i < rowsA; i++)
-            {
-                for (int j = 0; j < v.Length; j++)
-                {
-                    resultData[i] += A._data[i][j] * v.Data[j];
-                }
-            }
-            return new Vector(resultData, false);
-        }
-
-        /// <summary>
-        /// Multiplies matrix A and vector V
-        /// </summary>
-        /// <param name="A">Matrix A</param>
-        /// <param name="v">Vector</param>
-        /// <returns>Resulting vector</returns>
+        /// <inheritdoc cref="Multiply(Matrix, Vector)"/>
         public static Vector operator *(Matrix A, Vector v)
         {
             return Multiply(A, v);
         }
 
         /// <summary>
-        /// Multiplies this matrix by vector v
+        /// Multiplies by the vector.
         /// </summary>
-        /// <param name="v">Vector v</param>
-        /// <returns>Resulting vector</returns>
+        /// <param name="v">The vector.</param>
+        /// <returns>The resulting vector.</returns>
         public Vector Multiply(Vector v)
         {
             if (NumOfCols != v.Length)
             {
-                throw new InvalidOperationException($"Number of columns of the matrix must be equal to length of vector V");
+                throw new InvalidOperationException($"Number of columns of the matrix must be equal to length of the vector.");
             }
             int rows = NumOfRows;
             double[] resultData = new double[rows];
@@ -788,11 +678,11 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Multiplies matrix A and scalar s
+        /// Multiplies a matrix by the scalar.
         /// </summary>
-        /// <param name="A">Matrix A</param>
-        /// <param name="s">Scalar value</param>
-        /// <returns>Resulting matrix</returns>
+        /// <param name="A">The matrix.</param>
+        /// <param name="s">The scalar.</param>
+        /// <returns>The resulting matrix.</returns>
         public static Matrix Multiply(Matrix A, double s)
         {
             int rowsA = A.NumOfRows;
@@ -815,21 +705,16 @@ namespace RCNet.MathTools.MatrixMath
             return new Matrix(dataR, false);
         }
 
-        /// <summary>
-        /// Multiplies matrix A and scalar s
-        /// </summary>
-        /// <param name="A">Matrix A</param>
-        /// <param name="s">Scalar value</param>
-        /// <returns>Resulting matrix</returns>
+        /// <inheritdoc cref="Multiply(Matrix, double)"/>
         public static Matrix operator *(Matrix A, double s)
         {
             return Multiply(A, s);
         }
 
         /// <summary>
-        /// Multiplies elements in this matrix by scalar value
+        /// Multiplies by the scalar.
         /// </summary>
-        /// <param name="s">Scalar value</param>
+        /// <param name="s">The scalar.</param>
         public void Multiply(double s)
         {
             int cols = NumOfCols;
@@ -849,9 +734,9 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Retuns transposed given matrix.
+        /// Transposes a matrix.
         /// </summary>
-        /// <param name="A">Matrix A</param>
+        /// <param name="A">The matrix to be transposed.</param>
         public static Matrix Transpose(Matrix A)
         {
             int rowsA = A.NumOfRows;
@@ -876,8 +761,9 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Retuns transposed this matrix.
+        /// Transposes this matrix.
         /// </summary>
+        /// <returns>The resulting matrix.</returns>
         public Matrix Transpose()
         {
             int rowsR = NumOfCols;
@@ -900,43 +786,30 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Retuns transposed this matrix.
-        /// Function is single-threaded.
+        /// Inverses this matrix.
         /// </summary>
-        public Matrix ST_Transpose()
-        {
-            int rowsR = NumOfCols;
-            int colsR = NumOfRows;
-            double[][] dataR = new double[rowsR][];
-            for (int i = 0; i < rowsR; i++)
-            {
-                dataR[i] = new double[colsR];
-                for (int j = 0; j < colsR; j++)
-                {
-                    dataR[i][j] = _data[j][i];
-                }
-            }
-            return new Matrix(dataR, false);
-        }
-
-        /// <summary>
-        /// Computes inverse matrix of this matrix.
-        /// Function implements enhanced algorithm originally proposed by Ahmad FAROOQ and Khan HAMID in the publication:
-        /// <see href="https://www.researchgate.net/publication/220337321_An_Efficient_and_Generic_Algorithm_for_Matrix_Inversion">An Efficient and Generic Algorithm for Matrix Inversion</see>
-        /// (parallel processing was introduced to improve performance) 
-        /// 
+        /// <remarks>
+        /// <para>
+        /// Function implements the algorithm originally proposed by Ahmad FAROOQ and Khan HAMID in the publication:
+        /// https://www.researchgate.net/publication/220337321_An_Efficient_and_Generic_Algorithm_for_Matrix_Inversion (An Efficient and Generic Algorithm for Matrix Inversion).
+        /// </para>
+        /// <para>
         /// Additionaly was implemented flexible off-diagonal pivot selection using dictionary
         /// approach to build final inverted matrix proposed by Hafsa Athar Jafree, Muhammad Imtiaz, Syed Inayatullah,
         /// Fozia Hanif Khan and Tajuddin Nizami in the publication:
-        /// <see href="https://arxiv.org/ftp/arxiv/papers/1304/1304.6893.pdf">A space efficient flexible pivot selection approach to evaluate determinant and inverse of a matrix</see>
-        /// </summary>
-        /// <param name="preferAccuracy">If true, function favorites accuracy (selects pivots having max abs values) over the execution speed (selects diagonal pivots).</param>
-        /// <returns>Inverse matrix of this matrix</returns>
+        /// https://arxiv.org/ftp/arxiv/papers/1304/1304.6893.pdf (A space efficient flexible pivot selection approach to evaluate determinant and inverse of a matrix).
+        /// </para>
+        /// <para>
+        /// Additionaly was implemented parallel processing to improve the performance. 
+        /// </para>
+        /// </remarks>
+        /// <param name="preferAccuracy">Specifies whether to favorite the accuracy (selects pivots having max abs values) over the execution speed (selects diagonal pivots).</param>
+        /// <returns>The resulting matrix.</returns>
         public Matrix Inverse(bool preferAccuracy = true)
         {
-            if (!IsSquared)
+            if (!IsSquareMatrix)
             {
-                throw new InvalidOperationException($"Matrix must be squared.");
+                throw new InvalidOperationException($"Matrix must be square.");
             }
             //Dimension to be used within the function
             int size = NumOfRows;
@@ -1090,19 +963,21 @@ namespace RCNet.MathTools.MatrixMath
         }
 
         /// <summary>
-        /// Method uses power iteration method to estimate largest eigen value (in magnitude) and corresponding eigen vector.
-        /// Matrix must be squared.
+        /// Estimates the largest eigenvalue (in magnitude).
         /// </summary>
-        /// <param name="resultEigenVector">Returned corresponding eigen vector</param>
-        /// <param name="maxNumOfIterations">Maximum number of method's iterations</param>
-        /// <param name="stopDelta">Stopping corvengence delta between previous iteration and current iteration</param>
-        /// <returns>Estimated largest eigen value (in magnitude)</returns>
-        public double EstimateLargestEigenValue(out double[] resultEigenVector, int maxNumOfIterations = 1000, double stopDelta = 1e-6)
+        /// <remarks>
+        /// Implements the Power Iteration Method.
+        /// </remarks>
+        /// <param name="resultEigenVector">The returned corresponding eigenvector.</param>
+        /// <param name="maxNumOfIterations">The maximum number of the iterations.</param>
+        /// <param name="stopDelta">The stopping corvengence delta of the previous iteration and current iteration.</param>
+        /// <returns>The estimated largest eigen value (in magnitude).</returns>
+        public double EstimateLargestEigenvalue(out double[] resultEigenVector, int maxNumOfIterations = 1000, double stopDelta = 1e-6)
         {
-            //Firstly check squared matrix
-            if (!IsSquared)
+            //Check square matrix
+            if (!IsSquareMatrix)
             {
-                throw new InvalidOperationException($"Matrix must be squared.");
+                throw new InvalidOperationException($"Matrix must be square.");
             }
             //Local variables
             //Iteration initialization
@@ -1159,8 +1034,6 @@ namespace RCNet.MathTools.MatrixMath
             } while (iteration < maxNumOfIterations && iterationDelta > stopDelta);
             return resultEigenValue;
         }
-
-
 
     }//Matrix
 

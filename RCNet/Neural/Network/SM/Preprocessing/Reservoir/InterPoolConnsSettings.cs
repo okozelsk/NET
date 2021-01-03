@@ -5,26 +5,26 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 {
     /// <summary>
-    /// The collection of the pools configurations
+    /// Configuration of the inter-pool connections.
     /// </summary>
     [Serializable]
     public class InterPoolConnsSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "ResStructInterPoolConnectionsType";
 
         //Attribute properties
         /// <summary>
-        /// Collection of inter-pool connections settings
+        /// The collection of the inter-pool connection configurations.
         /// </summary>
         public List<InterPoolConnSettings> InterPoolConnectionCfgCollection { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         private InterPoolConnsSettings()
         {
@@ -33,9 +33,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="interPoolConnectionCfgCollection">Collection of inter-pool connection settings</param>
+        /// <param name="interPoolConnectionCfgCollection">The collection of the inter-pool connection configurations.</param>
         public InterPoolConnsSettings(IEnumerable<InterPoolConnSettings> interPoolConnectionCfgCollection)
             : this()
         {
@@ -45,9 +45,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="interPoolConnectionCfgCollection">Collection of inter-pool connections settings</param>
+        /// <param name="interPoolConnectionCfgCollection">The inter-pool connection configurations.</param>
         public InterPoolConnsSettings(params InterPoolConnSettings[] interPoolConnectionCfgCollection)
             : this()
         {
@@ -57,9 +57,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public InterPoolConnsSettings(InterPoolConnsSettings source)
             : this()
         {
@@ -70,7 +70,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings.</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public InterPoolConnsSettings(XElement elem)
         {
             //Validation
@@ -101,9 +101,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// Adds cloned schemas from given collection into the internal collection
+        /// Adds the inter-pool connection configurations from the specified collection into the internal collection.
         /// </summary>
-        /// <param name="interPoolConnectionCfgCollection">Collection of inter-pool connection settings</param>
+        /// <param name="interPoolConnectionCfgCollection">The collection of the inter-pool connection configurations.</param>
         private void AddPools(IEnumerable<InterPoolConnSettings> interPoolConnectionCfgCollection)
         {
             foreach (InterPoolConnSettings interPoolConnectionCfg in interPoolConnectionCfgCollection)

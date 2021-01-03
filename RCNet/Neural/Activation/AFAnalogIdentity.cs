@@ -1,18 +1,18 @@
-﻿using System;
-using RCNet.Extensions;
+﻿using RCNet.Extensions;
 using RCNet.MathTools;
+using System;
 
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Implements the AFAnalogIdentity activation function (aka Linear)
+    /// Implements the Identity activation function (aka Linear).
     /// </summary>
     [Serializable]
     public class AFAnalogIdentity : AFAnalogBase
     {
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         public AFAnalogIdentity()
             : base(Interval.IntNIPI)

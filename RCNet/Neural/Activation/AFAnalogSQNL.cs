@@ -4,14 +4,14 @@ using System;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Implements the Square Nonlinearity activation function
+    /// Implements the Square Nonlinearity activation function.
     /// </summary>
     [Serializable]
     public class AFAnalogSQNL : AFAnalogBase
     {
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         public AFAnalogSQNL()
             : base(Interval.IntN1P1)

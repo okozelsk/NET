@@ -5,39 +5,39 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {
     /// <summary>
-    /// Configuration of the synapse linear dynamics (inhibitory spiking to hidden spiking neuron)
+    /// Configuration of the efficacy's linear dynamics of an inhibitory synapse connecting presynaptic hidden spiking neuron and postsynaptic hidden spiking neuron.
     /// </summary>
     [Serializable]
     public class LinearDynamicsSTInhibitorySettings : LinearDynamicsSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "SynapseLinearDynamicsSTInhibitoryType";
 
         //Default values
         /// <summary>
-        /// Default alpha argument in the linear expression efficacy = alpha * (spike - beta)
+        /// The default value of the alpha argument in the linear expression: efficacy = alpha * (spike - beta).
         /// </summary>
         public const double DefaultAlpha = 0.007d;
         /// <summary>
-        /// Default beta argument in the linear expression efficacy = alpha * (spike - beta)
+        /// The default value of the beta argument in the linear expression: efficacy = alpha * (spike - beta).
         /// </summary>
         public const double DefaultBeta = 0.739d;
         /// <summary>
-        /// Default synapse initial efficacy
+        /// The default value of the synapse's initial efficacy.
         /// </summary>
         public const double DefaultInitialEfficacy = 0.75d;
 
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="alpha">Alpha argument in the linear expression efficacy = alpha * (spike - beta)</param>
-        /// <param name="beta">Beta argument in the linear expression efficacy = alpha * (spike - beta)</param>
-        /// <param name="initialEfficacy">Synapse initial efficacy</param>
+        /// <param name="alpha">The value of the alpha argument in the linear expression: efficacy = alpha * (spike - beta).</param>
+        /// <param name="beta">The value of the beta argument in the linear expression: efficacy = alpha * (spike - beta).</param>
+        /// <param name="initialEfficacy">The value of the synapse's initial efficacy.</param>
         public LinearDynamicsSTInhibitorySettings(double alpha = DefaultAlpha, double beta = DefaultBeta, double initialEfficacy = DefaultInitialEfficacy)
             : base(alpha, beta, initialEfficacy)
         {
@@ -47,7 +47,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <summary>
         /// The deep copy constructor
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public LinearDynamicsSTInhibitorySettings(LinearDynamicsSTInhibitorySettings source)
             : base(source)
         {
@@ -57,7 +57,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public LinearDynamicsSTInhibitorySettings(XElement elem)
             : base(elem, XsdTypeName)
         {
@@ -69,17 +69,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         public override PlasticityCommon.DynApplication Application { get { return PlasticityCommon.DynApplication.STInhibitory; } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultAlpha { get { return (Alpha == DefaultAlpha); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultBeta { get { return (Beta == DefaultBeta); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultInitialEfficacy { get { return (InitialEfficacy == DefaultInitialEfficacy); } }
 

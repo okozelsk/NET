@@ -5,26 +5,26 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Network.SM.Readout
 {
     /// <summary>
-    /// Maps specific predictors to readout units
+    /// Implements the mapper of specific predictors to readout units.
     /// </summary>
     [Serializable]
     public class PredictorsMapper
     {
         //Attribute properties
         /// <summary>
-        /// Collection of switches generally enabling/disabling predictors
+        /// The collection of switches generally enabling/disabling the predictors.
         /// </summary>
         public bool[] PredictorGeneralSwitchCollection { get; private set; }
+
         //Attributes
-        /// <summary>
-        /// Mapping of readout unit to switches determining what predictors are assigned to.
-        /// </summary>
         private readonly Dictionary<string, ReadoutUnitMap> _mapCollection;
         private readonly int _numOfAllowedPredictors;
+
+        //Constructors
         /// <summary>
-        /// Creates initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="numOfPredictors">Total number of available predictors</param>
+        /// <param name="numOfPredictors">The total number of predictors.</param>
         public PredictorsMapper(int numOfPredictors)
         {
             PredictorGeneralSwitchCollection = new bool[numOfPredictors];
@@ -35,9 +35,9 @@ namespace RCNet.Neural.Network.SM.Readout
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="predictorGeneralSwitchCollection">Collection of switches generally enabling/disabling predictors</param>
+        /// <param name="predictorGeneralSwitchCollection">The collection of switches generally enabling/disabling the predictors.</param>
         public PredictorsMapper(bool[] predictorGeneralSwitchCollection)
         {
             PredictorGeneralSwitchCollection = (bool[])predictorGeneralSwitchCollection.Clone();
@@ -55,10 +55,10 @@ namespace RCNet.Neural.Network.SM.Readout
         }
 
         /// <summary>
-        /// Adds new mapping for ReadoutUntit
+        /// Adds the mapping for the specified readout untit.
         /// </summary>
-        /// <param name="readoutUnitName"></param>
-        /// <param name="map">Boolean switches indicating if to use available prdictor for the ReadoutUnit</param>
+        /// <param name="readoutUnitName">The name of the readout unit.</param>
+        /// <param name="map">The collection of switches indicating whether to use a predictor for the readout unit.</param>
         public void Add(string readoutUnitName, bool[] map)
         {
             if (map.Length != PredictorGeneralSwitchCollection.Length)
@@ -117,7 +117,7 @@ namespace RCNet.Neural.Network.SM.Readout
         }
 
         /// <summary>
-        /// Creates input vector containing specific subset of predictors for the ReadoutUnit.
+        /// Creates an input vector containing specific subset of predictors for the specified readout unit.
         /// </summary>
         /// <param name="readoutUnitName">ReadoutUnit name</param>
         /// <param name="predictors">Available predictors</param>
@@ -139,7 +139,7 @@ namespace RCNet.Neural.Network.SM.Readout
         }
 
         /// <summary>
-        /// Creates input vector collection where each vector containing specific subset of predictors for the ReadoutUnit.
+        /// Creates an input vector collection where each vector contains the specific subset of predictors for the specified readout unit.
         /// </summary>
         /// <param name="readoutUnitName">ReadoutUnit name</param>
         /// <param name="predictorsCollection">Collection of available predictors</param>
@@ -167,25 +167,25 @@ namespace RCNet.Neural.Network.SM.Readout
 
         //Inner classes
         /// <summary>
-        /// Maps specific predictors to readout unit
+        /// Implements the map of specific predictors to readout unit.
         /// </summary>
         [Serializable]
         private class ReadoutUnitMap
         {
             //Attribute properties
             /// <summary>
-            /// Boolean switches indicating if to use available prdictor for this ReadoutUnit
+            /// The switches indicating whether to use predictor for the readout unit.
             /// </summary>
             public bool[] Map { get; set; }
             /// <summary>
-            /// Resulting length of ReadoutUnit's input vector (number of true switches in the Map)
+            /// The length of the readout unit's input vector.
             /// </summary>
             public int VectorLength { get; private set; }
 
             /// <summary>
-            /// Creates initialized instance
+            /// Creates an initialized instance.
             /// </summary>
-            /// <param name="map">Boolean switches indicating if to use available prdictor for this ReadoutUnit.</param>
+            /// <param name="map">The switches indicating whether to use predictor for the readout unit.</param>
             public ReadoutUnitMap(bool[] map)
             {
                 Map = map;
@@ -200,4 +200,5 @@ namespace RCNet.Neural.Network.SM.Readout
         }//ReadoutUnitMap
 
     }//PredictorsMapper
+
 }//Namespace

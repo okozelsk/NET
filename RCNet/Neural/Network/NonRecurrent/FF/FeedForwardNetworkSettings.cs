@@ -1,5 +1,4 @@
-﻿using RCNet.MathTools;
-using RCNet.Neural.Activation;
+﻿using RCNet.Neural.Activation;
 using System;
 using System.Linq;
 using System.Xml.Linq;
@@ -7,38 +6,38 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.NonRecurrent.FF
 {
     /// <summary>
-    /// Configuration of the FeedForwardNetwork and associated trainer
+    /// Configuration of the FeedForwardNetwork and its associated trainer.
     /// </summary>
     [Serializable]
     public class FeedForwardNetworkSettings : RCNetBaseSettings, INonRecurrentNetworkSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "FFNetType";
 
         //Attribute properties
         /// <summary>
-        /// Hidden layers configuration. Hidden layers are optional.
+        /// The configuration of the hidden layers. Hidden layers are optional.
         /// </summary>
         public HiddenLayersSettings HiddenLayersCfg { get; }
         /// <summary>
-        /// Output layer activation configuration
+        /// Configuration of the output layer activation function.
         /// </summary>
         public IActivationSettings OutputActivationCfg { get; }
         /// <summary>
-        /// Configuration of associated trainer
+        /// The configuration of the associated trainer.
         /// </summary>
         public RCNetBaseSettings TrainerCfg { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="outputActivationCfg">Output layer activation configuration</param>
-        /// <param name="hiddenLayersCfg">Hidden layers configuration. Hidden layers are optional.</param>
-        /// <param name="trainerCfg">Configuration of the associated trainer</param>
+        /// <param name="outputActivationCfg">Configuration of the output layer activation function.</param>
+        /// <param name="hiddenLayersCfg">The configuration of the hidden layers. Hidden layers are optional.</param>
+        /// <param name="trainerCfg">The configuration of the associated trainer.</param>
         public FeedForwardNetworkSettings(IActivationSettings outputActivationCfg,
                                           HiddenLayersSettings hiddenLayersCfg,
                                           RCNetBaseSettings trainerCfg
@@ -52,11 +51,11 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         }
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public FeedForwardNetworkSettings(FeedForwardNetworkSettings source)
-            :this(source.OutputActivationCfg, source.HiddenLayersCfg, source.TrainerCfg)
+            : this(source.OutputActivationCfg, source.HiddenLayersCfg, source.TrainerCfg)
         {
             return;
         }
@@ -64,7 +63,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public FeedForwardNetworkSettings(XElement elem)
         {
             //Validation
@@ -118,7 +117,7 @@ namespace RCNet.Neural.Network.NonRecurrent.FF
         /// <inheritdoc/>
         protected override void Check()
         {
-            if(!FeedForwardNetwork.IsAllowedOutputAF(OutputActivationCfg))
+            if (!FeedForwardNetwork.IsAllowedOutputAF(OutputActivationCfg))
             {
                 throw new ArgumentException($"Specified output activation function can't be used in FF network's output activation.", "OutputActivationCfg");
             }

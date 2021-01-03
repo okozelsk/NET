@@ -11,13 +11,13 @@ namespace RCNet.Neural.Activation
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "ActivationSQNLType";
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         public AFAnalogSQNLSettings()
         {
@@ -25,7 +25,7 @@ namespace RCNet.Neural.Activation
         }
 
         /// <summary>
-        /// Copy constructor
+        /// The copy constructor.
         /// </summary>
         public AFAnalogSQNLSettings(AFAnalogSQNLSettings source)
         {
@@ -33,9 +33,9 @@ namespace RCNet.Neural.Activation
         }
 
         /// <summary>
-        /// Creates an instance and initializes it from given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public AFAnalogSQNLSettings(XElement elem)
         {
             //Validation

@@ -5,7 +5,7 @@ using System.Linq;
 namespace RCNet.Neural.Data.Generators
 {
     /// <summary>
-    /// Implements the Mackey-Glass signal generator
+    /// Implements the Mackey-Glass generator.
     /// </summary>
     [Serializable]
     public class MackeyGlassGenerator : IGenerator
@@ -15,16 +15,16 @@ namespace RCNet.Neural.Data.Generators
 
         //Attributes
         private List<double> _lastValues;
-        private readonly MackeyGlassGeneratorSettings _settings;
+        private readonly MackeyGlassGeneratorSettings _cfg;
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="settings">Configuration</param>
-        public MackeyGlassGenerator(MackeyGlassGeneratorSettings settings)
+        /// <param name="cfg">The configuration.</param>
+        public MackeyGlassGenerator(MackeyGlassGeneratorSettings cfg)
         {
-            _settings = (MackeyGlassGeneratorSettings)settings.DeepClone();
+            _cfg = (MackeyGlassGeneratorSettings)cfg.DeepClone();
             Reset();
             return;
         }
@@ -40,13 +40,14 @@ namespace RCNet.Neural.Data.Generators
         /// <inheritdoc />
         public double Next()
         {
-            double refMGV = _lastValues[_lastValues.Count - _settings.Tau];
+            double refMGV = _lastValues[_lastValues.Count - _cfg.Tau];
             double lastMGV = _lastValues.Last();
-            double nextMGV = lastMGV - _settings.B * lastMGV + _settings.C * refMGV / (1 + Math.Pow(refMGV, 10));
+            double nextMGV = lastMGV - _cfg.B * lastMGV + _cfg.C * refMGV / (1 + Math.Pow(refMGV, 10));
             _lastValues.RemoveAt(0);
             _lastValues.Add(nextMGV);
             return nextMGV;
         }
 
     }//MackeyGlassGenerator
+
 }//Namespace

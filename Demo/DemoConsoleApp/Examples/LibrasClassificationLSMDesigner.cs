@@ -1,5 +1,4 @@
-﻿using System;
-using RCNet.Neural.Activation;
+﻿using RCNet.Neural.Activation;
 using RCNet.Neural.Data.Coders.AnalogToSpiking;
 using RCNet.Neural.Data.Filter;
 using RCNet.Neural.Network.NonRecurrent;
@@ -9,12 +8,13 @@ using RCNet.Neural.Network.SM.Preprocessing.Input;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup;
 using RCNet.Neural.Network.SM.Readout;
+using System;
 
 namespace Demo.DemoConsoleApp.Examples
 {
     /// <summary>
-    /// Example code shows how to setup StateMachine as a pure LSM for classification using StateMachineDesigner and various
-    /// ways of input encoding for LSM spiking hidden neurons.
+    /// Example code shows how to use StateMachineDesigner to setup StateMachine as a pure LSM for classification.
+    /// Example also shows various ways of input spikes coding.
     /// Example uses LibrasMovement_train.csv and LibrasMovement_verify.csv from ./Data subfolder.
     /// The dataset is from "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
     /// https://timeseriesclassification.com/description.php?Dataset=Libras
@@ -35,22 +35,21 @@ namespace Demo.DemoConsoleApp.Examples
         /// <summary>
         /// Runs the example code.
         /// </summary>
-        public void Run(InputEncoder.SpikingInputEncodingRegime spikesEncodingRegime)
+        public void Run(InputEncoder.InputSpikesCoding spikesCoding)
         {
             //Create StateMachine configuration
             //Simplified input configuration and homogenous excitability
             InputEncoderSettings inputCfg;
             HomogenousExcitabilitySettings homogenousExcitability;
-            switch (spikesEncodingRegime)
+            switch (spikesCoding)
             {
                 /*
-                 * Horizontal spikes encoding means that every spike position in the spike-train has related its own input neuron.
-                 * So all the spikes are encoded at once, during one reservoir computation cycle.
+                 * Horizontal coding.
                  */
-                case InputEncoder.SpikingInputEncodingRegime.Horizontal:
+                case InputEncoder.InputSpikesCoding.Horizontal:
                     inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(1, NeuralPreprocessor.BidirProcessing.Continuous, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped, new UnificationSettings(false, false)),
                                                                    //136 spiking input neurons per input field - coding at once
-                                                                   new InputSpikesCoderSettings(InputEncoder.SpikingInputEncodingRegime.Horizontal,
+                                                                   new InputSpikesCoderSettings(InputEncoder.InputSpikesCoding.Horizontal,
                                                                                                 new A2SCoderSignalStrengthSettings(8), //8 neurons (spike-train length = 1)
                                                                                                 new A2SCoderUpDirArrowsSettings(8, 8), //64 neurons (spike-train length = 1)
                                                                                                 new A2SCoderDownDirArrowsSettings(8, 8) //64 neurons (spike-train length = 1)
@@ -59,16 +58,15 @@ namespace Demo.DemoConsoleApp.Examples
                                                                    new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings(), true),
                                                                    new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings(), true)
                                                                    );
-                    homogenousExcitability = new HomogenousExcitabilitySettings(1d, 0.7d, 0.2d); 
+                    homogenousExcitability = new HomogenousExcitabilitySettings(1d, 0.7d, 0.2d);
                     break;
                 /*
-                 * Vertical spikes encoding means that every coder generating spike-train has related its own input neuron.
-                 * So all the spikes are encoded in several reservoir computation cycles, depending on largest coder's code (number of code time-points).
+                 * Vertical coding.
                  */
-                case InputEncoder.SpikingInputEncodingRegime.Vertical:
+                case InputEncoder.InputSpikesCoding.Vertical:
                     inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(1, NeuralPreprocessor.BidirProcessing.Continuous, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped),
                                                                    //17 spiking input neurons per input field- coding in 10 cycles
-                                                                   new InputSpikesCoderSettings(InputEncoder.SpikingInputEncodingRegime.Vertical,
+                                                                   new InputSpikesCoderSettings(InputEncoder.InputSpikesCoding.Vertical,
                                                                                                 new A2SCoderSignalStrengthSettings(10), //1 neuron (spike-train length = 10)
                                                                                                 new A2SCoderUpDirArrowsSettings(8, 10), //8 neurons (spike-train length = 10)
                                                                                                 new A2SCoderDownDirArrowsSettings(8, 10) //8 neurons (spike-train length = 10)
@@ -80,13 +78,12 @@ namespace Demo.DemoConsoleApp.Examples
                     homogenousExcitability = new HomogenousExcitabilitySettings(1d, 0.7d, 0.2d);
                     break;
                 /*
-                 * Forbidden spikes encoding means no input spikes. Analog values from input fields are directly routed through synapses to hidden neurons.
-                 * So all the input values are encoded at once, during one reservoir computation cycle.
+                 * Forbidden - no spikes coding.
                  */
                 default:
                     //1 analog input neuron per input field
                     inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(1, NeuralPreprocessor.BidirProcessing.Continuous, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped, new UnificationSettings(false, false)),
-                                                                   new InputSpikesCoderSettings(InputEncoder.SpikingInputEncodingRegime.Forbidden),
+                                                                   new InputSpikesCoderSettings(InputEncoder.InputSpikesCoding.Forbidden),
                                                                    true, //Route the input pattern as the predictors to a readout layer
                                                                    new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings(), true),
                                                                    new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings(), true)
@@ -97,9 +94,9 @@ namespace Demo.DemoConsoleApp.Examples
 
             //Simplified readout layer configuration
             ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateClassificationReadoutCfg(new CrossvalidationSettings(0.0825d, 0, 1),
-                                                                                                  StateMachineDesigner.CreateMultiLayerRegrNet(10, new AFAnalogLeakyReLUSettings(), 2, 5, 400),
+                                                                                                  StateMachineDesigner.CreateMultiLayerFFNetCfg(10, new AFAnalogLeakyReLUSettings(), 2, 5, 400),
+                                                                                                  1,
                                                                                                   "Hand movement",
-                                                                                                  null,
                                                                                                   "curved swing",
                                                                                                   "horizontal swing",
                                                                                                   "vertical swing",

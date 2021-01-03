@@ -6,26 +6,26 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
     /// <summary>
-    /// The collection of the transformed fields configurations
+    /// Configuration of the transformed input fields.
     /// </summary>
     [Serializable]
     public class TransformedFieldsSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "NPTransformedInpFieldsType";
 
         //Attribute properties
         /// <summary>
-        /// Collection of transformed field settings
+        /// The collection of the transformed input field configurations.
         /// </summary>
         public List<TransformedFieldSettings> FieldCfgCollection { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         private TransformedFieldsSettings()
         {
@@ -34,9 +34,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="fieldCfgCollection">Collection of transformed field settings</param>
+        /// <param name="fieldCfgCollection">The collection of the transformed input field configurations.</param>
         public TransformedFieldsSettings(IEnumerable<TransformedFieldSettings> fieldCfgCollection)
             : this()
         {
@@ -46,9 +46,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="fieldCfgCollection">Collection of transformed field settings</param>
+        /// <param name="fieldCfgCollection">The transformed input field configurations.</param>
         public TransformedFieldsSettings(params TransformedFieldSettings[] fieldCfgCollection)
             : this()
         {
@@ -60,7 +60,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// The deep copy constructor
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public TransformedFieldsSettings(TransformedFieldsSettings source)
             : this()
         {
@@ -71,7 +71,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings.</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public TransformedFieldsSettings(XElement elem)
         {
             //Validation
@@ -113,9 +113,22 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Adds cloned settings from given collection into the internal collection
+        /// Gets the collection of the transformed input field names.
         /// </summary>
-        /// <param name="fieldCfgCollection">Collection of transformed field settings</param>
+        public List<string> GetFieldNames()
+        {
+            List<string> names = new List<string>();
+            foreach (TransformedFieldSettings fieldCfg in FieldCfgCollection)
+            {
+                names.Add(fieldCfg.Name);
+            }
+            return names;
+        }
+
+        /// <summary>
+        /// Adds the transformed input field configurations from the specified collection into the internal collection.
+        /// </summary>
+        /// <param name="fieldCfgCollection">The collection of the transformed input field configurations.</param>
         private void AddFields(IEnumerable<TransformedFieldSettings> fieldCfgCollection)
         {
             foreach (TransformedFieldSettings fieldCfg in fieldCfgCollection)
@@ -126,10 +139,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Returns the zero-based index of the field or -1 if given name not found
+        /// Gets the zero-based index of the transformed input field.
         /// </summary>
-        /// <param name="fieldName">Name of the field</param>
-        /// <param name="ex">Specifies whether to throw exception when not found</param>
+        /// <param name="fieldName">The name of the transformed input field.</param>
+        /// <param name="ex">Specifies whether to throw an exception or return -1 in case the external steady input field not found.</param>
         public int GetFieldID(string fieldName, bool ex = true)
         {
             for (int i = 0; i < FieldCfgCollection.Count; i++)
@@ -150,9 +163,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Returns configuration of the given field
+        /// Gets the configuration of the specified transformed input field.
         /// </summary>
-        /// <param name="fieldName">Field name</param>
+        /// <param name="fieldName">The name of the transformed input field.</param>
         public TransformedFieldSettings GetFieldCfg(string fieldName)
         {
             return FieldCfgCollection[GetFieldID(fieldName)];

@@ -1,11 +1,11 @@
-﻿using System;
+﻿using RCNet.Extensions;
+using System;
 using System.Collections.Generic;
-using RCNet.Extensions;
 
 namespace RCNet.MathTools
 {
     /// <summary>
-    /// Implements a simple thread safe (if required) class representing interval.
+    /// Implements an interval.
     /// </summary>
     [Serializable]
     public class Interval
@@ -31,24 +31,24 @@ namespace RCNet.MathTools
         //Constants
         //Enumerations
         /// <summary>
-        /// Interval types
+        /// Interval type.
         /// </summary>
         public enum IntervalType
         {
             /// <summary>
-            /// Left closed - Right closed
+            /// Left closed - Right closed.
             /// </summary>
             LeftClosedRightClosed,
             /// <summary>
-            /// Left closed - Right open
+            /// Left closed - Right open.
             /// </summary>
             LeftClosedRightOpen,
             /// <summary>
-            /// Left open - Right closed
+            /// Left open - Right closed.
             /// </summary>
             LeftOpenRightClosed,
             /// <summary>
-            /// Left open - Right open
+            /// Left open - Right open.
             /// </summary>
             LeftOpenRightOpen
         }//IntervalType
@@ -60,20 +60,19 @@ namespace RCNet.MathTools
         public bool Unmodifiable { get; private set; }
 
         //Attributes
-        //Locker to ensure thread safe behaviour
+        //Locking
         private readonly Object _lock = new Object();
         private readonly bool _threadSafe;
-        //Initialization indicator
-        private bool _initialized;
-        //Interval borders
+        //The borders
         private double _min;
         private double _max;
+        private bool _initialized;
 
         //Constructor
         /// <summary>
-        /// Construct an interval
+        /// Creates an uninitialized instance.
         /// </summary>
-        /// <param name="threadSafe">Specifies whether to create thread safe instance</param>
+        /// <param name="threadSafe">Specifies whether to create a thread safe instance.</param>
         public Interval(bool threadSafe = false)
         {
             Unmodifiable = false;
@@ -83,11 +82,11 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Construct an interval
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="min">Left value</param>
-        /// <param name="max">Right value</param>
-        /// <param name="threadSafe">Specifies whether to create thread safe instance</param>
+        /// <param name="min">The left boder value.</param>
+        /// <param name="max">The right boder value.</param>
+        /// <param name="threadSafe">Specifies whether to create a thread safe instance.</param>
         /// <param name="unmodifiable">Indicates whether the content can be modified or is unmodifiable.</param>
         public Interval(double min, double max, bool threadSafe = false, bool unmodifiable = false)
             : this(threadSafe)
@@ -98,27 +97,27 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Constructs an interval
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="values">Collection of the values from which are determined interval's min and max borders</param>
-        /// <param name="threadSafe">Specifies whether to create thread safe instance</param>
+        /// <param name="sampleCollection">The samples from which are determined interval's min and max border values.</param>
+        /// <param name="threadSafe">Specifies whether to create a thread safe instance.</param>
         /// <param name="unmodifiable">Indicates whether the content can be modified or is unmodifiable.</param>
-        public Interval(IEnumerable<double> values, bool threadSafe = false, bool unmodifiable = false)
+        public Interval(IEnumerable<double> sampleCollection, bool threadSafe = false, bool unmodifiable = false)
             : this(threadSafe)
         {
-            foreach (double value in values)
+            foreach (double sample in sampleCollection)
             {
-                Adjust(value);
+                Adjust(sample);
             }
             Unmodifiable = unmodifiable;
             return;
         }
 
         /// <summary>
-        /// Constructs an interval as a copy of source instance
+        /// The copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
-        /// <param name="threadSafe">Specifies whether to create thread safe instance</param>
+        /// <param name="source">The source instance.</param>
+        /// <param name="threadSafe">Specifies whether to create a thread safe instance.</param>
         public Interval(Interval source, bool threadSafe = false)
             : this(threadSafe)
         {
@@ -128,28 +127,7 @@ namespace RCNet.MathTools
 
         //Properties
         /// <summary>
-        /// Is this interval properly initialized and ready to use?
-        /// </summary>
-        public bool Initialized
-        {
-            get
-            {
-                if (_threadSafe)
-                {
-                    lock (_lock)
-                    {
-                        return _initialized;
-                    }
-                }
-                else
-                {
-                    return _initialized;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Left border of the interval
+        /// Gets the left border value of the interval.
         /// </summary>
         public double Min
         {
@@ -170,7 +148,7 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Right border of the interval
+        /// Gets the right border value of the interval.
         /// </summary>
         public double Max
         {
@@ -191,7 +169,7 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Middle value of the interval (min + (max-min)/2)
+        /// Gets the middle value of the interval (min + (max-min)/2).
         /// </summary>
         public double Mid
         {
@@ -212,7 +190,7 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Min and Max span (max-min)
+        /// Gets the span of the Min and Max (Max - Min).
         /// </summary>
         public double Span
         {
@@ -234,11 +212,11 @@ namespace RCNet.MathTools
 
         //Methods
         /// <summary>
-        /// Checks the content can be modified
+        /// Checks the content can be modified.
         /// </summary>
         private void CheckModifiable()
         {
-            if(Unmodifiable)
+            if (Unmodifiable)
             {
                 throw new InvalidOperationException("Content can not be modified.");
             }
@@ -246,7 +224,7 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Sets the content unmodifiable. That this is an irreversible change.
+        /// Sets the content unmodifiable. This is an irreversible operation.
         /// </summary>
         public void SetUnmodifiable()
         {
@@ -264,9 +242,7 @@ namespace RCNet.MathTools
             return;
         }
 
-        /// <summary>
-        /// See the base.
-        /// </summary>
+        /// <inheritdoc/>
         public override bool Equals(object obj)
         {
             if (obj == null) return false;
@@ -277,9 +253,7 @@ namespace RCNet.MathTools
             }
         }
 
-        /// <summary>
-        /// See the base.
-        /// </summary>
+        /// <inheritdoc/>
         public override int GetHashCode()
         {
             unchecked
@@ -292,7 +266,7 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Resets this interval to the uninitialized state
+        /// Resets the interval.
         /// </summary>
         public void Reset()
         {
@@ -313,16 +287,15 @@ namespace RCNet.MathTools
 
         private void ResetInternal()
         {
+            _min = 0d;
+            _max = 0d;
             _initialized = false;
-            _min = 0;
-            _max = 0;
             return;
         }
 
         /// <summary>
-        /// Creates a deep copy of this interval
+        /// Creates a deep copy of this instance.
         /// </summary>
-        /// <returns></returns>
         public Interval DeepClone()
         {
             if (_threadSafe)
@@ -339,9 +312,9 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Copies all internal attribute values from the source instance into this instance
+        /// Copies all data from the source instance.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public void CopyFrom(Interval source)
         {
             CheckModifiable();
@@ -369,11 +342,13 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Sets the border values min and max.
-        /// It is not necessary to care about border order, function evaluates the Min and Max by itself.
+        /// Sets the border values (min and max).
         /// </summary>
-        /// <param name="border1">The first border value</param>
-        /// <param name="border2">The second border value</param>
+        /// <remarks>
+        /// It is not necessary to care about an order, function evaluates what is the Min and Max by itself.
+        /// </remarks>
+        /// <param name="border1">The border value.</param>
+        /// <param name="border2">The border value.</param>
         public void Set(double border1, double border2)
         {
             CheckModifiable();
@@ -400,22 +375,22 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Adjusts the min and max borders according to sample value.
+        /// Adjusts the min and max border values.
         /// </summary>
-        /// <param name="sampleValue">Sample value</param>
-        public void Adjust(double sampleValue)
+        /// <param name="sample">The sample.</param>
+        public void Adjust(double sample)
         {
             CheckModifiable();
             if (_threadSafe)
             {
                 lock (_lock)
                 {
-                    AdjustInternal(sampleValue);
+                    AdjustInternal(sample);
                 }
             }
             else
             {
-                AdjustInternal(sampleValue);
+                AdjustInternal(sample);
             }
             return;
         }
@@ -443,108 +418,108 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Adjusts the min and max borders according to sample valus in a given collection.
+        /// Adjusts the min and max borders.
         /// </summary>
-        /// <param name="sampleValueCollection">Collection of sample values</param>
-        public void Adjust(IEnumerable<double> sampleValueCollection)
+        /// <param name="sampleCollection">The samples.</param>
+        public void Adjust(IEnumerable<double> sampleCollection)
         {
             CheckModifiable();
-            foreach (double value in sampleValueCollection)
+            foreach (double sample in sampleCollection)
             {
-                Adjust(value);
+                Adjust(sample);
             }
             return;
         }
 
         /// <summary>
-        /// Adjusts the min and max borders according to sample valus in a given collection.
+        /// Adjusts the min and max borders.
         /// </summary>
-        /// <param name="sampleValueCollection">Collection of sample values</param>
-        public void Adjust(IEnumerable<long> sampleValueCollection)
+        /// <param name="sampleCollection">The samples.</param>
+        public void Adjust(IEnumerable<long> sampleCollection)
         {
             CheckModifiable();
-            foreach (long value in sampleValueCollection)
+            foreach (long sample in sampleCollection)
             {
-                Adjust(value);
+                Adjust(sample);
             }
             return;
         }
 
         /// <summary>
-        /// Adjusts the min and max borders according to sample valus in a given collection.
+        /// Adjusts the min and max borders.
         /// </summary>
-        /// <param name="sampleValueCollection">Collection of sample values</param>
-        public void Adjust(IEnumerable<ulong> sampleValueCollection)
+        /// <param name="sampleCollection">The samples.</param>
+        public void Adjust(IEnumerable<ulong> sampleCollection)
         {
             CheckModifiable();
-            foreach (ulong value in sampleValueCollection)
+            foreach (ulong sample in sampleCollection)
             {
-                Adjust(value);
+                Adjust(sample);
             }
             return;
         }
 
         /// <summary>
-        /// Adjusts the min and max borders according to sample valus in a given collection.
+        /// Adjusts the min and max borders.
         /// </summary>
-        /// <param name="sampleValueCollection">Collection of sample values</param>
-        public void Adjust(IEnumerable<int> sampleValueCollection)
+        /// <param name="sampleCollection">The samples.</param>
+        public void Adjust(IEnumerable<int> sampleCollection)
         {
             CheckModifiable();
-            foreach (int value in sampleValueCollection)
+            foreach (int sample in sampleCollection)
             {
-                Adjust(value);
+                Adjust(sample);
             }
             return;
         }
 
         /// <summary>
-        /// Adjusts the min and max borders according to sample valus in a given collection.
+        /// Adjusts the min and max borders.
         /// </summary>
-        /// <param name="sampleValueCollection">Collection of sample values</param>
-        public void Adjust(IEnumerable<uint> sampleValueCollection)
+        /// <param name="sampleCollection">The samples.</param>
+        public void Adjust(IEnumerable<uint> sampleCollection)
         {
             CheckModifiable();
-            foreach (uint value in sampleValueCollection)
+            foreach (uint sample in sampleCollection)
             {
-                Adjust(value);
+                Adjust(sample);
             }
             return;
         }
 
         /// <summary>
-        /// Adjusts the min and max borders according to sample valus in a given collection.
+        /// Adjusts the min and max borders.
         /// </summary>
-        /// <param name="sampleValueCollection">Collection of sample values</param>
-        public void Adjust(IEnumerable<sbyte> sampleValueCollection)
+        /// <param name="sampleCollection">The samples.</param>
+        public void Adjust(IEnumerable<sbyte> sampleCollection)
         {
             CheckModifiable();
-            foreach (sbyte value in sampleValueCollection)
+            foreach (sbyte sample in sampleCollection)
             {
-                Adjust(value);
+                Adjust(sample);
             }
             return;
         }
 
         /// <summary>
-        /// Adjusts the min and max borders according to sample valus in a given collection.
+        /// Adjusts the min and max borders.
         /// </summary>
-        /// <param name="sampleValueCollection">Collection of sample values</param>
-        public void Adjust(IEnumerable<byte> sampleValueCollection)
+        /// <param name="sampleCollection">The samples.</param>
+        public void Adjust(IEnumerable<byte> sampleCollection)
         {
             CheckModifiable();
-            foreach (byte value in sampleValueCollection)
+            foreach (byte sample in sampleCollection)
             {
-                Adjust(value);
+                Adjust(sample);
             }
             return;
         }
 
         /// <summary>
-        /// Tests if given value belongs to this interval
+        /// Evaluates whether the value belongs to interval.
         /// </summary>
         /// <param name="value">Value to be tested</param>
-        /// <param name="intervalType">Type of interval to be considered</param>
+        /// <param name="intervalType">The type of interval to be considered.</param>
         public bool BelongsTo(double value, IntervalType intervalType = IntervalType.LeftClosedRightClosed)
         {
             if (_threadSafe)
@@ -579,10 +554,10 @@ namespace RCNet.MathTools
         }
 
         /// <summary>
-        /// Rescales given value to this interval
+        /// Rescales the value from another interval to appropriate value from this interval.
         /// </summary>
-        /// <param name="value">Input value</param>
-        /// <param name="valueRange">Input value range</param>
+        /// <param name="value">The value to be rescled.</param>
+        /// <param name="valueRange">Value's origin range.</param>
         public double Rescale(double value, Interval valueRange)
         {
             if (_threadSafe)
@@ -597,7 +572,6 @@ namespace RCNet.MathTools
                 return _min + (((value - valueRange._min) / valueRange.Span) * Span);
             }
         }
-
 
     }//Interval
 

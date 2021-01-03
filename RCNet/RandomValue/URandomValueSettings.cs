@@ -6,14 +6,14 @@ using System.Xml.Linq;
 namespace RCNet.RandomValue
 {
     /// <summary>
-    /// Configuration of the unsigned random value
+    /// Configuration of the unsigned random value.
     /// </summary>
     [Serializable]
     public class URandomValueSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "URandomValueType";
 
@@ -25,27 +25,27 @@ namespace RCNet.RandomValue
 
         //Attribute properties
         /// <summary>
-        /// Min random value
+        /// The min value.
         /// </summary>
         public double Min { get; }
 
         /// <summary>
-        /// Max random value
+        /// The max value.
         /// </summary>
         public double Max { get; }
 
         /// <summary>
-        /// Distribution parameters
+        /// The configuration of the distribution.
         /// </summary>
         public IDistrSettings DistrCfg { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="min">Min random value</param>
-        /// <param name="max">Max random value</param>
-        /// <param name="distrCfg">Specific parameters of the distribution</param>
+        /// <param name="min">The min value (inclusive).</param>
+        /// <param name="max">The max value (exclusive).</param>
+        /// <param name="distrCfg">The configuration of the distribution.</param>
         public URandomValueSettings(double min,
                                     double max,
                                     IDistrSettings distrCfg = null
@@ -63,9 +63,9 @@ namespace RCNet.RandomValue
         }
 
         /// <summary>
-        /// Copy constructor
+        /// The copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public URandomValueSettings(URandomValueSettings source)
         {
             Min = source.Min;
@@ -75,9 +75,9 @@ namespace RCNet.RandomValue
         }
 
         /// <summary>
-        /// Creates an instance and initializes it from given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml data containing RandomValueSettings settings.</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public URandomValueSettings(XElement elem)
         {
             //Validation
@@ -92,7 +92,7 @@ namespace RCNet.RandomValue
             }
             else
             {
-                DistrCfg = RandomCommon.CreateUDistrSettings(distrParamsElem);
+                DistrCfg = RandomCommon.LoadUDistrCfg(distrParamsElem);
             }
             Check();
             return;
@@ -100,7 +100,7 @@ namespace RCNet.RandomValue
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultDistrType { get { return DistrType == RandomCommon.DistributionType.Uniform; } }
 
@@ -113,10 +113,17 @@ namespace RCNet.RandomValue
         //Methods
         //Static methods
         /// <summary>
-        /// If exists descendant element within the root element then function creates instance of the RandomValueSettings using
-        /// descendant's xml settings. If not, function creates an instance of the URandomValueSettings using specified default parameters.
+        /// Loads or creates the configuration of the unsigned random value.
         /// </summary>
-        public static URandomValueSettings LoadOrDefault(XElement rootElem, string descendant, double defaultMin, double defaultMax)
+        /// <remarks>
+        /// Checks whether exists the specified descendant element under the root element and if so, loads the configuration.
+        /// If the specified descendant element does not exist, creates the configuration according to specified parameters.
+        /// </remarks>
+        /// <param name="rootElem">The root xml element.</param>
+        /// <param name="descendant">The name of descendant element containing the configuration data.</param>
+        /// <param name="min">The min value.</param>
+        /// <param name="max">The max value.</param>
+        public static URandomValueSettings LoadOrCreate(XElement rootElem, string descendant, double min, double max)
         {
             XElement descendantElement = rootElem.Elements(descendant).FirstOrDefault();
             if (descendantElement != null)
@@ -125,27 +132,40 @@ namespace RCNet.RandomValue
             }
             else
             {
-                return new URandomValueSettings(defaultMin, defaultMax);
+                return new URandomValueSettings(min, max);
             }
         }
 
         /// <summary>
-        /// If exists descendant element within the root element then function creates instance of the URandomValueSettings using
-        /// descendant's xml settings. If not, function creates an instance of the URandomValueSettings using specified default parameters.
+        /// Loads or creates the configuration of the unsigned random value.
         /// </summary>
-        public static URandomValueSettings LoadOrDefault(XElement rootElem, string descendant, double defaultConst)
+        /// <remarks>
+        /// Checks whether exists the specified descendant element under the root element and if so, loads the configuration.
+        /// If the specified descendant element does not exist, creates the configuration according to specified parameters.
+        /// </remarks>
+        /// <param name="rootElem">The root xml element.</param>
+        /// <param name="descendant">The name of descendant element containing the configuration data.</param>
+        /// <param name="constValue">The constant value (the same min and max values).</param>
+        public static URandomValueSettings LoadOrCreate(XElement rootElem, string descendant, double constValue)
         {
-            return LoadOrDefault(rootElem, descendant, defaultConst, defaultConst);
+            return LoadOrCreate(rootElem, descendant, constValue, constValue);
         }
 
         /// <summary>
-        /// If source is not null then function creates it's clone. If not, function creates instance of the URandomValueSettings using specified default parameters.
+        /// Clones the existing configuration or creates the new configuration of the unsigned random value.
         /// </summary>
-        public static URandomValueSettings CloneOrDefault(URandomValueSettings source, double defaultMin, double defaultMax)
+        /// <remarks>
+        /// Checks whether the specified source configuration instance is not null and if so, creates its clone.
+        /// If the source configuration instance is null, creates the configuration according to specified parameters.
+        /// </remarks>
+        /// <param name="source">The source configuration instance.</param>
+        /// <param name="min">The min value.</param>
+        /// <param name="max">The max value.</param>
+        public static URandomValueSettings CloneOrCreate(URandomValueSettings source, double min, double max)
         {
             if (source == null)
             {
-                return new URandomValueSettings(defaultMin, defaultMax);
+                return new URandomValueSettings(min, max);
             }
             else
             {
@@ -154,11 +174,17 @@ namespace RCNet.RandomValue
         }
 
         /// <summary>
-        /// If source is not null then function creates it's clone. If not, function creates instance of the URandomValueSettings using specified default parameters.
+        /// Clones the existing configuration or creates the new configuration of the unsigned random value.
         /// </summary>
-        public static URandomValueSettings CloneOrDefault(URandomValueSettings source, double defaultConst)
+        /// <remarks>
+        /// Checks whether the specified source configuration instance is not null and if so, creates its clone.
+        /// If the source configuration instance is null, creates the configuration according to specified parameters.
+        /// </remarks>
+        /// <param name="source">The source configuration instance.</param>
+        /// <param name="constValue">The constant value (the same min and max values).</param>
+        public static URandomValueSettings CloneOrCreate(URandomValueSettings source, double constValue)
         {
-            return CloneOrDefault(source, defaultConst, defaultConst);
+            return CloneOrCreate(source, constValue, constValue);
         }
 
         //Methods

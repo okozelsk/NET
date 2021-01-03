@@ -5,39 +5,39 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {
     /// <summary>
-    /// Configuration of the synapse nonlinear dynamics (inhibitory spiking to hidden spiking neuron)
+    /// Configuration of the efficacy's nonlinear dynamics of an inhibitory synapse connecting presynaptic hidden spiking neuron and postsynaptic hidden spiking neuron.
     /// </summary>
     [Serializable]
     public class NonlinearDynamicsSTInhibitorySettings : NonlinearDynamicsSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "SynapseNonlinearDynamicsSTInhibitoryType";
 
         //Default values
         /// <summary>
-        /// Default resting efficacy
+        /// The default value of the resting efficacy.
         /// </summary>
         public const double DefaultRestingEfficacy = 0.99d;
         /// <summary>
-        /// Default tau depression
+        /// The default value of the tau depression.
         /// </summary>
         public const double DefaultTauDepression = 3d;
         /// <summary>
-        /// Default tau facilitation
+        /// The default value of the tau facilitation.
         /// </summary>
         public const double DefaultTauFacilitation = 1d;
 
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="restingEfficacy">Synapse's resting efficacy (average probability of neurotransmitter release)</param>
-        /// <param name="tauDepression">Synapse's efficacy depression model time constant (ms)</param>
-        /// <param name="tauFacilitation">Synapse's efficacy facilitation model time constant (ms)</param>
+        /// <param name="restingEfficacy">The value of the resting efficacy.</param>
+        /// <param name="tauDepression">The value of the tau depression (ms).</param>
+        /// <param name="tauFacilitation">The value of the tau facilitation (ms).</param>
         public NonlinearDynamicsSTInhibitorySettings(double restingEfficacy = DefaultRestingEfficacy,
                                                      double tauDepression = DefaultTauDepression,
                                                      double tauFacilitation = DefaultTauFacilitation
@@ -48,9 +48,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         }
 
         /// <summary>
-        /// The deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public NonlinearDynamicsSTInhibitorySettings(NonlinearDynamicsSTInhibitorySettings source)
             : base(source)
         {
@@ -60,7 +60,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public NonlinearDynamicsSTInhibitorySettings(XElement elem)
             : base(elem, XsdTypeName)
         {
@@ -72,17 +72,17 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
         public override PlasticityCommon.DynApplication Application { get { return PlasticityCommon.DynApplication.STInhibitory; } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultRestingEfficacy { get { return (RestingEfficacy == DefaultRestingEfficacy); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultTauDepression { get { return (TauDepression == DefaultTauDepression); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultTauFacilitation { get { return (TauFacilitation == DefaultTauFacilitation); } }
 

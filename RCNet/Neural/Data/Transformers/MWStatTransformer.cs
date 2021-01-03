@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Keeps stat of input field recent values and provides statistical features as a transformed values
+    /// Implements the statistical transformation. It keeps statistics of the input field recent values and provides specified statistical figure as the transformed value.
     /// </summary>
     [Serializable]
     public class MWStatTransformer : ITransformer
@@ -14,23 +14,23 @@ namespace RCNet.Neural.Data.Transformers
         //Attributes
         private readonly int _fieldIdx;
         private readonly SimpleQueue<double> _lastValues;
-        private readonly MWStatTransformerSettings _settings;
+        private readonly MWStatTransformerSettings _cfg;
 
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="availableFieldNames">Collection of names of all available input fields</param>
-        /// <param name="settings">Configuration</param>
-        public MWStatTransformer(List<string> availableFieldNames, MWStatTransformerSettings settings)
+        /// <param name="availableFieldNames">The collection of names of all available input fields.</param>
+        /// <param name="cfg">The configuration.</param>
+        public MWStatTransformer(List<string> availableFieldNames, MWStatTransformerSettings cfg)
         {
-            _settings = (MWStatTransformerSettings)settings.DeepClone();
-            _fieldIdx = availableFieldNames.IndexOf(_settings.InputFieldName);
+            _cfg = (MWStatTransformerSettings)cfg.DeepClone();
+            _fieldIdx = availableFieldNames.IndexOf(_cfg.InputFieldName);
             if (_fieldIdx == -1)
             {
-                throw new InvalidOperationException($"Input field name {_settings.InputFieldName} not found among given available fields.");
+                throw new InvalidOperationException($"Input field name {_cfg.InputFieldName} not found among given available fields.");
             }
-            _lastValues = new SimpleQueue<double>(_settings.Window);
+            _lastValues = new SimpleQueue<double>(_cfg.WindowSize);
             return;
         }
 
@@ -53,9 +53,9 @@ namespace RCNet.Neural.Data.Transformers
             BasicStat stat = new BasicStat();
             for (int i = 0; i < _lastValues.Count; i++)
             {
-                stat.AddSampleValue(_lastValues.GetElementAt(i, true));
+                stat.AddSample(_lastValues.GetElementAt(i, true));
             }
-            return stat.Get(_settings.Output);
+            return stat.Get(_cfg.OutputFigure);
         }
 
     }//MWStatTransformer

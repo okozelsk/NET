@@ -5,39 +5,39 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Configuration of the LogTransformer
+    /// Configuration of the LogTransformer.
     /// </summary>
     [Serializable]
     public class LogTransformerSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "LogTransformerType";
         //Default values
         /// <summary>
-        /// Default base
+        /// The default base.
         /// </summary>
         public const double DefaultBase = Math.E;
 
         //Attribute properties
         /// <summary>
-        /// Name of the input field to be transformed
+        /// The name of the input field to be transformed.
         /// </summary>
         public string InputFieldName { get; }
 
         /// <summary>
-        /// Base
+        /// The base.
         /// </summary>
         public double Base { get; }
 
         //Constructors
         /// <summary>
-        /// Constructs an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="inputFieldName">Name of the input field to be transformed</param>
-        /// <param name="b">Base</param>
+        /// <param name="inputFieldName">The name of the input field to be transformed.</param>
+        /// <param name="b">The base.</param>
         public LogTransformerSettings(string inputFieldName, double b = DefaultBase)
         {
             Base = b;
@@ -47,9 +47,9 @@ namespace RCNet.Neural.Data.Transformers
         }
 
         /// <summary>
-        /// Deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public LogTransformerSettings(LogTransformerSettings source)
             : this(source.InputFieldName, source.Base)
         {
@@ -59,7 +59,7 @@ namespace RCNet.Neural.Data.Transformers
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public LogTransformerSettings(XElement elem)
         {
             //Validation
@@ -73,7 +73,7 @@ namespace RCNet.Neural.Data.Transformers
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultBase { get { return Base == DefaultBase; } }
 

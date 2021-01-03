@@ -1,24 +1,22 @@
 ﻿using RCNet.Extensions;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace RCNet.Neural.Data.Coders.AnalogToSpiking
 {
     /// <summary>
-    /// Common base class for an analog value to a spike-code coders
+    /// Implements the common base class of all A2S coders (transformation of an analog value to a spike-code).
     /// </summary>
     [Serializable]
     public abstract class A2SCoderBase
     {
         //Attribute properties
         /// <summary>
-        /// The length of the base spike-code (one component)
+        /// The length of the base spike-code (the spike-code length of the single component).
         /// </summary>
         public int BaseCodeLength { get; protected set; }
 
         /// <summary>
-        /// The number of components that make up the resulting spike-coding
+        /// The number of components that make up the spike-coding.
         /// </summary>
         public int NumOfComponents { get; protected set; }
 
@@ -26,8 +24,8 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         /// <summary>
         /// Protected constructor
         /// </summary>
-        /// <param name="baseCodeLength">The length of the base spike-code (one component)</param>
-        /// <param name="numOfComponents">The number of components that make up the resulting spike-coding</param>
+        /// <param name="baseCodeLength">The length of the base spike-code (the spike-code length of the single component).</param>
+        /// <param name="numOfComponents">The number of components that make up the spike-coding.</param>
         protected A2SCoderBase(int baseCodeLength, int numOfComponents)
         {
             BaseCodeLength = baseCodeLength;
@@ -35,20 +33,18 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
             return;
         }
 
-        //Properties
-        /// <summary>
-        /// The length of the flat spike-code
-        /// </summary>
-        public int CodeTotalLength { get { return BaseCodeLength * NumOfComponents; } }
-
         //Methods
         /// <summary>
-        /// Implements a novel spike coding to have met two important spike-train conditions together:
-        /// 1. Frequency - as stronger value as higher spiking frequency
-        /// 2. Time to first spike - as stronger value as earlier spike
+        /// Implements a novel coding algorithm to have met the two important spike-train conditions together:
+        /// <para>
+        /// 1. The frequency - as stronger value as higher spiking frequency.
+        /// </para>
+        /// <para>
+        /// 2. The time to a first spike - as stronger value as earlier spike.
+        /// </para>
         /// </summary>
-        /// <param name="normalizedAbsValue">A normalized analog value between 0 and 1</param>
-        /// <param name="codeLength">Desired output code length</param>
+        /// <param name="normalizedAbsValue">A normalized analog value between 0 and 1.</param>
+        /// <param name="codeLength">The desired output code length.</param>
         public static byte[] GetStrengthCode(double normalizedAbsValue, int codeLength)
         {
             int[] spikeSquashPos = new int[codeLength];
@@ -75,15 +71,15 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
         }
 
         /// <summary>
-        /// Resets coder
+        /// Resets the coder.
         /// </summary>
         public abstract void Reset();
 
         /// <summary>
-        /// Codes an analog value as the corresponding spike-code
+        /// Codes an analog value.
         /// </summary>
-        /// <param name="normalizedValue">A normalized analog value between -1 and 1</param>
-        /// <returns>Resulting spike-code from all components as an array of arrays of 0/1 byte values</returns>
+        /// <param name="normalizedValue">A normalized analog value between -1 and 1.</param>
+        /// <returns>The resulting spike-code from all coder components as an array of arrays of 0/1 byte values.</returns>
         public abstract byte[][] GetCode(double normalizedValue);
 
 

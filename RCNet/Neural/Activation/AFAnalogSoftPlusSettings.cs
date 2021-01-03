@@ -4,20 +4,20 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Configuration of the AFAnalogSoftPlus activation function
+    /// Configuration of the AFAnalogSoftPlus activation function.
     /// </summary>
     [Serializable]
     public class AFAnalogSoftPlusSettings : RCNetBaseSettings, IActivationSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "ActivationSoftPlusType";
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         public AFAnalogSoftPlusSettings()
         {
@@ -25,18 +25,18 @@ namespace RCNet.Neural.Activation
         }
 
         /// <summary>
-        /// Copy constructor
+        /// The copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public AFAnalogSoftPlusSettings(AFAnalogSoftPlusSettings source)
         {
             return;
         }
 
         /// <summary>
-        /// Creates an instance and initializes it from given xml element.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public AFAnalogSoftPlusSettings(XElement elem)
         {
             //Validation

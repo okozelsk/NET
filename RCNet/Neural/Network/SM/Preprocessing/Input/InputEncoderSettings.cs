@@ -7,40 +7,40 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Input
 {
     /// <summary>
-    /// Configuration of the InputEncoder
+    /// Configuration of the InputEncoder.
     /// </summary>
     [Serializable]
     public class InputEncoderSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "NPInputEncoderType";
 
         //Attribute properties
         /// <summary>
-        /// Input feeding settings
+        /// The configuration of the input feeding.
         /// </summary>
         public IFeedingSettings FeedingCfg { get; }
-        
+
         /// <summary>
-        /// Varying input fields settings
+        /// The configuration of the varying input fields.
         /// </summary>
         public VaryingFieldsSettings VaryingFieldsCfg { get; }
 
         /// <summary>
-        /// Input placement in 3D space
+        /// Configuration of the input placement.
         /// </summary>
         public CoordinatesSettings CoordinatesCfg { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="feedingCfg">Input feeding settings</param>
-        /// <param name="varyingFieldsCfg">Varying input fields settings</param>
-        /// <param name="coordinatesCfg">Input placement in 3D space</param>
+        /// <param name="feedingCfg">The configuration of the input feeding.</param>
+        /// <param name="varyingFieldsCfg">The configuration of the varying input fields.</param>
+        /// <param name="coordinatesCfg">Configuration of the input placement.</param>
         public InputEncoderSettings(IFeedingSettings feedingCfg,
                                     VaryingFieldsSettings varyingFieldsCfg,
                                     CoordinatesSettings coordinatesCfg = null
@@ -56,7 +56,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// The deep copy constructor
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public InputEncoderSettings(InputEncoderSettings source)
             : this(source.FeedingCfg, source.VaryingFieldsCfg, source.CoordinatesCfg)
         {
@@ -66,7 +66,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings.</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public InputEncoderSettings(XElement elem)
         {
             //Validation
@@ -90,13 +90,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         protected override void Check()
         {
             //Uniqueness of all input field names
-            if(FeedingCfg.FeedingType == InputEncoder.InputFeedingType.Patterned)
+            if (FeedingCfg.FeedingType == InputEncoder.InputFeedingType.Patterned)
             {
                 FeedingPatternedSettings patternedCfg = (FeedingPatternedSettings)FeedingCfg;
-                if(patternedCfg.SteadyFieldsCfg != null)
+                if (patternedCfg.SteadyFieldsCfg != null)
                 {
                     //There are steady fields defined
-                    foreach(SteadyFieldSettings sf in patternedCfg.SteadyFieldsCfg.FieldCfgCollection)
+                    foreach (SteadyFieldSettings sf in patternedCfg.SteadyFieldsCfg.FieldCfgCollection)
                     {
                         if (VaryingFieldsCfg.GetFieldID(sf.Name, false) != -1)
                         {
@@ -110,7 +110,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
         }
 
         /// <summary>
-        /// Returns collection of input field names to be routed to readout layer as the predictors
+        /// Gets the collection of input field names being routed to readout layer.
         /// </summary>
         public List<string> GetRoutedFieldNames()
         {

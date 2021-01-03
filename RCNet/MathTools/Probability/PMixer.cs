@@ -1,16 +1,15 @@
 ﻿using RCNet.Extensions;
 using System;
-using System.Collections.Generic;
 
 namespace RCNet.MathTools.Probability
 {
     /// <summary>
-    /// Implements the weighted probabilities mixer
+    /// Implements the mixer of the weighted probabilities.
     /// </summary>
     public static class PMixer
     {
         //Constants
-        //Operating bounds
+        //The bounds
         private const double MinP = 1e-6;
         private const double MaxP = 1d - MinP;
         private const double MinX = -40d;
@@ -18,15 +17,15 @@ namespace RCNet.MathTools.Probability
 
         //Properties
         /// <summary>
-        /// Probability interval
+        /// Gets the probability range.
         /// </summary>
         public static Interval ProbabilityRange { get { return Interval.IntZP1; } }
 
         //Methods
         /// <summary>
-        /// Logarithmically stretches given probability
+        /// Logarithmically stretches the probability.
         /// </summary>
-        /// <param name="p">Probability (between 0 and 1) to be stretched</param>
+        /// <param name="p">The probability (between 0 and 1) to be stretched.</param>
         public static double Stretch(double p)
         {
             p = p.Bound(MinP, MaxP);
@@ -34,10 +33,12 @@ namespace RCNet.MathTools.Probability
         }
 
         /// <summary>
-        /// Exponentially squashes back previously stretched probability.
-        /// Reversal funtion to Stretch.
+        /// Exponentially squashes the stretched probability.
         /// </summary>
-        /// <param name="x">Stretched probability</param>
+        /// <remarks>
+        /// The reversal funtion to Stretch.
+        /// </remarks>
+        /// <param name="x">The stretched probability.</param>
         public static double Squash(double x)
         {
             x = x.Bound(MinX, MaxX);
@@ -45,33 +46,33 @@ namespace RCNet.MathTools.Probability
         }
 
         /// <summary>
-        /// Mixes given weighted probabilities to the resulting probability (between 0 and 1).
+        /// Mixes specified weighted probabilities and computes the resulting probability.
         /// </summary>
-        /// <param name="probabilities">Probabilities (between 0 and 1)</param>
-        /// <param name="weights">Weights corresponding to probabilities. When not specified, flat weights will be used.</param>
+        /// <param name="probabilities">The probabilities (between 0 and 1).</param>
+        /// <param name="weights">The weights corresponding to the probabilities. When not specified the flat weights are used.</param>
+        /// <returns>The resulting probability.</returns>
         public static double MixP(double[] probabilities, double[] weights = null)
         {
-            if(probabilities == null)
+            if (probabilities == null)
             {
                 throw new ArgumentNullException("probabilities");
             }
-            if(weights == null)
+            if (weights == null)
             {
                 //Weights are not specified
-                //Prepare flat weights having sum equal to 1
+                //Prepare flat weights having the sum equal to 1
                 weights = new double[probabilities.Length];
                 weights.Populate(1d / probabilities.Length);
             }
-            //Compute sum of stretched weighted probabilities
+            //Compute the weighted sum of stretched probabilities
             double sum = 0;
-            for(int i = 0; i < probabilities.Length; i++)
+            for (int i = 0; i < probabilities.Length; i++)
             {
                 sum += weights[i] * Stretch(probabilities[i]);
             }
-            //Return resulting probability (squashed previously stretched weighted probabilities)
+            //Return the resulting probability
             return Squash(sum);
         }
-
 
     }//PMixer
 

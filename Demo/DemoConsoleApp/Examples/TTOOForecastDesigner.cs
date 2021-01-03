@@ -1,17 +1,16 @@
-﻿using System;
-using RCNet.Neural.Activation;
-using RCNet.Neural.Data.Coders.AnalogToSpiking;
+﻿using RCNet.Neural.Activation;
 using RCNet.Neural.Data.Filter;
 using RCNet.Neural.Network.NonRecurrent;
 using RCNet.Neural.Network.SM;
 using RCNet.Neural.Network.SM.Preprocessing.Input;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 using RCNet.Neural.Network.SM.Readout;
+using System;
 
 namespace Demo.DemoConsoleApp.Examples
 {
     /// <summary>
-    /// Example code shows how to setup StateMachine using StateMachineDesigner.
+    /// Example code shows how to use StateMachineDesigner and setup StateMachine as a pure ESN for multivariate timeseries forecast.
     /// Example uses TTOO.csv from ./Data subfolder.
     /// Time series contains real share prices of TTOO title from https://finance.yahoo.com/quote/TTOO/history?p=TTOO.
     /// The last recorded prices are from 2018/03/02 so StateMachine is predicting next High and Low prices for the following
@@ -35,8 +34,8 @@ namespace Demo.DemoConsoleApp.Examples
                                                                                 );
             //Simplified readout layer configuration
             ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateForecastReadoutCfg(new CrossvalidationSettings(0.1d, 0, 1),
-                                                                                            StateMachineDesigner.CreateSingleLayerRegrNet(new AFAnalogIdentitySettings(), 2, 1000),
-                                                                                            null,
+                                                                                            StateMachineDesigner.CreateSingleLayerFFNetCfg(new AFAnalogIdentitySettings(), 2, 1000),
+                                                                                            1,
                                                                                             "High",
                                                                                             "Low"
                                                                                             );
@@ -76,9 +75,9 @@ namespace Demo.DemoConsoleApp.Examples
             TrainStateMachine(stateMachine, "./Data/TTOO.csv", out double[] predictionInputVector);
 
             //Forecasting
-            ReadoutLayer.ReadoutData readoutData = stateMachine.ComputeReadoutData(predictionInputVector);
+            double[] outputVector = stateMachine.Compute(predictionInputVector, out ReadoutLayer.ReadoutData readoutData);
             _log.Write("    Forecasted next High and Low TTOO prices (real prices on 2018/03/05 are High=6.58$ and Low=5.99$):", false);
-            _log.Write(stateMachine.RL.GetForecastReport(readoutData.DataVector, 6));
+            _log.Write(stateMachine.RL.GetForecastReport(readoutData.NatDataVector, 6));
             _log.Write(string.Empty);
 
             return;

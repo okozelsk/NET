@@ -5,43 +5,43 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 {
     /// <summary>
-    /// Configuration of the ActivationPower predictor
+    /// Configuration of the ActivationPower predictor computer.
     /// </summary>
     [Serializable]
     public class PredictorActivationPowerSettings : RCNetBaseSettings, IPredictorSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "PredictorActivationPowerType";
         //Default values
         /// <summary>
-        /// Default value of the exponent
+        /// The default value of the exponent.
         /// </summary>
         public const double DefaultExponent = 2d;
         /// <summary>
-        /// Default value of the parameter specifying whether to keep original sign of the activation value
+        /// The default value of the parameter specifying whether to keep the original sign of the activation value.
         /// </summary>
         public const bool DefaultKeepSign = false;
 
         //Attribute properties
         /// <summary>
-        /// Exponent
+        /// The exponent.
         /// </summary>
         public double Exponent { get; }
 
         /// <summary>
-        /// Specifies whether to keep original sign of the activation value
+        /// Specifies whether to keep the original sign of the activation value.
         /// </summary>
         public bool KeepSign { get; }
 
         //Constructors
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="exponent">Exponent</param>
-        /// <param name="keepSign">Specifies whether to keep original sign of the activation value</param>
+        /// <param name="exponent">The exponent.</param>
+        /// <param name="keepSign">Specifies whether to keep the original sign of the activation value.</param>
         public PredictorActivationPowerSettings(double exponent = DefaultExponent, bool keepSign = DefaultKeepSign)
         {
             Exponent = exponent;
@@ -51,9 +51,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         }
 
         /// <summary>
-        /// Copy constructor
+        /// The copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public PredictorActivationPowerSettings(PredictorActivationPowerSettings source)
             : this(source.Exponent, source.KeepSign)
         {
@@ -61,9 +61,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         }
 
         /// <summary>
-        /// Creates initialized instance using xml element
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public PredictorActivationPowerSettings(XElement elem)
         {
             //Validation
@@ -92,12 +92,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
         public bool NeedsContinuousActivationDiffStat { get { return false; } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultExponent { get { return (Exponent == DefaultExponent); } }
 
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultKeepSign { get { return (KeepSign == DefaultKeepSign); } }
 

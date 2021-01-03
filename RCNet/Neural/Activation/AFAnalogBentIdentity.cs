@@ -1,18 +1,18 @@
-﻿using System;
-using RCNet.Extensions;
+﻿using RCNet.Extensions;
 using RCNet.MathTools;
+using System;
 
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Implements the Bent Identity activation function
+    /// Implements the Bent Identity activation function.
     /// </summary>
     [Serializable]
     public class AFAnalogBentIdentity : AFAnalogBase
     {
         //Constructor
         /// <summary>
-        /// Creates an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
         public AFAnalogBentIdentity()
             : base(Interval.IntZPI)

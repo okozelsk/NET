@@ -1,20 +1,19 @@
-﻿using System;
+﻿using RCNet.CsvTools;
+using RCNet.Extensions;
+using RCNet.MathTools;
+using RCNet.Neural.Activation;
+using RCNet.Neural.Data;
+using RCNet.Neural.Data.Coders.AnalogToSpiking;
+using RCNet.Neural.Data.Filter;
+using RCNet.Neural.Data.Generators;
+using RCNet.Neural.Data.Transformers;
+using RCNet.Neural.Network.NonRecurrent;
+using RCNet.Neural.Network.NonRecurrent.FF;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
-using System.Linq;
-using RCNet.Extensions;
-using RCNet.Neural.Activation;
-using RCNet.Neural.Data.Transformers;
-using RCNet.Neural.Data.Generators;
-using RCNet.Neural.Data.Coders.AnalogToSpiking;
-using RCNet.CsvTools;
-using RCNet.MathTools;
-using RCNet.Neural.Data.Filter;
-using RCNet.Neural.Data;
-using RCNet.Neural.Network.NonRecurrent;
-using RCNet.Neural.Network.NonRecurrent.FF;
 
 namespace Demo.DemoConsoleApp
 {
@@ -122,7 +121,7 @@ namespace Demo.DemoConsoleApp
             transformer = new YeoJohnsonTransformer(singleFieldList, new YeoJohnsonTransformerSettings(singleFieldList[0], 0.5d));
             TestSingleFieldTransformer(transformer);
             //MWStat transformer
-            transformer = new MWStatTransformer(singleFieldList, new MWStatTransformerSettings(singleFieldList[0], 5, BasicStat.OutputFeature.RootMeanSquare));
+            transformer = new MWStatTransformer(singleFieldList, new MWStatTransformerSettings(singleFieldList[0], 5, BasicStat.StatisticalFigure.RootMeanSquare));
             TestSingleFieldTransformer(transformer);
             //Mul transformer
             transformer = new MulTransformer(twoFieldsList, new MulTransformerSettings(twoFieldsList[0], twoFieldsList[1]));
@@ -146,11 +145,11 @@ namespace Demo.DemoConsoleApp
                 MackeyGlassGenerator mgg = new MackeyGlassGenerator(new MackeyGlassGeneratorSettings(tau));
                 int neededDataLength = 1 + patternLength + (tauSamples - 1);
                 double[] mggData = new double[neededDataLength];
-                for(int i = 0; i < neededDataLength; i++)
+                for (int i = 0; i < neededDataLength; i++)
                 {
                     mggData[i] = mgg.Next();
                 }
-                for(int i = 0; i < tauSamples; i++)
+                for (int i = 0; i < tauSamples; i++)
                 {
                     DelimitedStringValues patternData = new DelimitedStringValues();
                     //Steady data
@@ -185,7 +184,7 @@ namespace Demo.DemoConsoleApp
         private string ByteArrayToString(byte[] arr)
         {
             StringBuilder builder = new StringBuilder(arr.Length);
-            for(int i = 0; i < arr.Length; i++)
+            for (int i = 0; i < arr.Length; i++)
             {
                 builder.Append(arr[i].ToString());
             }
@@ -248,33 +247,6 @@ namespace Demo.DemoConsoleApp
             return;
         }
 
-        private void TestEnumFeatureFilter()
-        {
-            int enumerations = 10;
-            EnumFeatureFilter filter = new EnumFeatureFilter(Interval.IntZP1, new EnumFeatureFilterSettings(enumerations));
-            Random rand = new Random();
-            for(int i = 0; i < 200; i++)
-            {
-                filter.Update((double)rand.Next(1, enumerations));
-            }
-
-            Console.WriteLine($"{filter.GetType().Name} ApplyFilter");
-            for (int i = 1; i <= 10; i++)
-            {
-                Console.WriteLine($"    {i.ToString(CultureInfo.InvariantCulture),-20} {filter.ApplyFilter(i)}");
-            }
-
-            Console.WriteLine($"{filter.GetType().Name} ApplyReverse");
-            int pieces = 100;
-            for(int i = 0; i <= pieces; i++)
-            {
-                double value = (double)i * (1d / pieces);
-                Console.WriteLine($"    {value.ToString(CultureInfo.InvariantCulture),-20} {filter.ApplyReverse(value)}");
-            }
-            Console.ReadLine();
-
-        }
-
         private void TestBinFeatureFilter()
         {
             BinFeatureFilter filter = new BinFeatureFilter(Interval.IntZP1, new BinFeatureFilterSettings());
@@ -300,7 +272,7 @@ namespace Demo.DemoConsoleApp
             Console.ReadLine();
         }
 
-        private void TestVectorBundleFolderization(string dataFile, int numOfClasses)
+        private void TestDataBundleFolderization(string dataFile, int numOfClasses)
         {
             //Load csv data
             CsvDataHolder csvData = new CsvDataHolder(dataFile);
@@ -322,9 +294,9 @@ namespace Demo.DemoConsoleApp
                     classesBin1Counts.Populate(0);
                     for (int sampleIdx = 0; sampleIdx < numOfFoldSamples; sampleIdx++)
                     {
-                        for(int classIdx = 0; classIdx < numOfClasses; classIdx++)
+                        for (int classIdx = 0; classIdx < numOfClasses; classIdx++)
                         {
-                            if(folds[foldIdx].OutputVectorCollection[sampleIdx][classIdx] >= binBorder)
+                            if (folds[foldIdx].OutputVectorCollection[sampleIdx][classIdx] >= binBorder)
                             {
                                 ++classesBin1Counts[classIdx];
                             }
@@ -333,7 +305,7 @@ namespace Demo.DemoConsoleApp
                     Console.WriteLine($"        Number of positive samples per class");
                     for (int classIdx = 0; classIdx < numOfClasses; classIdx++)
                     {
-                        Console.WriteLine($"          ClassID={classIdx.ToString(CultureInfo.InvariantCulture), -3}, Bin1Samples={classesBin1Counts[classIdx].ToString(CultureInfo.InvariantCulture)}");
+                        Console.WriteLine($"          ClassID={classIdx.ToString(CultureInfo.InvariantCulture),-3}, Bin1Samples={classesBin1Counts[classIdx].ToString(CultureInfo.InvariantCulture)}");
                     }
                 }
                 Console.ReadLine();
@@ -344,22 +316,22 @@ namespace Demo.DemoConsoleApp
         /// <summary>
         /// Displays information about the readout unit regression progress.
         /// </summary>
-        /// <param name="buildingState">Current state of the regression process</param>
+        /// <param name="buildProgress">Current state of the regression process</param>
         /// <param name="foundBetter">Indicates that the best readout unit was changed as a result of the performed epoch</param>
-        private void OnRegressionEpochDone(TrainedOneTakesAllNetworkBuilder.BuildingState buildingState, bool foundBetter)
+        private void OnRegressionEpochDone(TNRNetBuilder.BuildProgress buildProgress, bool foundBetter)
         {
             int reportEpochsInterval = 5;
             //Progress info
             if (foundBetter ||
-                (buildingState.Epoch % reportEpochsInterval) == 0 ||
-                buildingState.Epoch == buildingState.MaxEpochs ||
-                (buildingState.Epoch == 1 && buildingState.RegrAttemptNumber == 1)
+                (buildProgress.Epoch % reportEpochsInterval) == 0 ||
+                buildProgress.Epoch == buildProgress.MaxEpochs ||
+                (buildProgress.Epoch == 1 && buildProgress.AttemptNumber == 1)
                 )
             {
                 //Build progress report message
-                string progressText = buildingState.GetProgressInfo(4);
+                string progressText = buildProgress.GetInfo(4);
                 //Report the progress
-                if((buildingState.Epoch == 1 && buildingState.RegrAttemptNumber == 1))
+                if ((buildProgress.Epoch == 1 && buildProgress.AttemptNumber == 1))
                 {
                     Console.WriteLine();
                 }
@@ -369,10 +341,10 @@ namespace Demo.DemoConsoleApp
         }
 
 
-        private void TestTrainedOneTakesAllClusterAndBuilder(string trainDataFile, string verifyDataFile, int numOfClasses, double foldDataRatio = 0.1d)
+        private void TestProbabilisticClusterAndBuilder(string trainDataFile, string verifyDataFile, int numOfClasses, double foldDataRatio = 0.1d)
         {
             Console.BufferWidth = 320;
-            Console.WriteLine("One Takes All - Cluster and Cluster builder test");
+            Console.WriteLine("Probabilistic cluster and builder test");
             //Load csv data and create vector bundle
             Console.WriteLine($"Loading {trainDataFile}...");
             CsvDataHolder trainCsvData = new CsvDataHolder(trainDataFile);
@@ -388,15 +360,24 @@ namespace Demo.DemoConsoleApp
                                                        new RPropTrainerSettings(5, 750)
                                                        )
                         );
-
-            TrainedOneTakesAllNetworkClusterBuilder builder =
-                new TrainedOneTakesAllNetworkClusterBuilder("Test",
-                                                            netCfgs,
-                                                            null,
-                                                            null
-                                                            );
-            builder.RegressionEpochDone += OnRegressionEpochDone;
-            TrainedOneTakesAllNetworkCluster tc = builder.Build(trainData, new CrossvalidationSettings(foldDataRatio));
+            ITNRNetClusterSettings clusterCfg = new TNRNetClusterProbabilisticSettings(new TNRNetClusterProbabilisticNetworksSettings(netCfgs),
+                                                                                       new TNRNetClusterProbabilisticWeightsSettings()
+                                                                                       );
+            TNRNetClusterBuilder builder =
+                new TNRNetClusterBuilder("Probabilistic",
+                                         "Cluster",
+                                         new CrossvalidationSettings(foldDataRatio),
+                                         clusterCfg,
+                                         null,
+                                         null
+                                         );
+            builder.EpochDone += OnRegressionEpochDone;
+            FeatureFilterBase[] filters = new BinFeatureFilter[numOfClasses];
+            for (int i = 0; i < numOfClasses; i++)
+            {
+                filters[i] = new BinFeatureFilter(Interval.IntZP1);
+            }
+            TNRNetCluster tc = builder.Build(trainData, filters);
 
             //VERIFICATION
             Console.WriteLine();
@@ -404,16 +385,151 @@ namespace Demo.DemoConsoleApp
             Console.WriteLine($"Cluster verification on {verifyDataFile}...");
             Console.WriteLine();
             int numOfErrors = 0;
-            for(int i = 0; i < verifyData.InputVectorCollection.Count; i++)
+            for (int i = 0; i < verifyData.InputVectorCollection.Count; i++)
             {
-                double[] computed = tc.Compute(verifyData.InputVectorCollection[i]);
+                double[] computed = tc.Compute(verifyData.InputVectorCollection[i], out _);
                 int computedWinnerIdx = computed.MaxIdx();
                 int realWinnerIdx = verifyData.OutputVectorCollection[i].MaxIdx();
                 if (computedWinnerIdx != realWinnerIdx) ++numOfErrors;
-                Console.Write("\x0d" + $"({i+1}/{verifyData.InputVectorCollection.Count}) Errors:{numOfErrors}...");
+                Console.Write("\x0d" + $"({i + 1}/{verifyData.InputVectorCollection.Count}) Errors:{numOfErrors}...");
             }
             Console.WriteLine();
-            Console.WriteLine($"Accuracy {(1d - (double)numOfErrors/(double)verifyData.InputVectorCollection.Count).ToString(CultureInfo.InvariantCulture)}");
+            Console.WriteLine($"Accuracy {(1d - (double)numOfErrors / (double)verifyData.InputVectorCollection.Count).ToString(CultureInfo.InvariantCulture)}");
+            Console.WriteLine();
+
+            return;
+        }
+
+        private void TestProbabilisticClusterChainAndBuilder(string trainDataFile, string verifyDataFile, int numOfClasses, double foldDataRatio = 0.1d)
+        {
+            Console.BufferWidth = 320;
+            Console.WriteLine("Probabilistic cluster chain and builder test");
+            //Load csv data and create vector bundle
+            Console.WriteLine($"Loading {trainDataFile}...");
+            CsvDataHolder trainCsvData = new CsvDataHolder(trainDataFile);
+            VectorBundle trainData = VectorBundle.Load(trainCsvData, numOfClasses);
+            Console.WriteLine($"Loading {verifyDataFile}...");
+            CsvDataHolder verifyCsvData = new CsvDataHolder(verifyDataFile);
+            VectorBundle verifyData = VectorBundle.Load(verifyCsvData, numOfClasses);
+            Console.WriteLine($"Chain training on {trainDataFile}...");
+            //Common crossvalidation configuration
+            CrossvalidationSettings crossvalidationCfg = new CrossvalidationSettings(foldDataRatio, 0, 2);
+            //TRAINING
+            List<FeedForwardNetworkSettings> netCfgs1 = new List<FeedForwardNetworkSettings>();
+            netCfgs1.Add(new FeedForwardNetworkSettings(new AFAnalogSoftMaxSettings(),
+                                                        new HiddenLayersSettings(new HiddenLayerSettings(20, new AFAnalogTanHSettings())),
+                                                        new RPropTrainerSettings(5, 750)
+                                                        )
+                        );
+            netCfgs1.Add(new FeedForwardNetworkSettings(new AFAnalogSoftMaxSettings(),
+                                                        new HiddenLayersSettings(new HiddenLayerSettings(20, new AFAnalogLeakyReLUSettings())),
+                                                        new RPropTrainerSettings(5, 750)
+                                                        )
+                        );
+            TNRNetClusterProbabilisticSettings clusterCfg1 = new TNRNetClusterProbabilisticSettings(new TNRNetClusterProbabilisticNetworksSettings(netCfgs1),
+                                                                                        new TNRNetClusterProbabilisticWeightsSettings()
+                                                                                        );
+            List<FeedForwardNetworkSettings> netCfgs2 = new List<FeedForwardNetworkSettings>();
+            netCfgs2.Add(new FeedForwardNetworkSettings(new AFAnalogSoftMaxSettings(),
+                                                        new HiddenLayersSettings(new HiddenLayerSettings(20, new AFAnalogTanHSettings())),
+                                                        new RPropTrainerSettings(5, 750)
+                                                        )
+                        );
+            TNRNetClusterProbabilisticSettings clusterCfg2 = new TNRNetClusterProbabilisticSettings(new TNRNetClusterProbabilisticNetworksSettings(netCfgs2),
+                                                                                        new TNRNetClusterProbabilisticWeightsSettings()
+                                                                                        );
+            List<TNRNetClusterProbabilisticSettings> clusterCfgCollection = new List<TNRNetClusterProbabilisticSettings>() { clusterCfg1, clusterCfg2 };
+            TNRNetClusterChainBuilder builder =
+                new TNRNetClusterChainBuilder("Probabilistic",
+                                              "Chain",
+                                              new TNRNetClusterChainProbabilisticSettings(crossvalidationCfg, new TNRNetClustersProbabilisticSettings(clusterCfgCollection)),
+                                              null,
+                                              null
+                                              );
+            builder.EpochDone += OnRegressionEpochDone;
+            FeatureFilterBase[] filters = new BinFeatureFilter[numOfClasses];
+            for (int i = 0; i < numOfClasses; i++)
+            {
+                filters[i] = new BinFeatureFilter(Interval.IntZP1);
+            }
+            TNRNetClusterChain chain = builder.Build(trainData, filters);
+
+            //VERIFICATION
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine($"Chain verification on {verifyDataFile}...");
+            Console.WriteLine();
+            int numOfErrors = 0;
+            for (int i = 0; i < verifyData.InputVectorCollection.Count; i++)
+            {
+                double[] computed = chain.Compute(verifyData.InputVectorCollection[i], out _);
+                int computedWinnerIdx = computed.MaxIdx();
+                int realWinnerIdx = verifyData.OutputVectorCollection[i].MaxIdx();
+                if (computedWinnerIdx != realWinnerIdx) ++numOfErrors;
+                Console.Write("\x0d" + $"({i + 1}/{verifyData.InputVectorCollection.Count}) Errors:{numOfErrors}...");
+            }
+            Console.WriteLine();
+            Console.WriteLine($"Accuracy {(1d - (double)numOfErrors / (double)verifyData.InputVectorCollection.Count).ToString(CultureInfo.InvariantCulture)}");
+            Console.WriteLine();
+
+            return;
+        }
+
+
+        private void TestRealClusterAndBuilder(string trainDataFile, string verifyDataFile, int numOfClasses, double foldDataRatio = 0.1d)
+        {
+            Console.BufferWidth = 320;
+            Console.WriteLine("Real cluster and builder test");
+            //Load csv data and create vector bundle
+            Console.WriteLine($"Loading {trainDataFile}...");
+            CsvDataHolder trainCsvData = new CsvDataHolder(trainDataFile);
+            VectorBundle trainData = VectorBundle.Load(trainCsvData, numOfClasses);
+            Console.WriteLine($"Loading {verifyDataFile}...");
+            CsvDataHolder verifyCsvData = new CsvDataHolder(verifyDataFile);
+            VectorBundle verifyData = VectorBundle.Load(verifyCsvData, numOfClasses);
+            Console.WriteLine($"Cluster training on {trainDataFile}...");
+            //TRAINING
+            List<FeedForwardNetworkSettings> netCfgs = new List<FeedForwardNetworkSettings>();
+            netCfgs.Add(new FeedForwardNetworkSettings(new AFAnalogIdentitySettings(),
+                                                       new HiddenLayersSettings(new HiddenLayerSettings(30, new AFAnalogTanHSettings())),
+                                                       new RPropTrainerSettings(5, 750)
+                                                       )
+                        );
+            ITNRNetClusterSettings clusterCfg = new TNRNetClusterRealSettings(new TNRNetClusterRealNetworksSettings(netCfgs),
+                                                                              new TNRNetClusterRealWeightsSettings()
+                                                                              );
+            TNRNetClusterBuilder builder =
+                new TNRNetClusterBuilder("Real",
+                                         "Cluster",
+                                         new CrossvalidationSettings(foldDataRatio),
+                                         clusterCfg,
+                                         null,
+                                         null
+                                         );
+            builder.EpochDone += OnRegressionEpochDone;
+            FeatureFilterBase[] filters = new BinFeatureFilter[numOfClasses];
+            for (int i = 0; i < numOfClasses; i++)
+            {
+                filters[i] = new BinFeatureFilter(Interval.IntZP1);
+            }
+            TNRNetCluster tc = builder.Build(trainData, filters);
+
+            //VERIFICATION
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine($"Cluster verification on {verifyDataFile}...");
+            Console.WriteLine();
+            int numOfErrors = 0;
+            for (int i = 0; i < verifyData.InputVectorCollection.Count; i++)
+            {
+                double[] computed = tc.Compute(verifyData.InputVectorCollection[i], out _);
+                int computedWinnerIdx = computed.MaxIdx();
+                int realWinnerIdx = verifyData.OutputVectorCollection[i].MaxIdx();
+                if (computedWinnerIdx != realWinnerIdx) ++numOfErrors;
+                Console.Write("\x0d" + $"({i + 1}/{verifyData.InputVectorCollection.Count}) Errors:{numOfErrors}...");
+            }
+            Console.WriteLine();
+            Console.WriteLine($"Accuracy {(1d - (double)numOfErrors / (double)verifyData.InputVectorCollection.Count).ToString(CultureInfo.InvariantCulture)}");
             Console.WriteLine();
 
             return;
@@ -426,9 +542,15 @@ namespace Demo.DemoConsoleApp
         {
             Console.Clear();
             //TODO - place your code here
-            //TestVectorBundleFolderization("./Data/ProximalPhalanxOutlineAgeGroup_train.csv", 3);
-            TestTrainedOneTakesAllClusterAndBuilder("./Data/LibrasMovement_train.csv", "./Data/LibrasMovement_verify.csv", 15, 0.1d);
-            TestTrainedOneTakesAllClusterAndBuilder("./Data/ProximalPhalanxOutlineAgeGroup_train.csv", "./Data/ProximalPhalanxOutlineAgeGroup_verify.csv", 3, 0.1d);
+            //TestDataBundleFolderization("./Data/ProximalPhalanxOutlineAgeGroup_train.csv", 3);
+
+            TestProbabilisticClusterChainAndBuilder("./Data/LibrasMovement_train.csv", "./Data/LibrasMovement_verify.csv", 15, 0.1d);
+            TestProbabilisticClusterChainAndBuilder("./Data/ProximalPhalanxOutlineAgeGroup_train.csv", "./Data/ProximalPhalanxOutlineAgeGroup_verify.csv", 3, 0.1d);
+
+            TestProbabilisticClusterAndBuilder("./Data/LibrasMovement_train.csv", "./Data/LibrasMovement_verify.csv", 15, 0.1d);
+            TestProbabilisticClusterAndBuilder("./Data/ProximalPhalanxOutlineAgeGroup_train.csv", "./Data/ProximalPhalanxOutlineAgeGroup_verify.csv", 3, 0.1d);
+            TestRealClusterAndBuilder("./Data/LibrasMovement_train.csv", "./Data/LibrasMovement_verify.csv", 15, 0.1d);
+            TestRealClusterAndBuilder("./Data/ProximalPhalanxOutlineAgeGroup_train.csv", "./Data/ProximalPhalanxOutlineAgeGroup_verify.csv", 3, 0.1d);
             return;
         }
 

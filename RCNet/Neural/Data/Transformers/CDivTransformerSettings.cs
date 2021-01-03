@@ -5,39 +5,39 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Configuration of the CDivTransformer
+    /// Configuration of the CDivTransformer.
     /// </summary>
     [Serializable]
     public class CDivTransformerSettings : RCNetBaseSettings
     {
         //Constants
         /// <summary>
-        /// Name of the associated xsd type
+        /// The name of the associated xsd type.
         /// </summary>
         public const string XsdTypeName = "CDivTransformerType";
         //Default values
         /// <summary>
-        /// Default value of the numerator
+        /// The default value of the constant numerator.
         /// </summary>
         public const double DefaultC = 1d;
 
         //Attribute properties
         /// <summary>
-        /// Name of the input field to be transformed
+        /// The name of the input field to be transformed.
         /// </summary>
         public string InputFieldName { get; }
 
         /// <summary>
-        /// The numerator
+        /// The constant numerator.
         /// </summary>
         public double C { get; }
 
         //Constructors
         /// <summary>
-        /// Constructs an initialized instance
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="inputFieldName">Name of the input field to be transformed</param>
-        /// <param name="c">Constant numerator</param>
+        /// <param name="inputFieldName">The name of the input field to be transformed.</param>
+        /// <param name="c">The constant numerator.</param>
         public CDivTransformerSettings(string inputFieldName, double c)
         {
             InputFieldName = inputFieldName;
@@ -47,9 +47,9 @@ namespace RCNet.Neural.Data.Transformers
         }
 
         /// <summary>
-        /// Deep copy constructor
+        /// The deep copy constructor.
         /// </summary>
-        /// <param name="source">Source instance</param>
+        /// <param name="source">The source instance.</param>
         public CDivTransformerSettings(CDivTransformerSettings source)
             : this(source.InputFieldName, source.C)
         {
@@ -59,7 +59,7 @@ namespace RCNet.Neural.Data.Transformers
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="elem">Xml element containing the initialization settings</param>
+        /// <param name="elem">A xml element containing the configuration data.</param>
         public CDivTransformerSettings(XElement elem)
         {
             //Validation
@@ -73,7 +73,7 @@ namespace RCNet.Neural.Data.Transformers
 
         //Properties
         /// <summary>
-        /// Checks the defaults
+        /// Checks the defaults.
         /// </summary>
         public bool IsDefaultC { get { return (C == DefaultC); } }
 

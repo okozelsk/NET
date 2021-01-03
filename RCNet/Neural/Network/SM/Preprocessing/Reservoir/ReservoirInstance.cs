@@ -18,86 +18,86 @@ using System.Threading.Tasks;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 {
     /// <summary>
-    /// Implements reservoir supporting analog and spiking neurons working together.
+    /// Implements the reservoir.
     /// </summary>
     [Serializable]
     public class ReservoirInstance
     {
         //Attribute properties
         /// <summary>
-        /// Reservoir's instance ID
+        /// The reservoir instance ID.
         /// </summary>
         public int InstanceID { get; }
 
         /// <summary>
-        /// Reservoir's structure configuration
+        /// The configuration of the reservoir structure.
         /// </summary>
         public ReservoirStructureSettings StructureCfg { get; }
 
         /// <summary>
-        /// Reservoir's instance configuration
+        /// The configuration of the reservoir instance.
         /// </summary>
         public ReservoirInstanceSettings InstanceCfg { get; }
 
         /// <summary>
-        /// Neurons providing predictors
+        /// The collection of neurons providing the predictors.
         /// </summary>
         public List<HiddenNeuron> PredictingNeuronCollection { get; }
 
         /// <summary>
-        /// Number of reservoir's predictors
+        /// The number of reservoir predictors.
         /// </summary>
         public int NumOfPredictors { get; }
 
 
         //Attributes
         /// <summary>
-        /// Neurons within the pools.
+        /// The neurons within the pools.
         /// </summary>
         private readonly List<HiddenNeuron[]> _poolNeuronCollection;
         /// <summary>
-        /// Reservoir's all internal neurons (flat structure).
+        /// All reservoir neurons (flat structure).
         /// </summary>
         private readonly HiddenNeuron[] _reservoirNeuronCollection;
         /// <summary>
-        /// Input connections
+        /// The input synapses.
         /// </summary>
-        private readonly SortedList<int, Synapse>[] _neuronInputConnectionsCollection;
+        private readonly SortedList<int, Synapse>[] _neuronInputSynapsesCollection;
         /// <summary>
-        /// Internal connections
+        /// The internal synapses.
         /// </summary>
-        private readonly SortedList<int, Synapse>[] _neuronNeuronConnectionsCollection;
+        private readonly SortedList<int, Synapse>[] _neuronNeuronSynapsesCollection;
         /// <summary>
-        /// Prepared ranges for parallel processing
+        /// The ranges for parallel processing.
         /// </summary>
         private readonly List<Tuple<int, int>> _parallelRanges;
         /// <summary>
-        /// Total number of analog hidden neurons
+        /// The total number of analog hidden neurons.
         /// </summary>
         private readonly int _numOfAnalogNeurons;
         /// <summary>
-        /// Total number of spiking hidden neurons
+        /// The total number of spiking hidden neurons.
         /// </summary>
         private readonly int _numOfSpikingNeurons;
         /// <summary>
-        /// Input distances statistics
+        /// The input distances statistics.
         /// </summary>
         private readonly BasicStat _inputDistancesStat;
         /// <summary>
-        /// Internal distances statistics
+        /// The internal distances statistics.
         /// </summary>
         private readonly BasicStat _internalDistancesStat;
 
 
         //Constructor
         /// <summary>
-        /// Instantiates the reservoir
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="instanceID">ID of the reservoir instance</param>
-        /// <param name="structureCfg">Reservoir structure configuration</param>
-        /// <param name="instanceCfg">Reservoir instance configuration</param>
-        /// <param name="inputEncoder">Input encoder</param>
-        /// <param name="rand">Random object to be used for random part of the initialization</param>
+        /// <param name="instanceID">The reservoir instance ID.</param>
+        /// <param name="structureCfg">The configuration of the reservoir structure.</param>
+        /// <param name="instanceCfg">The configuration of the reservoir instance.</param>
+        /// <param name="inputEncoder">The input encoder.</param>
+        /// <param name="rand">The random object to be used.</param>
         public ReservoirInstance(int instanceID,
                                  ReservoirStructureSettings structureCfg,
                                  ReservoirInstanceSettings instanceCfg,
@@ -106,7 +106,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                                  )
         {
             InstanceID = instanceID;
-            //Copy settings
+            //Copy the configurations
             StructureCfg = (ReservoirStructureSettings)structureCfg.DeepClone();
             InstanceCfg = (ReservoirInstanceSettings)instanceCfg.DeepClone();
             //-----------------------------------------------------------------------------
@@ -202,7 +202,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                                                                                   neuronParamCollection[neuronPoolFlatIdx].RetainmentStrength,
                                                                                   neuronParamCollection[neuronPoolFlatIdx].PredictorsCfg
                                                                                   );
-                                if(firingRefHistDistance > 40)
+                                if (firingRefHistDistance > 40)
                                 {
                                     firingRefHistDistance = 0;
                                 }
@@ -242,12 +242,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             _inputDistancesStat = new BasicStat(false);
             _internalDistancesStat = new BasicStat(true);
             //Connection banks allocations
-            _neuronInputConnectionsCollection = new SortedList<int, Synapse>[_reservoirNeuronCollection.Length];
-            _neuronNeuronConnectionsCollection = new SortedList<int, Synapse>[_reservoirNeuronCollection.Length];
+            _neuronInputSynapsesCollection = new SortedList<int, Synapse>[_reservoirNeuronCollection.Length];
+            _neuronNeuronSynapsesCollection = new SortedList<int, Synapse>[_reservoirNeuronCollection.Length];
             for (int n = 0; n < _reservoirNeuronCollection.Length; n++)
             {
-                _neuronInputConnectionsCollection[n] = new SortedList<int, Synapse>();
-                _neuronNeuronConnectionsCollection[n] = new SortedList<int, Synapse>();
+                _neuronInputSynapsesCollection[n] = new SortedList<int, Synapse>();
+                _neuronNeuronSynapsesCollection[n] = new SortedList<int, Synapse>();
             }
 
             //-----------------------------------------------------------------------------
@@ -301,7 +301,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             //-----------------------------------------------------------------------------
             //Delay
             //Setup delay on input synapses
-            foreach (SortedList<int, Synapse> synapses in _neuronInputConnectionsCollection)
+            foreach (SortedList<int, Synapse> synapses in _neuronInputSynapsesCollection)
             {
                 foreach (Synapse synapse in synapses.Values)
                 {
@@ -309,7 +309,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 }
             }
             //Setup delay on internal synapses
-            foreach (SortedList<int, Synapse> synapses in _neuronNeuronConnectionsCollection)
+            foreach (SortedList<int, Synapse> synapses in _neuronNeuronSynapsesCollection)
             {
                 foreach (Synapse synapse in synapses.Values)
                 {
@@ -344,13 +344,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 
         //Properties
         /// <summary>
-        /// Reservoir size. (Number of neurons within the reservoir)
+        /// Gets the reservoir size (the number of neurons within the reservoir).
         /// </summary>
         public int Size { get { return _reservoirNeuronCollection.Length; } }
 
         //Methods
         /// <summary>
-        /// Estimates necessary number of cycles to make reservoir's state and predictors useable
+        /// Estimates the number of computation cycles necessary to make the reservoir and predictors useable.
         /// </summary>
         public int GetDefaultBootCycles()
         {
@@ -363,7 +363,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// Returns collection of predictor descriptor objects related to predictors from hidden neurons
+        /// Gets the collection of descriptors of all the predictors.
         /// </summary>
         public List<PredictorDescriptor> GetPredictorsDescriptors()
         {
@@ -382,7 +382,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// Scales weights of synapses targeting analog neurons to achieve requiered spectral radius
+        /// Adjusts weights of synapses connecting the analog neurons to achieve required spectral radius.
         /// </summary>
         private void ApplySpectralRadius(double spectralRadius)
         {
@@ -396,12 +396,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 Matrix wMatrix = new Matrix(_reservoirNeuronCollection.Length, _reservoirNeuronCollection.Length);
                 Parallel.ForEach(scopeNeurons, neuron =>
                 {
-                    foreach (Synapse synapse in _neuronNeuronConnectionsCollection[neuron.Location.ReservoirFlatIdx].Values)
+                    foreach (Synapse synapse in _neuronNeuronSynapsesCollection[neuron.Location.ReservoirFlatIdx].Values)
                     {
                         wMatrix.Data[neuron.Location.ReservoirFlatIdx][synapse.PresynapticNeuron.Location.ReservoirFlatIdx] = synapse.Weight;
                     }
                 });
-                double largestEigenValue = Math.Abs(wMatrix.EstimateLargestEigenValue(out double[] eigenVector));
+                double largestEigenValue = Math.Abs(wMatrix.EstimateLargestEigenvalue(out double[] eigenVector));
                 if (largestEigenValue == 0)
                 {
                     throw new InvalidOperationException($"Can't apply SpectralRadius. Invalid analog weights, largest eigenvalue is 0.");
@@ -410,7 +410,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 //Scale weights of synapses targeting analog neurons
                 Parallel.ForEach(scopeNeurons, neuron =>
                 {
-                    foreach (Synapse synapse in _neuronNeuronConnectionsCollection[neuron.Location.ReservoirFlatIdx].Values)
+                    foreach (Synapse synapse in _neuronNeuronSynapsesCollection[neuron.Location.ReservoirFlatIdx].Values)
                     {
                         synapse.Rescale(scale);
                     }
@@ -420,7 +420,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// Function sets homogenous excitability of spiking hidden neurons
+        /// Sets the homogenous excitability of the hidden spiking neurons.
         /// </summary>
         private void ApplyHomogenousExcitability()
         {
@@ -430,12 +430,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 HomogenousExcitabilitySettings homogenousExcitabilityCfg = ((SpikingNeuronGroupSettings)StructureCfg.PoolsCfg.PoolCfgCollection[neuron.Location.PoolID].NeuronGroupsCfg.GroupCfgCollection[neuron.Location.PoolGroupID]).HomogenousExcitabilityCfg;
                 double sumOfInputWeights = 0d, sumOfExcitatoryWeights = 0d, sumOfInhibitoryWeights = 0d;
                 //Scan input synapses
-                foreach (Synapse synapse in _neuronInputConnectionsCollection[neuron.Location.ReservoirFlatIdx].Values)
+                foreach (Synapse synapse in _neuronInputSynapsesCollection[neuron.Location.ReservoirFlatIdx].Values)
                 {
                     sumOfInputWeights += Math.Abs(synapse.Weight);
                 }
                 //Scan Excitatory and Inhibitory synapses
-                foreach (Synapse synapse in _neuronNeuronConnectionsCollection[neuron.Location.ReservoirFlatIdx].Values)
+                foreach (Synapse synapse in _neuronNeuronSynapsesCollection[neuron.Location.ReservoirFlatIdx].Values)
                 {
                     if (synapse.Role == Synapse.SynRole.Excitatory)
                     {
@@ -456,7 +456,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 if (sumOfInputWeights > 0)
                 {
                     double factor = targetSumOfInputWeights / sumOfInputWeights;
-                    foreach (Synapse synapse in _neuronInputConnectionsCollection[neuron.Location.ReservoirFlatIdx].Values)
+                    foreach (Synapse synapse in _neuronInputSynapsesCollection[neuron.Location.ReservoirFlatIdx].Values)
                     {
                         synapse.Rescale(factor);
                     }
@@ -466,7 +466,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 if (sumOfExcitatoryWeights > 0)
                 {
                     double factor = targetSumOfExcitatoryWeights / sumOfExcitatoryWeights;
-                    foreach (Synapse synapse in _neuronNeuronConnectionsCollection[neuron.Location.ReservoirFlatIdx].Values)
+                    foreach (Synapse synapse in _neuronNeuronSynapsesCollection[neuron.Location.ReservoirFlatIdx].Values)
                     {
                         if (synapse.Role == Synapse.SynRole.Excitatory)
                         {
@@ -479,7 +479,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 if (sumOfInhibitoryWeights > 0)
                 {
                     double factor = targetSumOfInhibitoryWeights / sumOfInhibitoryWeights;
-                    foreach (Synapse synapse in _neuronNeuronConnectionsCollection[neuron.Location.ReservoirFlatIdx].Values)
+                    foreach (Synapse synapse in _neuronNeuronSynapsesCollection[neuron.Location.ReservoirFlatIdx].Values)
                     {
                         if (synapse.Role == Synapse.SynRole.Inhibitory)
                         {
@@ -492,7 +492,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// Function adjusts weights of input synapses to analog neurons to ensure theirs sum does not exceed Max
+        /// Adjusts the weights of input synapses connecting analog neurons to ensure their sum does not exceed the max.
         /// </summary>
         private void AdjustAnalogInputStrength()
         {
@@ -503,10 +503,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 if (_reservoirNeuronCollection[nIdx].TypeOfActivation == ActivationType.Analog)
                 {
                     //Adjust input synapses
-                    if (_neuronInputConnectionsCollection[nIdx].Values.Count > 1)
+                    if (_neuronInputSynapsesCollection[nIdx].Values.Count > 1)
                     {
-                        double factor = 1d / _neuronInputConnectionsCollection[nIdx].Values.Count;
-                        foreach (Synapse synapse in _neuronInputConnectionsCollection[nIdx].Values)
+                        double factor = 1d / _neuronInputSynapsesCollection[nIdx].Values.Count;
+                        foreach (Synapse synapse in _neuronInputSynapsesCollection[nIdx].Values)
                         {
                             synapse.Rescale(factor);
                         }
@@ -517,19 +517,19 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// This general function adds the synapse into the given connections bank.
+        /// Adds the synapse into the specified bank.
         /// </summary>
-        /// <param name="connectionsCollection">Bank of connections</param>
-        /// <param name="synapse">A synapse to be added into the bank</param>
-        /// <param name="replace">Specifies whether to replace existing connection</param>
-        private bool SetInterconnection(SortedList<int, Synapse>[] connectionsCollection, Synapse synapse, bool replace = false)
+        /// <param name="synapsesCollection">The bank of the synapses.</param>
+        /// <param name="synapse">A synapse to be added into the bank.</param>
+        /// <param name="replace">Specifies whether to replace existing connection.</param>
+        private bool SetInterconnection(SortedList<int, Synapse>[] synapsesCollection, Synapse synapse, bool replace = false)
         {
             //Add new connection
-            lock (connectionsCollection[synapse.PostsynapticNeuron.Location.ReservoirFlatIdx])
+            lock (synapsesCollection[synapse.PostsynapticNeuron.Location.ReservoirFlatIdx])
             {
                 try
                 {
-                    connectionsCollection[synapse.PostsynapticNeuron.Location.ReservoirFlatIdx].Add(synapse.PresynapticNeuron.Location.ReservoirFlatIdx, synapse);
+                    synapsesCollection[synapse.PostsynapticNeuron.Location.ReservoirFlatIdx].Add(synapse.PresynapticNeuron.Location.ReservoirFlatIdx, synapse);
                     return true;
                 }
                 catch
@@ -537,7 +537,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                     //Connection already exists
                     if (replace)
                     {
-                        connectionsCollection[synapse.PostsynapticNeuron.Location.ReservoirFlatIdx][synapse.PresynapticNeuron.Location.ReservoirFlatIdx] = synapse;
+                        synapsesCollection[synapse.PostsynapticNeuron.Location.ReservoirFlatIdx][synapse.PresynapticNeuron.Location.ReservoirFlatIdx] = synapse;
                         return true;
                     }
                     return false;
@@ -546,11 +546,11 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// Creates input synapses from input neurons to hidden neurons
+        /// Creates the input synapses from input neurons to hidden neurons.
         /// </summary>
-        /// <param name="inputEncoder">Input encoder instance</param>
-        /// <param name="inputConnCfg">Input connection configuration</param>
-        /// <param name="rand">Random object to be used</param>
+        /// <param name="inputEncoder">The input encoder.</param>
+        /// <param name="inputConnCfg">The input connection configuration.</param>
+        /// <param name="rand">The random object to be used.</param>
         private void ConnectInput(InputEncoder inputEncoder, InputConnSettings inputConnCfg, Random rand)
         {
             InputField inputField = inputEncoder.GetVaryingInputField(inputConnCfg.InputFieldName);
@@ -598,8 +598,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                                                             InstanceCfg.SynapseCfg,
                                                             rand
                                                             );
-                            _inputDistancesStat.AddSampleValue(synapse.Distance);
-                            SetInterconnection(_neuronInputConnectionsCollection, synapse);
+                            _inputDistancesStat.AddSample(synapse.Distance);
+                            SetInterconnection(_neuronInputSynapsesCollection, synapse);
                         }//for i
                     }//Analog synapses
                     else
@@ -624,8 +624,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                                                                   InstanceCfg.SynapseCfg,
                                                                   rand
                                                                   );
-                                    _inputDistancesStat.AddSampleValue(synapse.Distance);
-                                    SetInterconnection(_neuronInputConnectionsCollection, synapse);
+                                    _inputDistancesStat.AddSample(synapse.Distance);
+                                    SetInterconnection(_neuronInputSynapsesCollection, synapse);
                                 }//for i
                                  //Increment combination index
                                 if (++cmbIdx == plannedConnCmbIdxs.Count)
@@ -643,8 +643,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                                                               InstanceCfg.SynapseCfg,
                                                               rand
                                                               );
-                                _inputDistancesStat.AddSampleValue(synapse.Distance);
-                                SetInterconnection(_neuronInputConnectionsCollection, synapse);
+                                _inputDistancesStat.AddSample(synapse.Distance);
+                                SetInterconnection(_neuronInputSynapsesCollection, synapse);
                             }
                         }//for nIdx
                         for (int i = 0; i < inputField.SpikingNeuronCollection.Length; i++)
@@ -660,8 +660,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                                                               InstanceCfg.SynapseCfg,
                                                               rand
                                                               );
-                                _inputDistancesStat.AddSampleValue(synapse.Distance);
-                                SetInterconnection(_neuronInputConnectionsCollection, synapse);
+                                _inputDistancesStat.AddSample(synapse.Distance);
+                                SetInterconnection(_neuronInputSynapsesCollection, synapse);
                             }//!inputNeuronUsageChecker[i]
                         }//for i
                     }//Spiking synapses
@@ -672,19 +672,19 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 
 
         /// <summary>
-        /// Connects target neuron and source neurons
+        /// Connects the target neuron and source neurons.
         /// </summary>
-        /// <param name="targetNeuron">Target neuron</param>
-        /// <param name="sourceNeurons">Source neurons</param>
-        /// <param name="roleSelector">Realtime probabilistic selector of synapse role</param>
-        /// <param name="avgDistance">Average distance to be achieved</param>
-        /// <param name="numOfSynapses">Number of source neurons to be connected</param>
-        /// <param name="rand">Random object</param>
-        /// <param name="allowSelfConnection">Specifies whether to allow target neuron to be connected by itself</param>
-        /// <param name="replace">Specifies whether to replace existing connections</param>
+        /// <param name="targetNeuron">The target neuron.</param>
+        /// <param name="sourceNeurons">The source neurons.</param>
+        /// <param name="roleSelector">The realtime probabilistic selector of the synapse role.</param>
+        /// <param name="avgDistance">An average distance to be achieved.</param>
+        /// <param name="numOfSynapses">The number of source neurons to be connected.</param>
+        /// <param name="rand">The random object to be used</param>
+        /// <param name="allowSelfConnection">Specifies whether to allow the target neuron to be connected by itself.</param>
+        /// <param name="replace">Specifies whether to replace the existing connections.</param>
         private void ConnectNeuron(HiddenNeuron targetNeuron,
                                    List<HiddenNeuron> sourceNeurons,
-                                   RelShareSelector<Synapse.SynRole> roleSelector,
+                                   ProbabilisticSelector<Synapse.SynRole> roleSelector,
                                    double avgDistance,
                                    int numOfSynapses,
                                    Random rand,
@@ -758,10 +758,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                     HiddenNeuron sourceNeuron = neuronBuffer[sourceNeuronIdx].Neuron;
                     neuronBuffer.RemoveAt(sourceNeuronIdx);
                     Synapse synapse = new Synapse(sourceNeuron, targetNeuron, role, InstanceCfg.SynapseCfg, rand);
-                    if (SetInterconnection(_neuronNeuronConnectionsCollection, synapse, replace))
+                    if (SetInterconnection(_neuronNeuronSynapsesCollection, synapse, replace))
                     {
                         ++counts[(int)role];
-                        _internalDistancesStat.AddSampleValue(synapse.Distance);
+                        _internalDistancesStat.AddSample(synapse.Distance);
                         break;
                     }
                 }
@@ -774,10 +774,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         {
             PoolSettings poolSettings = StructureCfg.PoolsCfg.PoolCfgCollection[poolID];
             List<HiddenNeuron> sourceNeurons = new List<HiddenNeuron>(_poolNeuronCollection[poolID]);
-            RelShareSelector<Synapse.SynRole> spikingRoleSelector = new RelShareSelector<Synapse.SynRole>();
+            ProbabilisticSelector<Synapse.SynRole> spikingRoleSelector = new ProbabilisticSelector<Synapse.SynRole>();
             spikingRoleSelector.Add(InstanceCfg.SynapseCfg.SpikingTargetCfg.ExcitatorySynCfg.RelShare, Synapse.SynRole.Excitatory);
             spikingRoleSelector.Add(InstanceCfg.SynapseCfg.SpikingTargetCfg.InhibitorySynCfg.RelShare, Synapse.SynRole.Inhibitory);
-            RelShareSelector<int> connCountFluctuationSelector = new RelShareSelector<int>();
+            ProbabilisticSelector<int> connCountFluctuationSelector = new ProbabilisticSelector<int>();
             connCountFluctuationSelector.Add(1, -1);
             connCountFluctuationSelector.Add(2, 0);
             connCountFluctuationSelector.Add(1, 1);
@@ -821,7 +821,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 
         private void ConnectChainOfNeurons(List<HiddenNeuron> neurons, Random rand, bool replace)
         {
-            RelShareSelector<Synapse.SynRole> spikingRoleSelector = new RelShareSelector<Synapse.SynRole>();
+            ProbabilisticSelector<Synapse.SynRole> spikingRoleSelector = new ProbabilisticSelector<Synapse.SynRole>();
             spikingRoleSelector.Add(InstanceCfg.SynapseCfg.SpikingTargetCfg.ExcitatorySynCfg.RelShare, Synapse.SynRole.Excitatory);
             spikingRoleSelector.Add(InstanceCfg.SynapseCfg.SpikingTargetCfg.InhibitorySynCfg.RelShare, Synapse.SynRole.Inhibitory);
             for (int i = 0; i < neurons.Count - 1; i++)
@@ -852,7 +852,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             for (int repetition = 1; repetition <= schemaCfg.Repetitions; repetition++)
             {
                 List<HiddenNeuron> chainNeuronCollection = RandomlySelectPoolNeurons(poolID, rand, chainLength);
-                if(schemaCfg.Circle)
+                if (schemaCfg.Circle)
                 {
                     chainNeuronCollection.Add(chainNeuronCollection[0]);
                 }
@@ -908,7 +908,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 }
                 chain.Add(twistNeuronCollection[0]);
                 ConnectChainOfNeurons(chain, rand, schemaCfg.ReplaceExistingConnections);
-                if(schemaCfg.LDiagonalSelf)
+                if (schemaCfg.LDiagonalSelf)
                 {
                     //Left diagonal self connections
                     chain.Clear();
@@ -938,10 +938,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 
         private void SetInterPoolConnection(Random rand, InterPoolConnSettings cfg)
         {
-            RelShareSelector<Synapse.SynRole> spikingRoleSelector = new RelShareSelector<Synapse.SynRole>();
+            ProbabilisticSelector<Synapse.SynRole> spikingRoleSelector = new ProbabilisticSelector<Synapse.SynRole>();
             spikingRoleSelector.Add(InstanceCfg.SynapseCfg.SpikingTargetCfg.ExcitatorySynCfg.RelShare, Synapse.SynRole.Excitatory);
             spikingRoleSelector.Add(InstanceCfg.SynapseCfg.SpikingTargetCfg.InhibitorySynCfg.RelShare, Synapse.SynRole.Inhibitory);
-            RelShareSelector<int> connCountFluctuationSelector = new RelShareSelector<int>();
+            ProbabilisticSelector<int> connCountFluctuationSelector = new ProbabilisticSelector<int>();
             connCountFluctuationSelector.Add(1, -1);
             connCountFluctuationSelector.Add(2, 0);
             connCountFluctuationSelector.Add(1, 1);
@@ -976,10 +976,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
 
 
         /// <summary>
-        /// Resets reservoir's state to its initial state.
-        /// Function does not affect weights or internal structure of the resservoir.
+        /// Resets the reservoir to its initial state.
         /// </summary>
-        /// <param name="resetStatistics">Specifies whether to reset internal statistics</param>
+        /// <param name="resetStatistics">Specifies whether to reset also the statistics.</param>
         public void Reset(bool resetStatistics)
         {
             //Reservoir neurons and all linked synapses
@@ -987,12 +986,12 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             {
                 _reservoirNeuronCollection[n].Reset(resetStatistics);
                 //Linked input synapses
-                foreach (Synapse synapse in _neuronInputConnectionsCollection[n].Values)
+                foreach (Synapse synapse in _neuronInputSynapsesCollection[n].Values)
                 {
                     synapse.Reset(resetStatistics);
                 }
                 //Linked internal synapses
-                foreach (Synapse synapse in _neuronNeuronConnectionsCollection[n].Values)
+                foreach (Synapse synapse in _neuronNeuronSynapsesCollection[n].Values)
                 {
                     synapse.Reset(resetStatistics);
                 }
@@ -1001,9 +1000,9 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// Performs new computation cycle of the reservoir.
+        /// Performs the computation cycle of the reservoir.
         /// </summary>
-        /// <param name="updateStatistics">Specifies whether to update reservoir's statistics.</param>
+        /// <param name="updateStatistics">Specifies whether to update reservoir statistics.</param>
         public void Compute(bool updateStatistics)
         {
             //Set new stimulation on each reservoir neuron
@@ -1013,13 +1012,13 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
                 {
                     //Stimulation from input neurons
                     double iStimuli = 0;
-                    foreach (Synapse synapse in _neuronInputConnectionsCollection[neuronIdx].Values)
+                    foreach (Synapse synapse in _neuronInputSynapsesCollection[neuronIdx].Values)
                     {
                         iStimuli += synapse.GetSignal(updateStatistics);
                     }
                     //Stimulation from connected reservoir neurons
                     double rStimuli = 0;
-                    foreach (Synapse synapse in _neuronNeuronConnectionsCollection[neuronIdx].Values)
+                    foreach (Synapse synapse in _neuronNeuronSynapsesCollection[neuronIdx].Values)
                     {
                         rStimuli += synapse.GetSignal(updateStatistics);
                     }
@@ -1039,10 +1038,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// Copies all reservoir predictors to a given buffer starting from the specified position
+        /// Copies the reservoir predictors into a buffer starting from the specified position.
         /// </summary>
-        /// <param name="buffer">Target buffer</param>
-        /// <param name="fromOffset">Starting zero based position in the target buffer</param>
+        /// <param name="buffer">The buffer.</param>
+        /// <param name="fromOffset">The starting zero-based position in the buffer.</param>
         public int CopyPredictorsTo(double[] buffer, int fromOffset)
         {
             int offset = fromOffset;
@@ -1054,7 +1053,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
         }
 
         /// <summary>
-        /// Collects key statistics related to reservoir neurons states
+        /// Collects the reservoir statistics.
         /// </summary>
         public ReservoirStat CollectStatistics()
         {
@@ -1067,8 +1066,8 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir
             foreach (HiddenNeuron neuron in _reservoirNeuronCollection)
             {
                 resStat.Update(neuron,
-                               _neuronInputConnectionsCollection[neuron.Location.ReservoirFlatIdx].Values,
-                               _neuronNeuronConnectionsCollection[neuron.Location.ReservoirFlatIdx].Values
+                               _neuronInputSynapsesCollection[neuron.Location.ReservoirFlatIdx].Values,
+                               _neuronNeuronSynapsesCollection[neuron.Location.ReservoirFlatIdx].Values
                                );
             }
             return resStat;
