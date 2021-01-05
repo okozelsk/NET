@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Implements the multiplication transformation. It multiplies the value of the first field by the value of the second field.
+    /// Implements the transformer of values from two input fields. Multiplies the value of the first input field by the value from the second input field.
     /// </summary>
     [Serializable]
     public class MulTransformer : ITransformer

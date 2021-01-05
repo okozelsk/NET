@@ -3,7 +3,7 @@
 namespace RCNet.Neural.Data.Filter
 {
     /// <summary>
-    /// The common interface of the feature filter configurations.
+    /// Common interface of the feature filter configurations.
     /// </summary>
     public interface IFeatureFilterSettings
     {

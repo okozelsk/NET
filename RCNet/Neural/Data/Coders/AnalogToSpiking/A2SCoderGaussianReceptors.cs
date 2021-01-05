@@ -4,7 +4,7 @@ using System;
 namespace RCNet.Neural.Data.Coders.AnalogToSpiking
 {
     /// <summary>
-    /// Implements the Gussian Receptive Fields coder.
+    /// Implements the Gaussian Receptive Fields coder.
     /// </summary>
     [Serializable]
     public class A2SCoderGaussianReceptors : A2SCoderBase

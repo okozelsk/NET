@@ -5,10 +5,14 @@ using System;
 namespace RCNet.Neural.Data.Coders.AnalogToSpiking
 {
     /// <summary>
-    /// Implements the upward signal direction receptor.
+    /// Implements the upward signal direction receptors coder.
     /// </summary>
     /// <remarks>
-    /// The receptor is sensitive to upward direction against a past value at the time T-1...T-number of receptors.
+    /// Each receptor is sensitive to upward signal direction of the current signal against the past
+    /// signal at the time T-x (where x is 1...number of receptors).
+    /// The positive difference of current and past signal is then expressed as spikes through a novel coding
+    /// algorithm meeting together two important spike-train conditions where stronger stimulation leads to earlier
+    /// first spike and higher spiking frequency.
     /// </remarks>
     [Serializable]
     public class A2SCoderUpDirArrows : A2SCoderBase

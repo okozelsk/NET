@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Implements the power transformation. It computes value^exponent.
+    /// Implements the transformer of values from one input field. Raises the value from the input field to the power of fixed exponent.
     /// </summary>
     [Serializable]
     public class PowerTransformer : ITransformer

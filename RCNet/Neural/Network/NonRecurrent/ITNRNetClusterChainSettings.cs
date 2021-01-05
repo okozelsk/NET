@@ -4,7 +4,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.NonRecurrent
 {
     /// <summary>
-    /// The common interface of the clusters chain configurations.
+    /// Common interface of the cluster chain configurations.
     /// </summary>
     public interface ITNRNetClusterChainSettings
     {

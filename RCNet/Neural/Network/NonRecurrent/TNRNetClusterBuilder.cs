@@ -7,7 +7,7 @@ using System.Globalization;
 namespace RCNet.Neural.Network.NonRecurrent
 {
     /// <summary>
-    /// Implements the builder of the cluster of the trained non-recurrent networks.
+    /// Implements the builder of trained non-recurrent networks cluster based on the cross-validation approach.
     /// </summary>
     public class TNRNetClusterBuilder
     {

@@ -9,10 +9,10 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Network.SM.Readout
 {
     /// <summary>
-    /// Implements the "One Takes All" group of the readout layer.
+    /// Implements the "One Takes All" group of readout units.
     /// </summary>
     /// <remarks>
-    /// Supports the basic winner decision or decision by the trained cluster chain.
+    /// Supports basic decision-making based directly on the results of readout units and also more advanced decision-making based on the result of a dedicated chain of network clusters.
     /// </remarks>
     [Serializable]
     public class OneTakesAllGroup

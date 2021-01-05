@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Implements the linear transformation. Uses the values of the two input fields and computes (a*X + b*Y).
+    /// Implements the transformer of values from two input fields. Computes the linear equation (a*X + b*Y) where "X" is the value from the first input field and "Y" is the value from the second input field. Coefficients "a" and "b" are specified constants.
     /// </summary>
     [Serializable]
     public class LinearTransformer : ITransformer

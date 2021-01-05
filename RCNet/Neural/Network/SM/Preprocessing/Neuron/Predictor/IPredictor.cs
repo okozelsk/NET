@@ -4,7 +4,7 @@ using RCNet.Queue;
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 {
     /// <summary>
-    /// The common interface of the predictor computers.
+    /// Common interface of the predictor computers.
     /// </summary>
     public interface IPredictor
     {

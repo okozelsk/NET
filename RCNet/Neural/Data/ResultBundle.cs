@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Data
 {
     /// <summary>
-    /// Implements the bundle of input, computed and ideal (desired) data vectors.
+    /// Implements a bundle of input, computed and ideal (desired) data vector triplets.
     /// </summary>
     [Serializable]
     public class ResultBundle

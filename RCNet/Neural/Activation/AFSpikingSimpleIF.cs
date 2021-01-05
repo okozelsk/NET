@@ -3,7 +3,7 @@
 namespace RCNet.Neural.Activation
 {
     /// <summary>
-    /// Implements a very simple form of Integrate and Fire neuron model.
+    /// Implements a very simple form of the Integrate and Fire neuron model.
     /// </summary>
     [Serializable]
     public class AFSpikingSimpleIF : AFSpikingBase

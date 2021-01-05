@@ -3,7 +3,7 @@
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
 {
     /// <summary>
-    /// Common interface of interconnection schema settings
+    /// Common interface of interconnection schema configurations.
     /// </summary>
     public interface IInterconnSchemaSettings
     {
@@ -17,16 +17,10 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool
         /// </summary>
         int Repetitions { get; }
 
-        /// <summary>
-        /// Creates the deep copy instance of this instance
-        /// </summary>
+        /// <inheritdoc cref="RCNetBaseSettings.DeepClone"/>
         RCNetBaseSettings DeepClone();
 
-        /// <summary>
-        /// Generates default named xml element containing the settings.
-        /// </summary>
-        /// <param name="suppressDefaults">Specifies whether to ommit optional nodes having set default values</param>
-        /// <returns>XElement containing the settings</returns>
+        /// <inheritdoc cref="RCNetBaseSettings.GetXml(bool)"/>
         XElement GetXml(bool suppressDefaults);
 
     }//IPoolInterconnectionSchemaSettings

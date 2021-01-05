@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Implements transformation of the input field value to its logarithm of the specified base.
+    /// Implements the transformer of values from one input field. Computes the input field value's logarithm to the specified base.
     /// </summary>
     [Serializable]
     public class LogTransformer : ITransformer

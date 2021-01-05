@@ -6,7 +6,7 @@ using System.Linq;
 namespace RCNet.Neural.Network.NonRecurrent
 {
     /// <summary>
-    /// Implements the chain of the cooperating clusters.
+    /// Implements the chain of cooperating non-recurrent network clusters.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -14,7 +14,7 @@ namespace RCNet.Neural.Network.NonRecurrent
     /// then the next cluster gets except the predictors also the output from the previous cluster.
     /// The pure cross-validation approach is still kept, no one network is tested on the data used
     /// for the training of the network providing the inputs for this network (nor indirectly).
-    /// This approach can improve the results.
+    /// This approach sometime improves the results.
     /// </para>
     /// <para>
     /// As the final result is considered the output of the last cluster in the chain.

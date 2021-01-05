@@ -3,7 +3,7 @@
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {
     /// <summary>
-    /// The common interface of the synapse's efficacy dynamics configurations.
+    /// Common interface of the synapse's efficacy dynamics configurations.
     /// </summary>
     public interface IDynamicsSettings
     {

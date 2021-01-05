@@ -6,7 +6,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
 {
     /// <summary>
-    /// The common interface of neuron group configurations.
+    /// Common interface of neuron group configurations.
     /// </summary>
     public interface INeuronGroupSettings
     {
@@ -16,7 +16,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup
         string Name { get; }
 
         /// <summary>
-        /// The common configuration of the neurons' activation function.
+        /// The configuration of the neurons' activation function.
         /// </summary>
         IActivationSettings ActivationCfg { get; }
 

@@ -6,7 +6,7 @@ using System.IO;
 namespace RCNet.CsvTools
 {
     /// <summary>
-    /// Implements the simple loading and saving of csv data.
+    /// Implements the holder of csv data and supports its loading and saving to a file.
     /// </summary>
     public class CsvDataHolder
     {

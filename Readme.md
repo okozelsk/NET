@@ -110,34 +110,34 @@ Follows list of components in logical order from basic to composite and complex.
 ### Chainable Input Data Transformations
 |Component|Description|
 |--|--|
-|[CDivTransformer](./RCNet/Neural/Data/Transformers/CDivTransformer.cs)|Implements the "constant divided by an input value" transformation.|
-|[DiffTransformer](./RCNet/Neural/Data/Transformers/DiffTransformer.cs)|Implements the transformation of the input field value as the difference between the current field value and the past value.|
-|[DivTransformer](./RCNet/Neural/Data/Transformers/DivTransformer.cs)|Implements the "two input fields division" transformation.|
-|[ExpTransformer](./RCNet/Neural/Data/Transformers/ExpTransformer.cs)|Implements the exponential transformation of the input field ("Base^Input field value").|
-|[LinearTransformer](./RCNet/Neural/Data/Transformers/LinearTransformer.cs)|Implements the linear transformation. Uses the values of the two input fields and computes (a*X + b*Y).|
-|[LogTransformer](./RCNet/Neural/Data/Transformers/LogTransformer.cs)|Implements transformation of the input field value to its logarithm of the specified base.|
-|[MulTransformer](./RCNet/Neural/Data/Transformers/MulTransformer.cs)|Implements the multiplication transformation. It multiplies the value of the first field by the value of the second field.|
-|[MWStatTransformer](./RCNet/Neural/Data/Transformers/MWStatTransformer.cs)|Implements the statistical transformation. It keeps statistics of the input field recent values and provides specified statistical figure as the transformed value.|
-|[PowerTransformer](./RCNet/Neural/Data/Transformers/PowerTransformer.cs)|Implements the power transformation. It computes value^exponent.|
-|[YeoJohnsonTransformer](./RCNet/Neural/Data/Transformers/YeoJohnsonTransformer.cs)|Implements the Yeo-Johnson transformation. See the [wiki pages](https://en.wikipedia.org/wiki/Power_transform#Yeo%E2%80%93Johnson_transformation).|
+|[CDivTransformer](./RCNet/Neural/Data/Transformers/CDivTransformer.cs)|Implements the transformer of values from one input field. Divides the constant by the value from the input field.|
+|[DiffTransformer](./RCNet/Neural/Data/Transformers/DiffTransformer.cs)|Implements the transformer of values from one input field. Subtracts the previous value of the input field from the current value.|
+|[DivTransformer](./RCNet/Neural/Data/Transformers/DivTransformer.cs)|Implements the transformer of values from two input fields. Divides the value of the first input field by the value from the second input field.|
+|[ExpTransformer](./RCNet/Neural/Data/Transformers/ExpTransformer.cs)|Implements the transformer of values from one input field. Raises the fixed base (by default the Euler's number) to the power of the value from the input field.|
+|[LinearTransformer](./RCNet/Neural/Data/Transformers/LinearTransformer.cs)|Implements the transformer of values from two input fields. Computes the linear equation (a*X + b*Y) where "X" is the value from the first input field and "Y" is the value from the second input field. Coefficients "a" and "b" are specified constants.|
+|[LogTransformer](./RCNet/Neural/Data/Transformers/LogTransformer.cs)|Implements the transformer of values from one input field. Computes the input field value's logarithm to the specified base.|
+|[MulTransformer](./RCNet/Neural/Data/Transformers/MulTransformer.cs)|Implements the transformer of values from two input fields. Multiplies the value of the first input field by the value from the second input field.|
+|[MWStatTransformer](./RCNet/Neural/Data/Transformers/MWStatTransformer.cs)|Implements the transformer of values from one input field. It keeps statistics of the input field recent values and provides specified statistical figure as the transformed value.|
+|[PowerTransformer](./RCNet/Neural/Data/Transformers/PowerTransformer.cs)|Implements the transformer of values from one input field. Raises the value from the input field to the power of fixed exponent.|
+|[YeoJohnsonTransformer](./RCNet/Neural/Data/Transformers/YeoJohnsonTransformer.cs)|Implements the transformer of values from one input field. Calculates the Yeo-Johnson transformation. See the [wiki pages](https://en.wikipedia.org/wiki/Power_transform#Yeo%E2%80%93Johnson_transformation).|
 
-### Analog to spikes data coding
+### Analog signal to spikes coders
 |Component|Description|
 |--|--|
-|[A2SCoderSignalStrength](./RCNet/Neural/Data/Coders/AnalogToSpiking/A2SCoderSignalStrength.cs)|Implements the signal strength coder. Uses a novel coding algorithm to have met the two important spike-train conditions together: 1. The frequency - as stronger value as higher spiking frequency. 2. The time to a first spike - as stronger value as earlier spike.|
-|[A2SCoderGaussianReceptors](./RCNet/Neural/Data/Coders/AnalogToSpiking/A2SCoderGaussianReceptors.cs)|Implements the Gussian Receptive Fields coder.|
-|[A2SCoderUpDirArrows](./RCNet/Neural/Data/Coders/AnalogToSpiking/A2SCoderUpDirArrows.cs)|Implements the upward signal direction receptor. The receptor is sensitive to upward direction against a past value at the time T-1...T-number of receptors.|
-|[A2SCoderDownDirArrows](./RCNet/Neural/Data/Coders/AnalogToSpiking/A2SCoderDownDirArrows.cs)|Implements the downward signal direction receptor. The receptor is sensitive to downward direction against a past value at the time T-1...T-number of receptors.|
+|[A2SCoderSignalStrength](./RCNet/Neural/Data/Coders/AnalogToSpiking/A2SCoderSignalStrength.cs)|Implements the signal strength coder. Uses a novel coding algorithm to meet together two important spike-train conditions. Stronger signal leads to earlier first spike and higher spiking frequency.|
+|[A2SCoderGaussianReceptors](./RCNet/Neural/Data/Coders/AnalogToSpiking/A2SCoderGaussianReceptors.cs)|Implements the Gaussian Receptive Fields coder.|
+|[A2SCoderUpDirArrows](./RCNet/Neural/Data/Coders/AnalogToSpiking/A2SCoderUpDirArrows.cs)|Implements the upward signal direction receptors coder. Each receptor is sensitive to upward signal direction of the current signal against the past signal at the time T-x (where x is 1...number of receptors). The positive difference of current and past signal is then expressed as spikes through a novel coding algorithm meeting together two important spike-train conditions where stronger stimulation leads to earlier first spike and higher spiking frequency.|
+|[A2SCoderDownDirArrows](./RCNet/Neural/Data/Coders/AnalogToSpiking/A2SCoderDownDirArrows.cs)|Implements the downward signal direction receptors coder. Each receptor is sensitive to downward signal direction of the current signal against the past signal at the time T-x (where x is 1...number of receptors). The negative difference of current and past signal is then expressed as spikes through a novel coding algorithm meeting together two important spike-train conditions where stronger stimulation leads to earlier first spike and higher spiking frequency.|
 
 ### Data holding
 |Component|Description|
 |--|--|
 |[SimpleQueue](./RCNet/Queue/SimpleQueue.cs)|Implements a simple FIFO queue template. Supports access to enqueued elements so it can be also used as the moving data window.|
 |[DelimitedStringValues](./RCNet/CsvTools/DelimitedStringValues.cs)|Implements the single row of the delimited string values (csv format).|
-|[CsvDataHolder](./RCNet/CsvTools/CsvDataHolder.cs)|Implements the simple loading and saving of csv data.|
-|[VectorBundle](./RCNet/Neural/Data/VectorBundle.cs)|Implements the bundle of the input and output vector pairs.|
+|[CsvDataHolder](./RCNet/CsvTools/CsvDataHolder.cs)|Implements the holder of csv data and supports its loading and saving to a file.|
+|[VectorBundle](./RCNet/Neural/Data/VectorBundle.cs)|Implements a bundle of input and output data vector pairs.|
 |[InputPattern](./RCNet/Neural/Data/InputPattern.cs)|Implements an input pattern. Pattern can be both univariate or multivariate. Supports data resampling (including simple detection of signal begin/end) and amplitude unification.|
-|[ResultBundle](./RCNet/Neural/Data/ResultBundle.cs)|Implements the bundle of input, computed and ideal (desired) data vectors.|
+|[ResultBundle](./RCNet/Neural/Data/ResultBundle.cs)|Implements a bundle of input, computed and ideal (desired) data vector triplets.|
 
 ### Analog activation functions (stateless)
 See the [wiki pages.](https://en.wikipedia.org/wiki/Activation_function)
@@ -168,26 +168,26 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 |[AFSpikingExpIF](./RCNet/Neural/Activation/AFSpikingExpIF.cs)|Implements the Exponential Integrate and Fire neuron model.|
 |[AFSpikingIzhikevichIF](./RCNet/Neural/Activation/AFSpikingIzhikevichIF.cs)|Implements the Izhikevich Integrate and Fire neuron model.|
 |[AFSpikingLeakyIF](./RCNet/Neural/Activation/AFSpikingLeakyIF.cs)|Implements the Leaky Integrate and Fire neuron model.|
-|[AFSpikingSimpleIF](./RCNet/Neural/Activation/AFSpikingSimpleIF.cs)|Implements a very simple form of Integrate and Fire neuron model.|
+|[AFSpikingSimpleIF](./RCNet/Neural/Activation/AFSpikingSimpleIF.cs)|Implements a very simple form of the Integrate and Fire neuron model.|
 
 ### Non-recurrent networks and trainers
 |Component|Description|
 |--|--|
-|[FeedForwardNetwork](./RCNet/Neural/Network/NonRecurrent/FF/FeedForwardNetwork.cs)|Implements the feed forward network supporting multiple hidden layers.|
+|[FeedForwardNetwork](./RCNet/Neural/Network/NonRecurrent/FF/FeedForwardNetwork.cs)|Implements the Feed Forward network supporting multiple hidden layers.|
 |[RPropTrainer](./RCNet/Neural/Network/NonRecurrent/FF/RPropTrainer.cs)|Implements the Resilient Backpropagation iRPROP+ trainer of the feed forward network.|
 |[QRDRegrTrainer](./RCNet/Neural/Network/NonRecurrent/FF/QRDRegrTrainer.cs)|Implements the QRD regression trainer of the feed forward network. The feed forward network to be trained must have no hidden layers and the Identity output activation.|
-|[RidgeRegrTrainer](./RCNet/Neural/Network/NonRecurrent/FF/RidgeRegrTrainer.cs)|Implements the ridge regression trainer of the feed forward network. The feed forward network to be trained must have no hidden layers and the Identity output activation.|
-|[ElasticRegrTrainer](./RCNet/Neural/Network/NonRecurrent/FF/ElasticRegrTrainer.cs)|Implements the elastic linear regression trainer of the feed forward network.. The feed forward network to be trained must have no hidden layers and the Identity output activation.|
+|[RidgeRegrTrainer](./RCNet/Neural/Network/NonRecurrent/FF/RidgeRegrTrainer.cs)|Implements the Ridge regression trainer of the feed forward network. The feed forward network to be trained must have no hidden layers and the Identity output activation.|
+|[ElasticRegrTrainer](./RCNet/Neural/Network/NonRecurrent/FF/ElasticRegrTrainer.cs)|Implements the Elastic linear regression trainer of the feed forward network.. The feed forward network to be trained must have no hidden layers and the Identity output activation.|
 |||
-|[ParallelPerceptron](./RCNet/Neural/Network/NonRecurrent/PP/ParallelPerceptron.cs)|Implements the parallel perceptron network.|
-|[PDeltaRuleTrainer](./RCNet/Neural/Network/NonRecurrent/PP/PDeltaRuleTrainer.cs)|Implements the p-delta rule trainer of the parallel perceptron network.|
+|[ParallelPerceptron](./RCNet/Neural/Network/NonRecurrent/PP/ParallelPerceptron.cs)|Implements the Parallel Perceptron network.|
+|[PDeltaRuleTrainer](./RCNet/Neural/Network/NonRecurrent/PP/PDeltaRuleTrainer.cs)|Implements the P-delta rule trainer of the parallel perceptron network.|
 |||
 |[TNRNet](./RCNet/Neural/Network/NonRecurrent/TNRNet.cs)|Implements the holder of trained non-recurrent network and its error statistics.|
 |[TNRNetBuilder](./RCNet/Neural/Network/NonRecurrent/TNRNetBuilder.cs)|Implements the builder of the trained non-recurrent network.|
-|[TNRNetCluster](./RCNet/Neural/Network/NonRecurrent/TNRNetCluster.cs)|Implements the cluster of the trained non-recurrent networks. The cluster is based on the cross-validation approach.|
-|[TNRNetClusterBuilder](./RCNet/Neural/Network/NonRecurrent/TNRNetClusterBuilder.cs)|Implements the builder of the cluster of the trained non-recurrent networks.|
-|[TNRNetClusterChain](./RCNet/Neural/Network/NonRecurrent/TNRNetClusterChain.cs)|Implements the chain of the cooperating clusters. The chain can contain one or more clusters.|
-|[TNRNetClusterChainBuilder](./RCNet/Neural/Network/NonRecurrent/TNRNetClusterChainBuilder.cs)|Implements the builder of the chain of cooperating clusters.|
+|[TNRNetCluster](./RCNet/Neural/Network/NonRecurrent/TNRNetCluster.cs)|Implements the cluster of trained non-recurrent networks.|
+|[TNRNetClusterBuilder](./RCNet/Neural/Network/NonRecurrent/TNRNetClusterBuilder.cs)|Implements the builder of trained non-recurrent networks cluster based on the cross-validation approach.|
+|[TNRNetClusterChain](./RCNet/Neural/Network/NonRecurrent/TNRNetClusterChain.cs)|Implements the chain of cooperating non-recurrent network clusters.|
+|[TNRNetClusterChainBuilder](./RCNet/Neural/Network/NonRecurrent/TNRNetClusterChainBuilder.cs)|Implements the builder of the chain of cooperating non-recurrent network clusters.|
 
 ### State Machine components
 
@@ -204,10 +204,10 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 |[ReservoirInstance](./RCNet/Neural/Network/SM/Preprocessing/Reservoir/ReservoirInstance.cs)|Implements the reservoir.|
 |[NeuralPreprocessor](./RCNet/Neural/Network/SM/Preprocessing/NeuralPreprocessor.cs)|Implements the neural preprocessor supporting multiple reservoirs.|
 |[ReadoutUnit](./RCNet/Neural/Network/SM/Readout/ReadoutUnit.cs)|Implements the readout unit of the readout layer. It can do the Forecast or Classification.|
-|[OneTakesAllGroup](./RCNet/Neural/Network/SM/Readout/OneTakesAllGroup.cs)|Implements the "One Takes All" group of the readout layer. Supports the basic winner decision or advanced decision by the trained cluster chain.|
+|[OneTakesAllGroup](./RCNet/Neural/Network/SM/Readout/OneTakesAllGroup.cs)|Implements the "One Takes All" group of readout units. Supports basic decision-making based directly on the results of readout units and also more advanced decision-making based on the result of a dedicated chain of network clusters.|
 |[ReadoutLayer](./RCNet/Neural/Network/SM/Readout/ReadoutLayer.cs)|Implements the readout layer consisting of trained readout units (and "One Takes All" groups).|
 
-### The State Machine component
+### The State Machine
 The main serializable [StateMachine](./RCNet/Neural/Network/SM/StateMachine.cs) component encapsulates the NeuralPreprocessor and ReadoutLayer components into the single component and adds support for routing of specific predictors and input fields to the specific readout units. State Machine also allows to bypass NeuralPreprocessor and to use input data directly as a predictors for the readout layer.
 
 #### Setup

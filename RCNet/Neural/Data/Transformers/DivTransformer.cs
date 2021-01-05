@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Implements the "two input fields division" transformation.
+    /// Implements the transformer of values from two input fields. Divides the value of the first input field by the value from the second input field.
     /// </summary>
     [Serializable]
     public class DivTransformer : ITransformer

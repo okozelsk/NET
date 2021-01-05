@@ -1,7 +1,7 @@
 ﻿namespace RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor
 {
     /// <summary>
-    /// The common interface of the predictors configurations.
+    /// Common interface of the predictor computer configurations.
     /// </summary>
     public interface IPredictorSettings
     {

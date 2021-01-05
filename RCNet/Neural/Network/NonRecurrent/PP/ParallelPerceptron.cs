@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace RCNet.Neural.Network.NonRecurrent.PP
 {
     /// <summary>
-    /// Implements the parallel perceptron network.
+    /// Implements the Parallel Perceptron network.
     /// </summary>
     /// <remarks>
     /// The parallel perceptron network has only one output value, always between -1 and 1.

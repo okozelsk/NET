@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace RCNet.Neural.Network.NonRecurrent.PP
 {
     /// <summary>
-    /// Implements the p-delta rule trainer of the parallel perceptron network.
+    /// Implements the P-delta rule trainer of the parallel perceptron network.
     /// </summary>
     [Serializable]
     public class PDeltaRuleTrainer : INonRecurrentNetworkTrainer

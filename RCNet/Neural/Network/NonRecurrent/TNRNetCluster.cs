@@ -9,7 +9,7 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Network.NonRecurrent
 {
     /// <summary>
-    /// Implements the cluster of the trained non-recurrent networks.
+    /// Implements the cluster of trained non-recurrent networks.
     /// </summary>
     /// <remarks>
     /// The cluster is based on the cross-validation approach.

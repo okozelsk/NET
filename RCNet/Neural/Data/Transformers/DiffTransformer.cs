@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Implements the transformation of the input field value as the difference between the current field value and the past value.
+    /// Implements the transformer of values from one input field. Subtracts the previous value of the input field from the current value.
     /// </summary>
     [Serializable]
     public class DiffTransformer : ITransformer

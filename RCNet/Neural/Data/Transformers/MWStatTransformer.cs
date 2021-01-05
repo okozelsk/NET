@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Implements the statistical transformation. It keeps statistics of the input field recent values and provides specified statistical figure as the transformed value.
+    /// Implements the transformer of values from one input field. It keeps statistics of the input field recent values and provides specified statistical figure as the transformed value.
     /// </summary>
     [Serializable]
     public class MWStatTransformer : ITransformer

@@ -1,7 +1,7 @@
 ﻿namespace RCNet.Neural.Data.Generators
 {
     /// <summary>
-    /// The common interface of generators.
+    /// Common interface of generators.
     /// </summary>
     public interface IGenerator
     {

@@ -1,7 +1,7 @@
 ﻿namespace RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS
 {
     /// <summary>
-    /// The common interface of the synapse's efficacy computers.
+    /// Common interface of the synapse's efficacy computers.
     /// </summary>
     public interface IEfficacy
     {

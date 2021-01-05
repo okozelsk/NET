@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Network.NonRecurrent
 {
     /// <summary>
-    /// The common interface of the non-recurrent networks.
+    /// Common interface of the non-recurrent networks.
     /// </summary>
     public interface INonRecurrentNetwork
     {

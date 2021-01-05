@@ -4,7 +4,7 @@ using System.Xml.Linq;
 namespace RCNet.Neural.Network.SM.Readout
 {
     /// <summary>
-    /// The common interface of classification and forecast tasks configurations.
+    /// Common interface of the task configurations.
     /// </summary>
     public interface ITaskSettings
     {

@@ -7,13 +7,8 @@ namespace RCNet.Neural.Data.Coders.AnalogToSpiking
     /// Implements the signal strength coder.
     /// </summary>
     /// <remarks>
-    /// Uses a novel coding algorithm to have met the two important spike-train conditions together:
-    /// <para>
-    /// 1. The frequency - as stronger value as higher spiking frequency.
-    /// </para>
-    /// <para>
-    /// 2. The time to a first spike - as stronger value as earlier spike.
-    /// </para>
+    /// Uses a novel coding algorithm meeting together two important spike-train conditions where stronger
+    /// stimulation leads to earlier first spike and higher spiking frequency.
     /// </remarks>
     [Serializable]
     public class A2SCoderSignalStrength : A2SCoderBase

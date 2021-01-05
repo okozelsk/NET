@@ -1,7 +1,7 @@
 ﻿namespace Demo.DemoConsoleApp.Log
 {
     /// <summary>
-    /// The interface of a simple output journal.
+    /// Interface of a simple output journal.
     /// </summary>
     public interface IOutputLog
     {

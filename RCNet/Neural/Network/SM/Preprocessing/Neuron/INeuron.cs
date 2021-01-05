@@ -3,7 +3,7 @@
 namespace RCNet.Neural.Network.SM.Preprocessing.Neuron
 {
     /// <summary>
-    /// The common interface of the input and hidden neurons.
+    /// Common interface of the input and hidden neurons.
     /// </summary>
     public interface INeuron
     {

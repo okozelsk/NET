@@ -3,7 +3,7 @@
 namespace RCNet.Neural.Network.SM.Readout
 {
     /// <summary>
-    /// The common interface of "One Takes All" decision configurations.
+    /// Common interface of "One Takes All" decision configurations.
     /// </summary>
     public interface IOneTakesAllDecisionSettings
     {

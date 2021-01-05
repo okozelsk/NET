@@ -9,7 +9,7 @@ using System.Linq;
 namespace RCNet.Neural.Network.NonRecurrent
 {
     /// <summary>
-    /// Implements the builder of the chain of cooperating clusters.
+    /// Implements the builder of the chain of cooperating non-recurrent network clusters.
     /// </summary>
     public class TNRNetClusterChainBuilder
     {

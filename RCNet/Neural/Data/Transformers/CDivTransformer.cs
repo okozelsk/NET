@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Implements the "constant divided by an input value" transformation.
+    /// Implements the transformer of values from one input field. Divides the constant by the value from the input field.
     /// </summary>
     [Serializable]
     public class CDivTransformer : ITransformer

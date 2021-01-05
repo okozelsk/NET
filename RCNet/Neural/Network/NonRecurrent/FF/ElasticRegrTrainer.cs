@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace RCNet.Neural.Network.NonRecurrent.FF
 {
     /// <summary>
-    /// Implements the elastic linear regression trainer of the feed forward network.
+    /// Implements the Elastic linear regression trainer of the feed forward network.
     /// </summary>
     /// <remarks>
     /// <para>

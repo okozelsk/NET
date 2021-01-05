@@ -8,25 +8,24 @@ using System.Text;
 namespace RCNet.Neural.Network.NonRecurrent
 {
     /// <summary>
-    /// Implements the builder of the trained non-recurrent network.
+    /// Implements the builder of trained non-recurrent network.
     /// </summary>
     public class TNRNetBuilder
     {
 
         //Delegates
         /// <summary>
-        /// The delegate of the controller of the network building process.
-        /// It is invoked after the completion of each training epoch.
+        /// The delegate of a network build process controller invoked during each training epoch.
         /// </summary>
         /// <remarks>
-        /// The goal of the build process is to train a network that gives good results both on the training data and the testing data.
+        /// The goal of the build process is to build a network that gives good results both on the training data and the testing data.
         /// BuildProgress object contains the best trained network so far and the current one. The primary purpose of controller is
         /// to make decision whether the current network is better than the best network so far.
         /// The controller can also tell the build process that it does not make any sense to continue. It can
-        /// stop the current regression attempt or the whole build process.
+        /// stop the current build attempt or the whole build process.
         /// </remarks>
         /// <param name="buildProgress">The BuildProgress object containing all the necessary information to control the build process.</param>
-        /// <returns>The instructions for the build process.</returns>
+        /// <returns>Instructions for the network build process.</returns>
         public delegate BuildInstr BuildControllerDelegate(BuildProgress buildProgress);
 
         /// <summary>
@@ -256,7 +255,7 @@ namespace RCNet.Neural.Network.NonRecurrent
                     bestNetwork = currNetwork.DeepClone();
                     bestNetworkAttempt = trainer.Attempt;
                 }
-                //RegrState instance
+                //BuildProgress instance
                 BuildProgress buildProgress = new BuildProgress(_buildContext, _networkName, _foldNum, _numOfFolds, _foldNetworkNum, _numOfFoldNetworks, trainer.Attempt, trainer.MaxAttempt, trainer.AttemptEpoch, trainer.MaxAttemptEpoch, currNetwork, currNetworkLastImprovementEpoch, bestNetwork, bestNetworkAttempt);
                 //Call controller
                 BuildInstr instructions = _controller(buildProgress);

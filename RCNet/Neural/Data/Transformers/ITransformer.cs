@@ -1,7 +1,7 @@
 ﻿namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// The common interface of all input data transformers.
+    /// Common interface of input data transformers.
     /// </summary>
     public interface ITransformer
     {

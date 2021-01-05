@@ -8,7 +8,7 @@ using System.Globalization;
 namespace RCNet.Neural.Data
 {
     /// <summary>
-    /// Implements the bundle of the input and output vector pairs.
+    /// Implements a bundle of input and output data vector pairs.
     /// </summary>
     [Serializable]
     public class VectorBundle

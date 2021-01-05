@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace RCNet.Neural.Network.NonRecurrent.FF
 {
     /// <summary>
-    /// Implements the feed forward network supporting multiple hidden layers.
+    /// Implements the Feed Forward network supporting multiple hidden layers.
     /// </summary>
     [Serializable]
     public class FeedForwardNetwork : INonRecurrentNetwork

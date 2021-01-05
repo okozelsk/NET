@@ -3,7 +3,7 @@
 namespace RCNet.Neural.Network.NonRecurrent
 {
     /// <summary>
-    /// The common interface of the non-recurrent network configurations.
+    /// Common interface of the non-recurrent network configurations.
     /// </summary>
     public interface INonRecurrentNetworkSettings
     {

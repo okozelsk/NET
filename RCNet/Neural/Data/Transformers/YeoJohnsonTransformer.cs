@@ -5,10 +5,10 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Implements the Yeo-Johnson transformation.
+    /// Implements the transformer of values from one input field. Calculates the Yeo-Johnson transformation.
     /// </summary>
     /// <remarks>
-    /// For more detailed information visit the https://www.stat.umn.edu/arc/yjpower.pdf page.
+    /// For more detailed information see the https://en.wikipedia.org/wiki/Power_transform#Yeo%E2%80%93Johnson_transformation wiki pages or read the  https://www.stat.umn.edu/arc/yjpower.pdf paper.
     /// </remarks>
     [Serializable]
     public class YeoJohnsonTransformer : ITransformer

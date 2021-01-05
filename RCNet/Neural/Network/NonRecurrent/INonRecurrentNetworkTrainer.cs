@@ -1,7 +1,7 @@
 ﻿namespace RCNet.Neural.Network.NonRecurrent
 {
     /// <summary>
-    /// The common interface of the non-recurrent network trainers.
+    /// Common interface of the non-recurrent network trainers.
     /// </summary>
     public interface INonRecurrentNetworkTrainer
     {

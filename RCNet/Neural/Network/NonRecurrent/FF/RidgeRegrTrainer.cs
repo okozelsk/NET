@@ -9,7 +9,7 @@ using System.Globalization;
 namespace RCNet.Neural.Network.NonRecurrent.FF
 {
     /// <summary>
-    /// Implements the ridge regression trainer of the feed forward network.
+    /// Implements the Ridge regression trainer of the feed forward network.
     /// </summary>
     /// <remarks>
     /// <para>

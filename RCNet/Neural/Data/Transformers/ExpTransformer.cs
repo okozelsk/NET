@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace RCNet.Neural.Data.Transformers
 {
     /// <summary>
-    /// Implements the exponential transformation of the input field ("Base^Input field value").
+    /// Implements the transformer of values from one input field. Raises the fixed base (by default the Euler's number) to the power of the value from the input field.
     /// </summary>
     [Serializable]
     public class ExpTransformer : ITransformer
