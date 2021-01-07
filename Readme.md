@@ -3,17 +3,11 @@
 <br>
 The main purpose of this project is to offer an easy-to-use .NET library for prediction and classification of time series.
 RCNet library implementation is based on the ["**Reservoir Computing**"](https://en.wikipedia.org/wiki/Reservoir_computing) concept where the two most well-known methods are Echo State Network (ESN) and Liquid State Machine (LSM).
-ESN uses analog activations within the recurrent reservoir and LSM uses spiking activations.
 The main component of RCNet is called "**State Machine**". State Machine has quite wide configuration options of the reservoirs and except of both mentioned methods (ESN, LSM) it also supports "hybrid" recurrent reservoirs where hidden neurons having an analog and spiking activation can be synaptically connected.
 The correct synaptic linkage of hidden neurons having heterogeneous activations is enabled by a specific implementation of a hidden neuron, where each hidden neuron provides analog and spiking output regardless of the type of activation function is used.
 Dual output of hidden neuron also enables to always offer the full set of predictors on hidden neuron level (very important is the FiringTrace predictor).
 Firing a spike of the hidden neuron having analog activation is based on defined firing event depending on current and previous value of the activation. Use of spiking based predictor (FiringTrace) dramatically improves classification accuracy of the classical ESN.
 "Analog spiking" is an unique feature discovered and introduced by this project and thanks that, ESN is now capable to classify time series with high accuracy with relatively low resources and to be fully competetive to other classification algorithms.
-
-
-More detailed documentation will be posted [here](https://github.com/okozelsk/NET/wiki) as soon as the current stage of the wild changes is over.
-I welcome questions, ideas and suggestions for improvements, usage experiences, bug alerts, constructive comments, etc...
-Please use my email address oldrich.kozelsky@email.cz to contact me.
 
 
 ## The demo application (.NET Core 3.1)
@@ -218,3 +212,7 @@ Each settings class can be instantiated manually from scratch or from a xml elem
 Each settings class also implements the GetXml method so it can be instantiated from scratch and the initialization xml element can be exported by calling the GetXml method (and stored for later use). Using xml constructors is generally preferable because the initialization xml can be edited without the need to modify source code of the manual setup.
 </br>
 To make things easier, RCNet also implements helper component [StateMachineDesigner](./RCNet/Neural/Network/SM/StateMachineDesigner.cs) for easier setup of simple ESN and LSM StateMachine configurations from the code (see the examples in demo application).
+
+## Documentation and contact
+More detailed documentation will be gradually published [here](https://github.com/okozelsk/NET/wiki).
+Questions, ideas, suggestions for improvement and constructive comments are welcome at my email address oldrich.kozelsky@email.cz or newly you can use github discussions.
