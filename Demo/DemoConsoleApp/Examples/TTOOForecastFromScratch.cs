@@ -1,15 +1,10 @@
-﻿using System;
-using System.IO;
-using RCNet.Extensions;
-using RCNet.Neural.Activation;
-using RCNet.Neural.Data.Coders.AnalogToSpiking;
+﻿using RCNet.Neural.Activation;
 using RCNet.Neural.Data.Filter;
 using RCNet.Neural.Network.NonRecurrent;
 using RCNet.Neural.Network.NonRecurrent.FF;
 using RCNet.Neural.Network.SM;
 using RCNet.Neural.Network.SM.Preprocessing;
 using RCNet.Neural.Network.SM.Preprocessing.Input;
-using RCNet.Neural.Network.SM.Preprocessing.Neuron;
 using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool;
@@ -18,6 +13,8 @@ using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Space3D;
 using RCNet.Neural.Network.SM.Preprocessing.Reservoir.SynapseNS;
 using RCNet.Neural.Network.SM.Readout;
 using RCNet.RandomValue;
+using System;
+using System.IO;
 
 namespace Demo.DemoConsoleApp.Examples
 {
@@ -116,7 +113,7 @@ namespace Demo.DemoConsoleApp.Examples
             PoolSettings poolCfg = new PoolSettings(poolName,
                                                     new ProportionsSettings(dimX, dimY, dimZ),
                                                     new NeuronGroupsSettings(grpCfg),
-                                                    new InterconnSettings(chainSchemaCfg, randomSchemaCfg )
+                                                    new InterconnSettings(chainSchemaCfg, randomSchemaCfg)
                                                     );
             return poolCfg;
         }
@@ -332,7 +329,7 @@ namespace Demo.DemoConsoleApp.Examples
             stateMachine.Serialize(serializationFileName);
 
             //Forecasting
-             double[] outputVector = stateMachine.Compute(predictionInputVector, out ReadoutLayer.ReadoutData readoutData);
+            double[] outputVector = stateMachine.Compute(predictionInputVector, out ReadoutLayer.ReadoutData readoutData);
             _log.Write("    Forecasted next High and Low TTOO prices (real prices on 2018/03/05 are High=6.58$ and Low=5.99$):", false);
             _log.Write(stateMachine.RL.GetForecastReport(outputVector, 6));
             _log.Write(string.Empty);

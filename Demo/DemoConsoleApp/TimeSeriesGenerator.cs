@@ -78,13 +78,11 @@ namespace Demo.DemoConsoleApp
         /// <param name="cultureInfo">The culture info object to be used.</param>
         public static void SaveTimeSeriesToCsvFile(string fileName, string valueColumnName, List<double> dataCollection, CultureInfo cultureInfo)
         {
-            using (StreamWriter streamWriter = new StreamWriter(new FileStream(fileName, FileMode.Create)))
+            using StreamWriter streamWriter = new StreamWriter(new FileStream(fileName, FileMode.Create));
+            streamWriter.WriteLine(valueColumnName);
+            foreach (double value in dataCollection)
             {
-                streamWriter.WriteLine(valueColumnName);
-                foreach (double value in dataCollection)
-                {
-                    streamWriter.WriteLine(value.ToString("F20", cultureInfo));
-                }
+                streamWriter.WriteLine(value.ToString("F20", cultureInfo));
             }
             return;
         }

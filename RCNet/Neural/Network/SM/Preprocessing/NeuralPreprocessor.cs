@@ -45,16 +45,16 @@ namespace RCNet.Neural.Network.SM.Preprocessing
         /// <param name="totalNumOfInputs">The total number of inputs to be processed.</param>
         /// <param name="numOfProcessedInputs">The number of already processed inputs.</param>
         /// <param name="finalPreprocessingOverview">The final overview of the preprocessing.</param>
-        public delegate void PreprocessingProgressChangedDelegate(int totalNumOfInputs,
-                                                                  int numOfProcessedInputs,
-                                                                  PreprocessingOverview finalPreprocessingOverview
-                                                                  );
+        public delegate void PreprocessingProgressChangedHandler(int totalNumOfInputs,
+                                                                 int numOfProcessedInputs,
+                                                                 PreprocessingOverview finalPreprocessingOverview
+                                                                 );
         //Events
         /// <summary>
         /// This informative event occurs every time the progress of neural preprocessing has changed.
         /// </summary>
         [field: NonSerialized]
-        public event PreprocessingProgressChangedDelegate PreprocessingProgressChanged;
+        public event PreprocessingProgressChangedHandler PreprocessingProgressChanged;
 
 
         //Attribute properties

@@ -354,12 +354,13 @@ namespace Demo.DemoConsoleApp
             VectorBundle verifyData = VectorBundle.Load(verifyCsvData, numOfClasses);
             Console.WriteLine($"Cluster training on {trainDataFile}...");
             //TRAINING
-            List<FeedForwardNetworkSettings> netCfgs = new List<FeedForwardNetworkSettings>();
-            netCfgs.Add(new FeedForwardNetworkSettings(new AFAnalogSoftMaxSettings(),
-                                                       new HiddenLayersSettings(new HiddenLayerSettings(30, new AFAnalogTanHSettings())),
-                                                       new RPropTrainerSettings(5, 750)
-                                                       )
-                        );
+            List<FeedForwardNetworkSettings> netCfgs = new List<FeedForwardNetworkSettings>
+            {
+                new FeedForwardNetworkSettings(new AFAnalogSoftMaxSettings(),
+                                               new HiddenLayersSettings(new HiddenLayerSettings(30, new AFAnalogTanHSettings())),
+                                               new RPropTrainerSettings(5, 750)
+                                               )
+            };
             ITNRNetClusterSettings clusterCfg = new TNRNetClusterProbabilisticSettings(new TNRNetClusterProbabilisticNetworksSettings(netCfgs),
                                                                                        new TNRNetClusterProbabilisticWeightsSettings()
                                                                                        );
@@ -415,26 +416,27 @@ namespace Demo.DemoConsoleApp
             //Common crossvalidation configuration
             CrossvalidationSettings crossvalidationCfg = new CrossvalidationSettings(foldDataRatio, 0, 2);
             //TRAINING
-            List<FeedForwardNetworkSettings> netCfgs1 = new List<FeedForwardNetworkSettings>();
-            netCfgs1.Add(new FeedForwardNetworkSettings(new AFAnalogSoftMaxSettings(),
-                                                        new HiddenLayersSettings(new HiddenLayerSettings(20, new AFAnalogTanHSettings())),
-                                                        new RPropTrainerSettings(5, 750)
-                                                        )
-                        );
-            netCfgs1.Add(new FeedForwardNetworkSettings(new AFAnalogSoftMaxSettings(),
-                                                        new HiddenLayersSettings(new HiddenLayerSettings(20, new AFAnalogLeakyReLUSettings())),
-                                                        new RPropTrainerSettings(5, 750)
-                                                        )
-                        );
+            List<FeedForwardNetworkSettings> netCfgs1 = new List<FeedForwardNetworkSettings>
+            {
+                new FeedForwardNetworkSettings(new AFAnalogSoftMaxSettings(),
+                                               new HiddenLayersSettings(new HiddenLayerSettings(20, new AFAnalogTanHSettings())),
+                                               new RPropTrainerSettings(5, 750)
+                                               ),
+                new FeedForwardNetworkSettings(new AFAnalogSoftMaxSettings(),
+                                               new HiddenLayersSettings(new HiddenLayerSettings(20, new AFAnalogLeakyReLUSettings())),
+                                               new RPropTrainerSettings(5, 750)
+                                               )
+            };
             TNRNetClusterProbabilisticSettings clusterCfg1 = new TNRNetClusterProbabilisticSettings(new TNRNetClusterProbabilisticNetworksSettings(netCfgs1),
                                                                                         new TNRNetClusterProbabilisticWeightsSettings()
                                                                                         );
-            List<FeedForwardNetworkSettings> netCfgs2 = new List<FeedForwardNetworkSettings>();
-            netCfgs2.Add(new FeedForwardNetworkSettings(new AFAnalogSoftMaxSettings(),
-                                                        new HiddenLayersSettings(new HiddenLayerSettings(20, new AFAnalogTanHSettings())),
-                                                        new RPropTrainerSettings(5, 750)
-                                                        )
-                        );
+            List<FeedForwardNetworkSettings> netCfgs2 = new List<FeedForwardNetworkSettings>
+            {
+                new FeedForwardNetworkSettings(new AFAnalogSoftMaxSettings(),
+                                               new HiddenLayersSettings(new HiddenLayerSettings(20, new AFAnalogTanHSettings())),
+                                               new RPropTrainerSettings(5, 750)
+                                               )
+            };
             TNRNetClusterProbabilisticSettings clusterCfg2 = new TNRNetClusterProbabilisticSettings(new TNRNetClusterProbabilisticNetworksSettings(netCfgs2),
                                                                                         new TNRNetClusterProbabilisticWeightsSettings()
                                                                                         );
@@ -489,12 +491,13 @@ namespace Demo.DemoConsoleApp
             VectorBundle verifyData = VectorBundle.Load(verifyCsvData, numOfClasses);
             Console.WriteLine($"Cluster training on {trainDataFile}...");
             //TRAINING
-            List<FeedForwardNetworkSettings> netCfgs = new List<FeedForwardNetworkSettings>();
-            netCfgs.Add(new FeedForwardNetworkSettings(new AFAnalogIdentitySettings(),
-                                                       new HiddenLayersSettings(new HiddenLayerSettings(30, new AFAnalogTanHSettings())),
-                                                       new RPropTrainerSettings(5, 750)
-                                                       )
-                        );
+            List<FeedForwardNetworkSettings> netCfgs = new List<FeedForwardNetworkSettings>
+            {
+                new FeedForwardNetworkSettings(new AFAnalogIdentitySettings(),
+                                               new HiddenLayersSettings(new HiddenLayerSettings(30, new AFAnalogTanHSettings())),
+                                               new RPropTrainerSettings(5, 750)
+                                               )
+            };
             ITNRNetClusterSettings clusterCfg = new TNRNetClusterRealSettings(new TNRNetClusterRealNetworksSettings(netCfgs),
                                                                               new TNRNetClusterRealWeightsSettings()
                                                                               );

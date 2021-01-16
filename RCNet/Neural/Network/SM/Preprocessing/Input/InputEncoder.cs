@@ -196,14 +196,14 @@ namespace RCNet.Neural.Network.SM.Preprocessing.Input
             foreach (ExternalFieldSettings fieldCfg in _encoderCfg.VaryingFieldsCfg.ExternalFieldsCfg.FieldCfgCollection)
             {
                 _varyingFields.Add(new InputField(fieldCfg.Name,
-                                          fieldIdx++,
-                                          coordinates,
-                                          Interval.IntN1P1,
-                                          fieldCfg.FeatureFilterCfg,
-                                          _encoderCfg.VaryingFieldsCfg.InputSpikesCoderCfg,
-                                          (fieldCfg.RouteToReadout && _encoderCfg.VaryingFieldsCfg.RouteToReadout),
-                                          inputNeuronStartIdx
-                                          ));
+                                                  fieldIdx++,
+                                                  coordinates,
+                                                  Interval.IntN1P1,
+                                                  fieldCfg.FeatureFilterCfg,
+                                                  _encoderCfg.VaryingFieldsCfg.InputSpikesCoderCfg,
+                                                 (fieldCfg.RouteToReadout && _encoderCfg.VaryingFieldsCfg.RouteToReadout),
+                                                 inputNeuronStartIdx
+                                                 ));
                 inputNeuronStartIdx += _varyingFields[(fieldIdx - _numOfSteadyFields) - 1].NumOfInputNeurons;
             }
             //Internal input transformers and fields

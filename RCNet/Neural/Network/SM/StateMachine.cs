@@ -230,27 +230,27 @@ namespace RCNet.Neural.Network.SM
         /// <summary>
         /// Performs the training of the state machine.
         /// </summary>
-        /// <param name="vectorBundle">The training data bundle.</param>
+        /// <param name="trainingData">The training data bundle.</param>
         /// <param name="controller">The build process controller (optional).</param>
         /// <returns>The training results.</returns>
-        public TrainingResults Train(VectorBundle vectorBundle, TNRNetBuilder.BuildControllerDelegate controller = null)
+        public TrainingResults Train(VectorBundle trainingData, TNRNetBuilder.BuildControllerDelegate controller = null)
         {
             //StateMachine reset
             Reset();
-            VectorBundle readoutInput;
+            VectorBundle readoutTrainingData;
             NeuralPreprocessor.PreprocessingOverview preprocessingOverview = null;
             if (NP == null)
             {
                 //Neural preprocessor is bypassed
-                readoutInput = vectorBundle;
+                readoutTrainingData = trainingData;
             }
             else
             {
                 //Neural preprocessing
-                readoutInput = NP.InitializeAndPreprocessBundle(vectorBundle, out preprocessingOverview);
+                readoutTrainingData = NP.InitializeAndPreprocessBundle(trainingData, out preprocessingOverview);
             }
             //Training of the readout layer 
-            ReadoutLayer.RegressionOverview regressionOverview = RL.Build(readoutInput, BuildPredictorsMapper(), controller, Config.RandomizerSeek);
+            ReadoutLayer.RegressionOverview regressionOverview = RL.Build(readoutTrainingData, BuildPredictorsMapper(), controller, Config.RandomizerSeek);
             //Return the training results
             return new TrainingResults(preprocessingOverview, regressionOverview);
         }
@@ -261,27 +261,27 @@ namespace RCNet.Neural.Network.SM
         /// <remarks>
         /// Performs the data bundle and evaluates the computed data against the ideal data.
         /// </remarks>
-        /// <param name="vectorBundle">The verification data bundle.</param>
+        /// <param name="verificationData">The verification data bundle.</param>
         /// <returns>The verification results.</returns>
-        public VerificationResults Verify(VectorBundle vectorBundle)
+        public VerificationResults Verify(VectorBundle verificationData)
         {
             VerificationResults verificationResults = new VerificationResults(Config.ReadoutLayerCfg);
-            for (int sampleIdx = 0; sampleIdx < vectorBundle.InputVectorCollection.Count; sampleIdx++)
+            for (int sampleIdx = 0; sampleIdx < verificationData.InputVectorCollection.Count; sampleIdx++)
             {
                 double[] predictors;
                 if (NP == null)
                 {
                     //Neural preprocessor is bypassed
-                    predictors = vectorBundle.InputVectorCollection[sampleIdx];
+                    predictors = verificationData.InputVectorCollection[sampleIdx];
                 }
                 else
                 {
                     //Neural preprocessing
-                    predictors = NP.Preprocess(vectorBundle.InputVectorCollection[sampleIdx]);
+                    predictors = NP.Preprocess(verificationData.InputVectorCollection[sampleIdx]);
                 }
                 double[] outputVector = RL.Compute(predictors, out ReadoutLayer.ReadoutData readoutData);
-                verificationResults.Update(predictors, readoutData, vectorBundle.OutputVectorCollection[sampleIdx]);
-                VerificationProgressChanged(vectorBundle.InputVectorCollection.Count, sampleIdx + 1);
+                verificationResults.Update(predictors, readoutData, verificationData.OutputVectorCollection[sampleIdx]);
+                VerificationProgressChanged(verificationData.InputVectorCollection.Count, sampleIdx + 1);
             }
             return verificationResults;
         }

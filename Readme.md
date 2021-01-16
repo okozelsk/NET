@@ -185,7 +185,7 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 
 ### State Machine components
 
-![Reservoir Computing conceptual view](./RCNet/Docs/Imgs/StateMachine_EntityRelationship.png)
+![StateMachine Components Relationship](./RCNet/Docs/Imgs/StateMachine_Components_Relationship.png)
 
 |Component|Description|
 |--|--|
@@ -199,9 +199,10 @@ See the [wiki pages.](https://en.wikipedia.org/wiki/Biological_neuron_model)
 |[NeuralPreprocessor](./RCNet/Neural/Network/SM/Preprocessing/NeuralPreprocessor.cs)|Implements the neural preprocessor supporting multiple reservoirs.|
 |[ReadoutUnit](./RCNet/Neural/Network/SM/Readout/ReadoutUnit.cs)|Implements the readout unit of the readout layer. It can do the Forecast or Classification.|
 |[OneTakesAllGroup](./RCNet/Neural/Network/SM/Readout/OneTakesAllGroup.cs)|Implements the "One Takes All" group of readout units. Supports basic decision-making based directly on the results of readout units and also more advanced decision-making based on the result of a dedicated chain of network clusters.|
+|[PredictorsMapper](./RCNet/Neural/Network/SM/Readout/PredictorsMapper.cs)|Implements the mapper of specific predictors to readout units.|
 |[ReadoutLayer](./RCNet/Neural/Network/SM/Readout/ReadoutLayer.cs)|Implements the readout layer consisting of trained readout units (and "One Takes All" groups).|
 
-### The State Machine
+### State Machine
 The main serializable [StateMachine](./RCNet/Neural/Network/SM/StateMachine.cs) component encapsulates the NeuralPreprocessor and ReadoutLayer components into the single component and adds support for routing of specific predictors and input fields to the specific readout units. State Machine also allows to bypass NeuralPreprocessor and to use input data directly as a predictors for the readout layer.
 
 #### Setup
