@@ -336,7 +336,7 @@ namespace Demo.DemoConsoleApp.Examples
 
             //Create new StateMachine instance from the file
             //Instance was serialized before forecasting of the next values
-            StateMachine stateMachineNewInstance = StateMachine.LoadFromFile(serializationFileName);
+            StateMachine stateMachineNewInstance = StateMachine.Deserialize(serializationFileName);
             //Forecasting of the deserialized instance (exactly the same results as in previous forecasting)
             outputVector = stateMachineNewInstance.Compute(predictionInputVector, out readoutData);
             _log.Write("    Forecast of the new StateMachine instance:", false);

@@ -102,7 +102,7 @@ namespace RCNet.Neural.Network.SM
         /// </summary>
         /// <param name="fileName">The name of the file.</param>
         /// <returns>The instance of the state machine.</returns>
-        public static StateMachine LoadFromFile(string fileName)
+        public static StateMachine Deserialize(string fileName)
         {
             using (Stream stream = File.Open(fileName, FileMode.Open))
             {
