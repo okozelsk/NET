@@ -256,10 +256,10 @@ namespace RCNet.Neural.Network.SM
         }
 
         /// <summary>
-        /// Verifies the state machine performance.
+        /// Verifies the state machine's accuracy.
         /// </summary>
         /// <remarks>
-        /// Performs the data bundle and evaluates the computed data against the ideal data.
+        /// Evaluates the computed data against the ideal data.
         /// </remarks>
         /// <param name="verificationData">The verification data bundle.</param>
         /// <returns>The verification results.</returns>

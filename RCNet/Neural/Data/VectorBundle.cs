@@ -33,7 +33,7 @@ namespace RCNet.Neural.Data
 
         //Constructors
         /// <summary>
-        /// Instantiates data bundle
+        /// Creates an uninitialized instance.
         /// </summary>
         public VectorBundle()
         {
@@ -42,18 +42,6 @@ namespace RCNet.Neural.Data
             return;
         }
 
-        //Constructors
-        /// <summary>
-        /// Creates an initialized instance.
-        /// </summary>
-        /// <param name="inputVectorCollection">The collection of input vectors.</param>
-        /// <param name="outputVectorCollection">The collection of output vectors.</param>
-        public VectorBundle(IEnumerable<double[]> inputVectorCollection, IEnumerable<double[]> outputVectorCollection)
-        {
-            InputVectorCollection = new List<double[]>(inputVectorCollection);
-            OutputVectorCollection = new List<double[]>(outputVectorCollection);
-            return;
-        }
 
         /// <summary>
         /// Creates an uninitialized instance.
@@ -67,43 +55,15 @@ namespace RCNet.Neural.Data
         }
 
         /// <summary>
-        /// Adds the vector pair into the bundle.
+        /// Creates an initialized instance.
         /// </summary>
-        /// <param name="inputVector">The input vector.</param>
-        /// <param name="outputVector">The output vector.</param>
-        public void AddPair(double[] inputVector, double[] outputVector)
+        /// <param name="inputVectorCollection">The collection of input vectors.</param>
+        /// <param name="outputVectorCollection">The collection of output vectors.</param>
+        public VectorBundle(IEnumerable<double[]> inputVectorCollection, IEnumerable<double[]> outputVectorCollection)
         {
-            InputVectorCollection.Add(inputVector);
-            OutputVectorCollection.Add(outputVector);
+            InputVectorCollection = new List<double[]>(inputVectorCollection);
+            OutputVectorCollection = new List<double[]>(outputVectorCollection);
             return;
-        }
-
-        /// <summary>
-        /// Shuffles the vector pairs.
-        /// </summary>
-        /// <param name="rand">The random object to be used.</param>
-        public void Shuffle(Random rand)
-        {
-            List<double[]> l1 = new List<double[]>(InputVectorCollection);
-            List<double[]> l2 = new List<double[]>(OutputVectorCollection);
-            InputVectorCollection.Clear();
-            OutputVectorCollection.Clear();
-            int[] shuffledIndices = new int[l2.Count];
-            shuffledIndices.ShuffledIndices(rand);
-            for (int i = 0; i < shuffledIndices.Length; i++)
-            {
-                InputVectorCollection.Add(l1[shuffledIndices[i]]);
-                OutputVectorCollection.Add(l2[shuffledIndices[i]]);
-            }
-            return;
-        }
-
-        /// <summary>
-        /// Creates the shallow copy of this bundle.
-        /// </summary>
-        public VectorBundle CreateShallowCopy()
-        {
-            return new VectorBundle(new List<double[]>(InputVectorCollection), new List<double[]>(OutputVectorCollection));
         }
 
         //Static methods
@@ -225,6 +185,19 @@ namespace RCNet.Neural.Data
             return bundle;
         }
 
+        //Methods
+        /// <summary>
+        /// Adds the vector pair into the bundle.
+        /// </summary>
+        /// <param name="inputVector">The input vector.</param>
+        /// <param name="outputVector">The output vector.</param>
+        public void AddPair(double[] inputVector, double[] outputVector)
+        {
+            InputVectorCollection.Add(inputVector);
+            OutputVectorCollection.Add(outputVector);
+            return;
+        }
+
         /// <summary>
         /// Adds all the vector pairs from another vector bundle.
         /// </summary>
@@ -236,7 +209,34 @@ namespace RCNet.Neural.Data
             return;
         }
 
-        //Methods
+        /// <summary>
+        /// Shuffles the vector pairs.
+        /// </summary>
+        /// <param name="rand">The random object to be used.</param>
+        public void Shuffle(Random rand)
+        {
+            List<double[]> l1 = new List<double[]>(InputVectorCollection);
+            List<double[]> l2 = new List<double[]>(OutputVectorCollection);
+            InputVectorCollection.Clear();
+            OutputVectorCollection.Clear();
+            int[] shuffledIndices = new int[l2.Count];
+            shuffledIndices.ShuffledIndices(rand);
+            for (int i = 0; i < shuffledIndices.Length; i++)
+            {
+                InputVectorCollection.Add(l1[shuffledIndices[i]]);
+                OutputVectorCollection.Add(l2[shuffledIndices[i]]);
+            }
+            return;
+        }
+
+        /// <summary>
+        /// Creates the shallow copy of this bundle.
+        /// </summary>
+        public VectorBundle CreateShallowCopy()
+        {
+            return new VectorBundle(new List<double[]>(InputVectorCollection), new List<double[]>(OutputVectorCollection));
+        }
+
         /// <summary>
         /// Splits this bundle to a collection of smaller folds (sub-bundles) suitable for the cross-validation.
         /// </summary>
