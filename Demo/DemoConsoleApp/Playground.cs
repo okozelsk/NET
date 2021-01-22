@@ -314,10 +314,10 @@ namespace Demo.DemoConsoleApp
         }
 
         /// <summary>
-        /// Displays information about the readout unit regression progress.
+        /// The EpochDone event handler.
         /// </summary>
-        /// <param name="buildProgress">Current state of the regression process</param>
-        /// <param name="foundBetter">Indicates that the best readout unit was changed as a result of the performed epoch</param>
+        /// <param name="buildProgress">The current state of the build process.</param>
+        /// <param name="foundBetter">Indicates that the best network so far was found during the last performed epoch.</param>
         private void OnRegressionEpochDone(TNRNetBuilder.BuildProgress buildProgress, bool foundBetter)
         {
             int reportEpochsInterval = 5;

@@ -57,12 +57,11 @@ Input data is standardly located in the "Data" sub-folder relative to the locati
 
 ## RCNet library (.NET Standard 2.0)
 
-### Code metrics
 |Maintenance index|Cyclomatic complexity|Depth of inheritance|Code lines|Executable code lines|
 |--|--|--|--|--|
 |82 (green)|7379|3|53090|11767|
 
-Follows list of components in logical order from basic to composite and complex.
+Components by category:
 
 ### Math
 |Component|Description|
@@ -101,6 +100,16 @@ Follows list of components in logical order from basic to composite and complex.
 |[BinFeatureFilter](./RCNet/Neural/Data/Filter/BinFeatureFilter.cs)|Implements the binary feature filter.|
 |[RealFeatureFilter](./RCNet/Neural/Data/Filter/RealFeatureFilter.cs)|Implements the real number feature filter.|
 
+### Data holding
+|Component|Description|
+|--|--|
+|[SimpleQueue](./RCNet/Queue/SimpleQueue.cs)|Implements a simple FIFO queue template. Supports access to enqueued elements so it can be also used as the moving data window.|
+|[DelimitedStringValues](./RCNet/CsvTools/DelimitedStringValues.cs)|Implements the single row of the delimited string values (csv format).|
+|[CsvDataHolder](./RCNet/CsvTools/CsvDataHolder.cs)|Implements the holder of csv data and supports its loading and saving to a file.|
+|[VectorBundle](./RCNet/Neural/Data/VectorBundle.cs)|Implements a bundle of input and output data vector pairs.|
+|[InputPattern](./RCNet/Neural/Data/InputPattern.cs)|Implements an input pattern. Pattern can be both univariate or multivariate. Supports data resampling (including simple detection of signal begin/end) and amplitude unification.|
+|[ResultBundle](./RCNet/Neural/Data/ResultBundle.cs)|Implements a bundle of input, computed and ideal (desired) data vector triplets.|
+
 ### Chainable Input Data Transformations
 |Component|Description|
 |--|--|
@@ -122,16 +131,6 @@ Follows list of components in logical order from basic to composite and complex.
 |[A2SCoderGaussianReceptors](./RCNet/Neural/Data/Coders/AnalogToSpiking/A2SCoderGaussianReceptors.cs)|Implements the Gaussian Receptive Fields coder.|
 |[A2SCoderUpDirArrows](./RCNet/Neural/Data/Coders/AnalogToSpiking/A2SCoderUpDirArrows.cs)|Implements the upward signal direction receptors coder. Each receptor is sensitive to upward signal direction of the current signal against the past signal at the time T-x (where x is 1...number of receptors). The positive difference of current and past signal is then expressed as spikes through a novel coding algorithm meeting together two important spike-train conditions where stronger stimulation leads to earlier first spike and higher spiking frequency.|
 |[A2SCoderDownDirArrows](./RCNet/Neural/Data/Coders/AnalogToSpiking/A2SCoderDownDirArrows.cs)|Implements the downward signal direction receptors coder. Each receptor is sensitive to downward signal direction of the current signal against the past signal at the time T-x (where x is 1...number of receptors). The negative difference of current and past signal is then expressed as spikes through a novel coding algorithm meeting together two important spike-train conditions where stronger stimulation leads to earlier first spike and higher spiking frequency.|
-
-### Data holding
-|Component|Description|
-|--|--|
-|[SimpleQueue](./RCNet/Queue/SimpleQueue.cs)|Implements a simple FIFO queue template. Supports access to enqueued elements so it can be also used as the moving data window.|
-|[DelimitedStringValues](./RCNet/CsvTools/DelimitedStringValues.cs)|Implements the single row of the delimited string values (csv format).|
-|[CsvDataHolder](./RCNet/CsvTools/CsvDataHolder.cs)|Implements the holder of csv data and supports its loading and saving to a file.|
-|[VectorBundle](./RCNet/Neural/Data/VectorBundle.cs)|Implements a bundle of input and output data vector pairs.|
-|[InputPattern](./RCNet/Neural/Data/InputPattern.cs)|Implements an input pattern. Pattern can be both univariate or multivariate. Supports data resampling (including simple detection of signal begin/end) and amplitude unification.|
-|[ResultBundle](./RCNet/Neural/Data/ResultBundle.cs)|Implements a bundle of input, computed and ideal (desired) data vector triplets.|
 
 ### Analog activation functions (stateless)
 See the [wiki pages.](https://en.wikipedia.org/wiki/Activation_function)
