@@ -23,8 +23,8 @@ namespace Demo.DemoConsoleApp.Examples
     /// train and serialize StateMachine (writes in Examples sub-folder), load serialized StateMachine and forecast next values.
     /// Example uses TTOO.csv from ./Data subfolder.
     /// Time series contains real share prices of TTOO title from https://finance.yahoo.com/quote/TTOO/history?p=TTOO.
-    /// The last recorded prices are from 2018/03/02 so StateMachine is predicting next High and Low prices for the following
-    /// business day 2018/03/05 (where real prices were High = 6.58$ and Low=5.99$).
+    /// The last recorded prices are from 2021/02/09 so StateMachine is predicting next High and Low prices for the following
+    /// business day 2021/02/10 (where real prices were High = 3.61$ and Low=3.10$).
     /// </summary>
     public class TTOOForecastFromScratch : ExampleBase
     {
@@ -330,7 +330,7 @@ namespace Demo.DemoConsoleApp.Examples
 
             //Forecasting
             double[] outputVector = stateMachine.Compute(predictionInputVector, out ReadoutLayer.ReadoutData readoutData);
-            _log.Write("    Forecasted next High and Low TTOO prices (real prices on 2018/03/05 are High=6.58$ and Low=5.99$):", false);
+            _log.Write("    Forecasted next High and Low TTOO prices (real prices on 2021/02/10 are High=3.61$ and Low=3.10$):", false);
             _log.Write(stateMachine.RL.GetForecastReport(outputVector, 6));
             _log.Write(string.Empty);
 

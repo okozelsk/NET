@@ -1,4 +1,5 @@
 ﻿using RCNet.MathTools;
+using RCNet.MiscTools;
 using RCNet.Neural.Data;
 using System;
 using System.Collections.Generic;
@@ -29,27 +30,21 @@ namespace RCNet.Neural.Network.NonRecurrent
         public delegate BuildInstr BuildControllerDelegate(BuildProgress buildProgress);
 
         /// <summary>
-        /// The delegate of the EpochDone event handler.
+        /// The delegate of the NetworkBuildProgressChanged event handler.
         /// </summary>
         /// <param name="buildProgress">The current state of the build process.</param>
-        /// <param name="foundBetter">Indicates that the best network so far was found during the last performed epoch.</param>
-        public delegate void EpochDoneHandler(BuildProgress buildProgress, bool foundBetter);
+        public delegate void NetworkBuildProgressChangedHandler(BuildProgress buildProgress);
 
         /// <summary>
         /// This informative event occurs every time the epoch of the network build process is done.
         /// </summary>
-        public event EpochDoneHandler EpochDone;
+        public event NetworkBuildProgressChangedHandler NetworkBuildProgressChanged;
 
 
         //Attributes
-        private readonly string _buildContext;
         private readonly string _networkName;
         private readonly INonRecurrentNetworkSettings _networkCfg;
         private readonly TNRNet.OutputType _networkOutput;
-        private readonly int _foldNum;
-        private readonly int _numOfFolds;
-        private readonly int _foldNetworkNum;
-        private readonly int _numOfFoldNetworks;
         private readonly VectorBundle _trainingBundle;
         private readonly VectorBundle _testingBundle;
         private readonly Random _rand;
@@ -59,41 +54,26 @@ namespace RCNet.Neural.Network.NonRecurrent
         /// <summary>
         /// Creates an initialized instance.
         /// </summary>
-        /// <param name="buildContext">The context of the build process.</param>
         /// <param name="networkName">The name of the network to be built.</param>
         /// <param name="networkCfg">The configuration of the network to be built.</param>
         /// <param name="networkOutput">The type of output of the network to be built.</param>
-        /// <param name="foldNum">The current fold number.</param>
-        /// <param name="numOfFolds">The total number of the folds.</param>
-        /// <param name="foldNetworkNum">The current fold network number.</param>
-        /// <param name="numOfFoldNetworks">The total number of the fold networks.</param>
         /// <param name="trainingBundle">The bundle of input and ideal vectors to be used for the network training.</param>
         /// <param name="testingBundle">The bundle of input and ideal vectors to be used for the network testing.</param>
         /// <param name="rand">The random generator to be used (optional).</param>
         /// <param name="controller">The build process controller (optional).</param>
-        public TNRNetBuilder(string buildContext,
-                             string networkName,
+        public TNRNetBuilder(string networkName,
                              INonRecurrentNetworkSettings networkCfg,
                              TNRNet.OutputType networkOutput,
-                             int foldNum,
-                             int numOfFolds,
-                             int foldNetworkNum,
-                             int numOfFoldNetworks,
                              VectorBundle trainingBundle,
                              VectorBundle testingBundle,
                              Random rand = null,
                              BuildControllerDelegate controller = null
                              )
         {
-            _buildContext = buildContext;
             _networkName = networkName;
             NonRecurrentNetUtils.CheckNetCfg(networkOutput, networkCfg);
             _networkCfg = networkCfg;
             _networkOutput = networkOutput;
-            _foldNum = foldNum;
-            _numOfFolds = numOfFolds;
-            _foldNetworkNum = foldNetworkNum;
-            _numOfFoldNetworks = numOfFoldNetworks;
             NonRecurrentNetUtils.CheckData(_networkOutput, trainingBundle);
             _trainingBundle = trainingBundle;
             NonRecurrentNetUtils.CheckData(_networkOutput, testingBundle);
@@ -203,6 +183,7 @@ namespace RCNet.Neural.Network.NonRecurrent
         {
             TNRNet bestNetwork = null;
             int bestNetworkAttempt = 0;
+            int bestNetworkAttemptEpoch = 0;
             int currNetworkLastImprovementEpoch = 0;
             double currNetworkLastImprovementCombinedPrecisionError = 0d;
             double currNetworkLastImprovementCombinedBinaryError = 0d;
@@ -255,8 +236,29 @@ namespace RCNet.Neural.Network.NonRecurrent
                     bestNetwork = currNetwork.DeepClone();
                     bestNetworkAttempt = trainer.Attempt;
                 }
+                if ((TNRNet.IsBinErrorStatsOutputType(_networkOutput) && currNetwork.CombinedBinaryError < currNetworkLastImprovementCombinedBinaryError) ||
+                    currNetwork.CombinedPrecisionError < currNetworkLastImprovementCombinedPrecisionError
+                    )
+                {
+                    currNetworkLastImprovementCombinedPrecisionError = currNetwork.CombinedPrecisionError;
+                    if (TNRNet.IsBinErrorStatsOutputType(_networkOutput))
+                    {
+                        currNetworkLastImprovementCombinedBinaryError = currNetwork.CombinedBinaryError;
+                    }
+                    currNetworkLastImprovementEpoch = trainer.AttemptEpoch;
+                }
                 //BuildProgress instance
-                BuildProgress buildProgress = new BuildProgress(_buildContext, _networkName, _foldNum, _numOfFolds, _foldNetworkNum, _numOfFoldNetworks, trainer.Attempt, trainer.MaxAttempt, trainer.AttemptEpoch, trainer.MaxAttemptEpoch, currNetwork, currNetworkLastImprovementEpoch, bestNetwork, bestNetworkAttempt);
+                BuildProgress buildProgress = new BuildProgress(_networkName,
+                                                                trainer.Attempt,
+                                                                trainer.MaxAttempt,
+                                                                trainer.AttemptEpoch,
+                                                                trainer.MaxAttemptEpoch,
+                                                                currNetwork,
+                                                                currNetworkLastImprovementEpoch,
+                                                                bestNetwork,
+                                                                bestNetworkAttempt,
+                                                                bestNetworkAttemptEpoch
+                                                                );
                 //Call controller
                 BuildInstr instructions = _controller(buildProgress);
                 //Better?
@@ -264,22 +266,15 @@ namespace RCNet.Neural.Network.NonRecurrent
                 {
                     //Adopt current regression unit as a best one
                     bestNetwork = currNetwork.DeepClone();
-                    buildProgress.BestNetwork = bestNetwork;
                     bestNetworkAttempt = trainer.Attempt;
-                }
-                if ((TNRNet.IsBinErrorStatsOutputType(_networkOutput) && currNetwork.CombinedBinaryError < currNetworkLastImprovementCombinedBinaryError) ||
-                    currNetwork.CombinedPrecisionError < currNetworkLastImprovementCombinedPrecisionError
-                    )
-                {
-                    currNetworkLastImprovementEpoch = trainer.AttemptEpoch;
-                    currNetworkLastImprovementCombinedPrecisionError = currNetwork.CombinedPrecisionError;
-                    if (TNRNet.IsBinErrorStatsOutputType(_networkOutput))
-                    {
-                        currNetworkLastImprovementCombinedBinaryError = currNetwork.CombinedBinaryError;
-                    }
+                    bestNetworkAttemptEpoch = trainer.AttemptEpoch;
+                    //Update build progress
+                    buildProgress.BestNetwork = bestNetwork;
+                    buildProgress.BestNetworkAttemptNum = bestNetworkAttempt;
+                    buildProgress.BestNetworkAttemptEpochNum = bestNetworkAttemptEpoch;
                 }
                 //Raise notification event
-                EpochDone?.Invoke(buildProgress, instructions.CurrentIsBetter);
+                NetworkBuildProgressChanged?.Invoke(buildProgress);
                 //Process instructions
                 if (instructions.StopProcess)
                 {
@@ -300,60 +295,25 @@ namespace RCNet.Neural.Network.NonRecurrent
 
         //Inner classes
         /// <summary>
-        /// Implements the holder of the build progress information.
+        /// Implements the holder of the network build progress information.
         /// </summary>
-        public class BuildProgress
+        public class BuildProgress : IBuildProgress
         {
             //Attribute properties
             /// <summary>
-            /// The context of the build process.
-            /// </summary>
-            public string BuildContext { get; }
-
-            /// <summary>
-            /// The name of the network.
+            /// Name of the network.
             /// </summary>
             public string NetworkName { get; }
 
             /// <summary>
-            /// The current fold number.
+            /// Information about the progress of network build attempts.
             /// </summary>
-            public int FoldNum { get; }
+            public ProgressTracker AttemptsTracker { get; }
 
             /// <summary>
-            /// The total number of the folds.
+            /// Information about the progress of network build epochs within the current attempt.
             /// </summary>
-            public int NumOfFolds { get; }
-
-            /// <summary>
-            /// The current fold network number.
-            /// </summary>
-            public int FoldNetworkNum { get; }
-
-            /// <summary>
-            /// The total number of the fold networks.
-            /// </summary>
-            public int NumOfFoldNetworks { get; }
-
-            /// <summary>
-            /// The current attempt number.
-            /// </summary>
-            public int AttemptNumber { get; }
-
-            /// <summary>
-            /// The maximum number of attempts.
-            /// </summary>
-            public int MaxAttempts { get; }
-
-            /// <summary>
-            /// The current epoch number.
-            /// </summary>
-            public int Epoch { get; }
-
-            /// <summary>
-            /// The maximum number of epochs.
-            /// </summary>
-            public int MaxEpochs { get; }
+            public ProgressTracker AttemptEpochsTracker { get; }
 
             /// <summary>
             /// The current network and its error statistics.
@@ -361,9 +321,9 @@ namespace RCNet.Neural.Network.NonRecurrent
             public TNRNet CurrNetwork { get; }
 
             /// <summary>
-            /// Specifies when was lastly found an improvement of the current network within the current attempt.
+            /// An epoch number within the current build attempt when was found an improvement of the current network.
             /// </summary>
-            public int CurrNetworkLastImprovementEpoch { get; set; }
+            public int CurrNetworkLastImprovementAttemptEpochNum { get; }
 
             /// <summary>
             /// The best network so far and its error statistics.
@@ -373,55 +333,46 @@ namespace RCNet.Neural.Network.NonRecurrent
             /// <summary>
             /// The attempt number in which was found the best network so far.
             /// </summary>
-            public int BestNetworkAttempt { get; set; }
+            public int BestNetworkAttemptNum { get; set; }
+
+            /// <summary>
+            /// The epoch number within the BestNetworkAttempt in which was found the best network so far.
+            /// </summary>
+            public int BestNetworkAttemptEpochNum { get; set; }
 
             /// <summary>
             /// Creates an initialized instance.
             /// </summary>
-            /// <param name="buildContext">The context of the build process.</param>
-            /// <param name="networkName">The name of the network.</param>
-            /// <param name="foldNum">The current fold number.</param>
-            /// <param name="numOfFolds">The total number of the folds.</param>
-            /// <param name="foldNetworkNum">The current fold network number.</param>
-            /// <param name="numOfFoldNetworks">The total number of the fold networks.</param>
-            /// <param name="regrAttemptNumber">The current attempt number.</param>
-            /// <param name="regrMaxAttempts">The maximum number of attempts.</param>
-            /// <param name="epoch">The current epoch number within the current attempt.</param>
-            /// <param name="maxEpochs">The maximum number of epochs.</param>
+            /// <param name="networkName">Name of the network.</param>
+            /// <param name="attemptNum">The current attempt number.</param>
+            /// <param name="maxNumOfAttempts">The maximum number of attempts.</param>
+            /// <param name="attemptEpochNum">The current epoch number within the current attempt.</param>
+            /// <param name="maxNumOfAttemptEpochs">The maximum number of epochs.</param>
             /// <param name="currNetwork">The current network and its error statistics.</param>
-            /// <param name="currNetworkLastImprovementEpoch">Specifies when was lastly found an improvement of the current network within the current attempt.</param>
+            /// <param name="currNetworkLastImprovementEpochNum">An epoch number within the current build attempt when was found an improvement of the current network.</param>
             /// <param name="bestNetwork">The best network so far and its error statistics.</param>
-            /// <param name="bestNetworkAttempt">The attempt number in which was found the best network so far.</param>
-            public BuildProgress(string buildContext,
-                                 string networkName,
-                                 int foldNum,
-                                 int numOfFolds,
-                                 int foldNetworkNum,
-                                 int numOfFoldNetworks,
-                                 int regrAttemptNumber,
-                                 int regrMaxAttempts,
-                                 int epoch,
-                                 int maxEpochs,
+            /// <param name="bestNetworkAttemptNum">The attempt number in which was found the best network so far.</param>
+            /// <param name="bestNetworkAttemptEpochNum">The epoch number within the bestNetworkAttemptNum in which was found the best network so far.</param>
+            public BuildProgress(string networkName,
+                                 int attemptNum,
+                                 int maxNumOfAttempts,
+                                 int attemptEpochNum,
+                                 int maxNumOfAttemptEpochs,
                                  TNRNet currNetwork,
-                                 int currNetworkLastImprovementEpoch,
+                                 int currNetworkLastImprovementEpochNum,
                                  TNRNet bestNetwork,
-                                 int bestNetworkAttempt
+                                 int bestNetworkAttemptNum,
+                                 int bestNetworkAttemptEpochNum
                                  )
             {
-                BuildContext = buildContext;
                 NetworkName = networkName;
-                FoldNum = foldNum;
-                NumOfFolds = numOfFolds;
-                FoldNetworkNum = foldNetworkNum;
-                NumOfFoldNetworks = numOfFoldNetworks;
-                AttemptNumber = regrAttemptNumber;
-                MaxAttempts = regrMaxAttempts;
-                Epoch = epoch;
-                MaxEpochs = maxEpochs;
+                AttemptsTracker = new ProgressTracker((uint)maxNumOfAttempts, (uint)attemptNum);
+                AttemptEpochsTracker = new ProgressTracker((uint)maxNumOfAttemptEpochs, (uint)attemptEpochNum);
                 CurrNetwork = currNetwork;
-                CurrNetworkLastImprovementEpoch = currNetworkLastImprovementEpoch;
+                CurrNetworkLastImprovementAttemptEpochNum = currNetworkLastImprovementEpochNum;
                 BestNetwork = bestNetwork;
-                BestNetworkAttempt = bestNetworkAttempt;
+                BestNetworkAttemptNum = bestNetworkAttemptNum;
+                BestNetworkAttemptEpochNum = bestNetworkAttemptEpochNum;
                 return;
             }
 
@@ -429,63 +380,151 @@ namespace RCNet.Neural.Network.NonRecurrent
             /// <inheritdoc cref="TNRNet.OutputType"/>
             public TNRNet.OutputType NetworkOutputType { get { return CurrNetwork.Output; } }
 
+            /// <summary>
+            /// Indicates the current network is also the best network so far.
+            /// </summary>
+            public bool CurrentIsBest { get { return (BestNetworkAttemptNum == AttemptsTracker.Current && BestNetworkAttemptEpochNum == AttemptEpochsTracker.Current); } }
+
+            /// <inheritdoc/>
+            public bool NewEndNetwork
+            {
+                get
+                {
+                    return AttemptsTracker.Current == 1 && AttemptEpochsTracker.Current == 1;
+                }
+            }
+
+            /// <inheritdoc/>
+            public bool ShouldBeReported
+            {
+                get
+                {
+                    return NewEndNetwork || CurrentIsBest || AttemptEpochsTracker.Last;
+                }
+            }
+
+            /// <inheritdoc/>
+            public int EndNetworkEpochNum
+            {
+                get
+                {
+                    return (int)AttemptEpochsTracker.Current;
+                }
+            }
+
             //Methods
             /// <summary>
-            /// Builds the text message with the information about the network build progress.
+            /// Gets textual information about the build basic progress.
             /// </summary>
-            /// <param name="margin">The left margin (number of spaces).</param>
-            /// <returns>The built text message.</returns>
-            public string GetInfo(int margin = 0)
+            /// <param name="shortVersion">Specifies whether to build short version of the informative text.</param>
+            public string GetBasicProgressInfoText(bool shortVersion = true)
+            {
+                StringBuilder text = new StringBuilder();
+                if (shortVersion)
+                {
+                    text.Append($"Attempt {AttemptsTracker.Current.ToString(CultureInfo.InvariantCulture).PadLeft(AttemptsTracker.Target.ToString(CultureInfo.InvariantCulture).Length)}");
+                    text.Append($", Epoch {AttemptEpochsTracker.Current.ToString(CultureInfo.InvariantCulture).PadLeft(AttemptEpochsTracker.Target.ToString(CultureInfo.InvariantCulture).Length)}");
+                }
+                else
+                {
+                    text.Append($"Attempt {AttemptsTracker}");
+                    text.Append($", Epoch {AttemptEpochsTracker}");
+                }
+                return text.ToString();
+            }
+
+            /// <summary>
+            /// Gets textual information about the training and test samples.
+            /// </summary>
+            /// <param name="shortVersion">Specifies whether to build short version of the informative text.</param>
+            public string GetSamplesInfoText(bool shortVersion = true)
+            {
+                StringBuilder text = new StringBuilder();
+                int numOfTrainingSamples = CurrNetwork.TrainingErrorStat.NumOfSamples / CurrNetwork.Network.NumOfOutputValues;
+                int numOfTestingSamples = CurrNetwork.TestingErrorStat.NumOfSamples / CurrNetwork.Network.NumOfOutputValues;
+                if (shortVersion)
+                {
+                    text.Append($"Samples {numOfTrainingSamples.ToString(CultureInfo.InvariantCulture)}");
+                    text.Append($"/{numOfTestingSamples.ToString(CultureInfo.InvariantCulture)}");
+                }
+                else
+                {
+                    text.Append($"Training samples {numOfTrainingSamples.ToString(CultureInfo.InvariantCulture)}");
+                    text.Append($", Testing samples {numOfTestingSamples.ToString(CultureInfo.InvariantCulture)}");
+                }
+                return text.ToString();
+            }
+
+            /// <summary>
+            /// Gets textual information about the specified trained network instance.
+            /// </summary>
+            /// <param name="network">An instance of trained network.</param>
+            /// <param name="shortVersion">Specifies whether to build short version of the informative text.</param>
+            public string GetNetworkInfoText(TNRNet network, bool shortVersion = true)
+            {
+                StringBuilder text = new StringBuilder();
+                if (shortVersion)
+                {
+                    text.Append("TrainErr ");
+                    text.Append(network.TrainingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture));
+                    if (network.HasBinErrorStats)
+                    {
+                        text.Append("/" + network.TrainingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture));
+                        text.Append("/" + network.TrainingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture));
+                    }
+                    text.Append(", TestErr ");
+                    text.Append(network.TestingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture));
+                    if (network.HasBinErrorStats)
+                    {
+                        text.Append("/" + network.TestingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture));
+                        text.Append("/" + network.TestingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture));
+                    }
+                }
+                else
+                {
+                    text.Append("Training numerical error ");
+                    text.Append(network.TrainingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture));
+                    if (network.HasBinErrorStats)
+                    {
+                        text.Append(", total bad classifications " + network.TrainingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture));
+                        text.Append(", false positive classifications " + network.TrainingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture));
+                    }
+                    text.Append(", Testing numerical error ");
+                    text.Append(network.TestingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture));
+                    if (network.HasBinErrorStats)
+                    {
+                        text.Append(", total incorrect classifications " + network.TestingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture));
+                        text.Append(", false positive classifications " + network.TestingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture));
+                    }
+                }
+                return text.ToString();
+            }
+
+            /// <inheritdoc/>
+            public string GetInfoText(int margin = 0, bool includeName = true)
             {
                 //Build the progress text message
                 StringBuilder progressText = new StringBuilder();
                 progressText.Append(new string(' ', margin));
-                progressText.Append("[");
-                if (BuildContext.Length > 0)
+                if (includeName)
                 {
-                    progressText.Append(BuildContext);
-                    progressText.Append(" - ");
+                    progressText.Append("[");
+                    progressText.Append(NetworkName);
+                    progressText.Append("] ");
                 }
-                progressText.Append(NetworkName);
-                progressText.Append("] Fold/Net/Attempt/Epoch: ");
-                progressText.Append(FoldNum.ToString().PadLeft(NumOfFolds.ToString().Length, '0') + "/");
-                progressText.Append(FoldNetworkNum.ToString().PadLeft(NumOfFoldNetworks.ToString().Length, '0') + "/");
-                progressText.Append(AttemptNumber.ToString().PadLeft(MaxAttempts.ToString().Length, '0') + "/");
-                progressText.Append(Epoch.ToString().PadLeft(MaxEpochs.ToString().Length, '0'));
-                progressText.Append(", Samples: ");
-                progressText.Append((CurrNetwork.TrainingErrorStat.NumOfSamples / CurrNetwork.Network.NumOfOutputValues).ToString() + "/");
-                progressText.Append((CurrNetwork.TestingErrorStat.NumOfSamples / CurrNetwork.Network.NumOfOutputValues).ToString());
-                progressText.Append(", Best-Train: ");
-                progressText.Append(BestNetwork.TrainingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture));
-                if (BestNetwork.HasBinErrorStats)
-                {
-                    progressText.Append("/" + BestNetwork.TrainingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture));
-                    progressText.Append("/" + BestNetwork.TrainingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture));
-                }
-                progressText.Append(", Best-Test: ");
-                progressText.Append(BestNetwork.TestingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture));
-                if (BestNetwork.HasBinErrorStats)
-                {
-                    progressText.Append("/" + BestNetwork.TestingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture));
-                    progressText.Append("/" + BestNetwork.TestingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture));
-                }
-                progressText.Append(", Curr-Train: ");
-                progressText.Append(CurrNetwork.TrainingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture));
-                if (CurrNetwork.HasBinErrorStats)
-                {
-                    progressText.Append("/" + CurrNetwork.TrainingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture));
-                    progressText.Append("/" + CurrNetwork.TrainingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture));
-                }
-                progressText.Append(", Curr-Test: ");
-                progressText.Append(CurrNetwork.TestingErrorStat.ArithAvg.ToString("E3", CultureInfo.InvariantCulture));
-                if (CurrNetwork.HasBinErrorStats)
-                {
-                    progressText.Append("/" + CurrNetwork.TestingBinErrorStat.TotalErrStat.Sum.ToString(CultureInfo.InvariantCulture));
-                    progressText.Append("/" + CurrNetwork.TestingBinErrorStat.BinValErrStat[1].Sum.ToString(CultureInfo.InvariantCulture));
-                }
+                progressText.Append(GetBasicProgressInfoText(true));
+                progressText.Append(", ");
+                progressText.Append(GetSamplesInfoText(true));
+                progressText.Append(", BestNet-{");
+                progressText.Append(GetNetworkInfoText(BestNetwork, true));
+                progressText.Append("}, CurrNet-{");
+                progressText.Append(GetNetworkInfoText(CurrNetwork, true));
+                progressText.Append("}");
                 if (BestNetwork.TrainerInfoMessage.Length > 0)
                 {
-                    progressText.Append($" [{BestNetwork.TrainerInfoMessage}]");
+                    progressText.Append(", BestParam-{");
+                    progressText.Append(BestNetwork.TrainerInfoMessage);
+                    progressText.Append("}");
                 }
                 return progressText.ToString();
             }

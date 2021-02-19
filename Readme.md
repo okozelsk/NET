@@ -1,7 +1,7 @@
 # Reservoir Computing for .NET (RCNet)
 ![Reservoir Computing conceptual view](./RCNet/Docs/Imgs/ReservoirComputing_BasicSchema.png)
-<br>
-The main purpose of this project is to offer an easy-to-use .NET library for prediction and classification of time series.
+<br/>
+This repository offers a .NET machine learning library primarily focused on prediction and classification of time series.
 RCNet library implementation is based on the ["**Reservoir Computing**"](https://en.wikipedia.org/wiki/Reservoir_computing) concept where the two most well-known methods are Echo State Network (ESN) and Liquid State Machine (LSM).
 The main component of RCNet is called "**State Machine**". State Machine has quite wide configuration options of the reservoirs and except of both mentioned methods (ESN, LSM) it also supports "hybrid" recurrent reservoirs where hidden neurons having an analog and spiking activation can be synaptically connected.
 The correct synaptic linkage of hidden neurons having heterogeneous activations is enabled by a specific implementation of a hidden neuron, where each hidden neuron provides analog and spiking output regardless of the type of activation function is used.
@@ -13,7 +13,7 @@ Firing a spike of the hidden neuron having analog activation is based on defined
 ## The demo application (.NET Core 3.1)
 A simple [demo application](https://github.com/okozelsk/NET/tree/master/Demo/DemoConsoleApp) demonstrates main functionalities and possibilities of the State Machine component.
 Application has no startup parameters and when started, it shows the menu.
-<br>
+<br/>
 *Note that application may write data into "Examples" sub-folder relative to the location of the executable DemoConsoleApp.exe.**
 
 ### Demonstration of performance and configuration options (1. menu choice)
@@ -28,7 +28,7 @@ Demo application has internally implemented the xml validation so connection of 
 SMDemoSettings.xml currently includes several classification problems from the:
 [Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com](https://timeseriesclassification.com)
 site and State Machine is able to achieve competetive results to the best classification algorithms referenced on that website.
-<br>
+<br/>
 
 |Dataset|State Machine Accuracy|Best Ref. Accuracy|Best Ref. Algorithm|
 |--|--|--|--|
@@ -59,7 +59,7 @@ Input data is standardly located in the "Data" sub-folder relative to the locati
 
 |Maintenance index|Cyclomatic complexity|Depth of inheritance|Code lines|Executable code lines|
 |--|--|--|--|--|
-|82 (green)|7379|3|53090|11767|
+|82 (green)|7482|3|53958|11949|
 
 Components by category:
 

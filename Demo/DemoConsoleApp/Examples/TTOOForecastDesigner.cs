@@ -13,8 +13,8 @@ namespace Demo.DemoConsoleApp.Examples
     /// Example code shows how to use StateMachineDesigner and setup StateMachine as a pure ESN for multivariate timeseries forecast.
     /// Example uses TTOO.csv from ./Data subfolder.
     /// Time series contains real share prices of TTOO title from https://finance.yahoo.com/quote/TTOO/history?p=TTOO.
-    /// The last recorded prices are from 2018/03/02 so StateMachine is predicting next High and Low prices for the following
-    /// business day 2018/03/05 (where real prices were High = 6.58$ and Low=5.99$).
+    /// The last recorded prices are from 2021/02/09 so StateMachine is predicting next High and Low prices for the following
+    /// business day 2021/02/10 (where real prices were High = 3.61$ and Low=3.10$).
     /// </summary>
     public class TTOOForecastDesigner : ExampleBase
     {
@@ -42,14 +42,14 @@ namespace Demo.DemoConsoleApp.Examples
             //Create designer instance
             StateMachineDesigner smd = new StateMachineDesigner(inputCfg, readoutCfg);
             //Create pure ESN fashioned StateMachine configuration
-            StateMachineSettings stateMachineCfg = smd.CreatePureESNCfg(250,
-                                                                        2.5,
-                                                                        1d,
-                                                                        0,
-                                                                        0.1d,
-                                                                        0,
-                                                                        0d,
-                                                                        0d,
+            StateMachineSettings stateMachineCfg = smd.CreatePureESNCfg(250, //Total size of the reservoir (number of hidden neurons within the reservoir).
+                                                                        2.5, //Maximum stimulation strength through hidden neuron's input synapses.
+                                                                        1d, //Connection density of an input field. 1 means that each input field will be synaptically connected to all neurons.
+                                                                        0, //Maximum delay on an input synapse. 0 means no delay.
+                                                                        0.1d, //Interconnection density. 0.1 means that each hidden neuron will be synaptically internally connected to 10% of other hidden neurons.
+                                                                        0, //Maximum delay on an internal synapse. 0 means no delay.
+                                                                        0d, //Maximum absolute value of the hidden neuron bias. 0 means no bias.
+                                                                        0d, //Maximum retainment on an hidden neuron. 0 means no retainment.
                                                                         new PredictorsProviderSettings(new PredictorActivationSettings(),
                                                                                                        new PredictorActivationPowerSettings(2d, true),
                                                                                                        new PredictorFiringTraceSettings(0.05, 30)
@@ -76,7 +76,7 @@ namespace Demo.DemoConsoleApp.Examples
 
             //Forecasting
             double[] outputVector = stateMachine.Compute(predictionInputVector, out ReadoutLayer.ReadoutData readoutData);
-            _log.Write("    Forecasted next High and Low TTOO prices (real prices on 2018/03/05 are High=6.58$ and Low=5.99$):", false);
+            _log.Write("    Forecasted next High and Low TTOO prices (real prices were High = 3.61$ and Low=3.10$):", false);
             _log.Write(stateMachine.RL.GetForecastReport(readoutData.NatDataVector, 6));
             _log.Write(string.Empty);
 

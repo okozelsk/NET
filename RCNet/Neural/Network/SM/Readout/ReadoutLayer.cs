@@ -1,4 +1,5 @@
 ﻿using RCNet.MathTools;
+using RCNet.MiscTools;
 using RCNet.Neural.Data;
 using RCNet.Neural.Data.Filter;
 using RCNet.Neural.Network.NonRecurrent;
@@ -18,10 +19,16 @@ namespace RCNet.Neural.Network.SM.Readout
     {
         //Events
         /// <summary>
-        /// This informative event occurs every time the regression epoch is done
+        /// This informative event occurs each time the progress of the build process takes a step forward.
         /// </summary>
         [field: NonSerialized]
-        public event TNRNetBuilder.EpochDoneHandler EpochDone;
+        public event RLBuildProgressChangedHandler RLBuildProgressChanged;
+
+        /// <summary>
+        /// The delegate of the RLBuildProgressChanged event handler.
+        /// </summary>
+        /// <param name="buildProgress">The current state of the build process.</param>
+        public delegate void RLBuildProgressChangedHandler(BuildProgress buildProgress);
 
         //Attribute properties
         /// <summary>
@@ -40,6 +47,13 @@ namespace RCNet.Neural.Network.SM.Readout
         private PredictorsMapper _predictorsMapper;
         private ReadoutUnit[] _readoutUnitCollection;
         private OneTakesAllGroup[] _oneTakesAllGroupCollection;
+
+        //Progress tracking attributes
+        [field: NonSerialized]
+        private int _buildReadoutUnitIdx;
+
+        [field: NonSerialized]
+        private int _buildOTAGroupIdx;
 
         //Constructor
         /// <summary>
@@ -77,6 +91,49 @@ namespace RCNet.Neural.Network.SM.Readout
         }
 
         //Methods
+        private void ResetProgressTracking()
+        {
+            _buildReadoutUnitIdx = 0;
+            _buildOTAGroupIdx = 0;
+            return;
+        }
+
+        private void OnReadoutUnitBuildProgressChanged(ReadoutUnit.BuildProgress unitBuildProgress)
+        {
+            int maxNumOfGroups = 0;
+            if (_oneTakesAllGroupCollection != null)
+            {
+                maxNumOfGroups = _oneTakesAllGroupCollection.Length;
+            }
+            //Prepare readout layer version
+            BuildProgress buildProgress = new BuildProgress(Math.Min(_buildReadoutUnitIdx + 1, ReadoutLayerCfg.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count),
+                                                            ReadoutLayerCfg.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count,
+                                                            unitBuildProgress,
+                                                            0,
+                                                            maxNumOfGroups,
+                                                            null
+                                                            );
+            //Raise event
+            RLBuildProgressChanged?.Invoke(buildProgress);
+            return;
+        }
+
+        private void OnOTAGBuildProgressChanged(OneTakesAllGroup.BuildProgress groupBuildProgress)
+        {
+            //Prepare readout layer version
+            BuildProgress buildProgress = new BuildProgress(Math.Min(_buildReadoutUnitIdx + 1, ReadoutLayerCfg.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count),
+                                                            ReadoutLayerCfg.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count,
+                                                            null,
+                                                            Math.Min(_buildOTAGroupIdx + 1, _oneTakesAllGroupCollection.Length),
+                                                            _oneTakesAllGroupCollection.Length,
+                                                            groupBuildProgress
+                                                            );
+            //Raise event
+            RLBuildProgressChanged?.Invoke(buildProgress);
+            return;
+        }
+
+
         /// <summary>
         /// Resets the readout layer to its initial untrained state.
         /// </summary>
@@ -102,13 +159,7 @@ namespace RCNet.Neural.Network.SM.Readout
                 }
             }
             Trained = false;
-            return;
-        }
-
-        private void OnRegressionEpochDone(TNRNetBuilder.BuildProgress buildProgress, bool foundBetter)
-        {
-            //Only raise up
-            EpochDone(buildProgress, foundBetter);
+            ResetProgressTracking();
             return;
         }
 
@@ -212,31 +263,32 @@ namespace RCNet.Neural.Network.SM.Readout
                 }
             }
 
+            ResetProgressTracking();
             //Building of readout units
-            for (int unitIdx = 0; unitIdx < ReadoutLayerCfg.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count; unitIdx++)
+            for (_buildReadoutUnitIdx = 0; _buildReadoutUnitIdx < ReadoutLayerCfg.ReadoutUnitsCfg.ReadoutUnitCfgCollection.Count; _buildReadoutUnitIdx++)
             {
                 List<double[]> idealValueCollection = new List<double[]>(shuffledData.OutputVectorCollection.Count);
                 //Transformation of ideal vectors to a single value vectors
                 foreach (double[] idealVector in shuffledData.OutputVectorCollection)
                 {
                     double[] value = new double[1];
-                    value[0] = idealVector[unitIdx];
+                    value[0] = idealVector[_buildReadoutUnitIdx];
                     idealValueCollection.Add(value);
                 }
-                List<double[]> readoutUnitInputVectorCollection = _predictorsMapper.CreateVectorCollection(ReadoutLayerCfg.ReadoutUnitsCfg.ReadoutUnitCfgCollection[unitIdx].Name, shuffledData.InputVectorCollection);
+                List<double[]> readoutUnitInputVectorCollection = _predictorsMapper.CreateVectorCollection(ReadoutLayerCfg.ReadoutUnitsCfg.ReadoutUnitCfgCollection[_buildReadoutUnitIdx].Name, shuffledData.InputVectorCollection);
                 VectorBundle readoutUnitDataBundle = new VectorBundle(readoutUnitInputVectorCollection, idealValueCollection);
-                _readoutUnitCollection[unitIdx].EpochDone += OnRegressionEpochDone;
-                _readoutUnitCollection[unitIdx].Build(readoutUnitDataBundle,
-                                                      _outputFeatureFilterCollection[unitIdx],
-                                                      rand,
-                                                      controller
-                                                      );
+                _readoutUnitCollection[_buildReadoutUnitIdx].ReadoutUnitBuildProgressChanged += OnReadoutUnitBuildProgressChanged;
+                _readoutUnitCollection[_buildReadoutUnitIdx].Build(readoutUnitDataBundle,
+                                                                   _outputFeatureFilterCollection[_buildReadoutUnitIdx],
+                                                                   rand,
+                                                                   controller
+                                                                   );
                 //Add unit's all computed results into the input data for "One Takes All" groups
                 if (_oneTakesAllGroupCollection != null)
                 {
                     for (int sampleIdx = 0; sampleIdx < readoutUnitDataBundle.InputVectorCollection.Count; sampleIdx++)
                     {
-                        allReadoutUnitResults[sampleIdx][unitIdx] = _readoutUnitCollection[unitIdx].Compute(readoutUnitDataBundle.InputVectorCollection[sampleIdx]);
+                        allReadoutUnitResults[sampleIdx][_buildReadoutUnitIdx] = _readoutUnitCollection[_buildReadoutUnitIdx].Compute(readoutUnitDataBundle.InputVectorCollection[sampleIdx]);
                     }
                 }
             }//unitIdx
@@ -254,7 +306,8 @@ namespace RCNet.Neural.Network.SM.Readout
                         {
                             groupFilters[i] = (BinFeatureFilter)_outputFeatureFilterCollection[group.MemberReadoutUnitIndexCollection[i]];
                         }
-                        group.RegressionEpochDone += OnRegressionEpochDone;
+                        ++_buildOTAGroupIdx;
+                        group.OTAGBuildProgressChanged += OnOTAGBuildProgressChanged;
                         group.Build(allReadoutUnitResults, shuffledData.OutputVectorCollection, groupFilters, rand, controller);
                     }
                 }
@@ -664,6 +717,114 @@ namespace RCNet.Neural.Network.SM.Readout
             }
 
         }//RegressionOverview
+
+
+        /// <summary>
+        /// Implements the holder of the readout layer build progress information.
+        /// </summary>
+        public class BuildProgress : IBuildProgress
+        {
+            //Attribute properties
+            /// <summary>
+            /// Information about the readout units processing progress.
+            /// </summary>
+            public ProgressTracker UnitsTracker { get; }
+
+            /// <summary>
+            /// Information about the current readout unit build progress.
+            /// </summary>
+            public ReadoutUnit.BuildProgress UnitBuildProgress { get; }
+
+            /// <summary>
+            /// Information about the One Takes All groups processing progress.
+            /// </summary>
+            public ProgressTracker GroupsTracker { get; }
+
+            /// <summary>
+            /// Information about the current One Takes All group build progress.
+            /// </summary>
+            public OneTakesAllGroup.BuildProgress GroupBuildProgress { get; }
+
+            //Constructor
+            /// <summary>
+            /// Creates an initialized instance.
+            /// </summary>
+            /// <param name="unitNum">The current readout unit number.</param>
+            /// <param name="maxNumOfUnits">The maximum number of readout units.</param>
+            /// <param name="unitBuildProgress">The holder of the readout unit build progress information.</param>
+            /// <param name="groupNum">The current One Takes All group number.</param>
+            /// <param name="maxNumOfGroups">The maximum number of One Takes All groups.</param>
+            /// <param name="groupBuildProgress">The holder of the One Takes All group build progress information.</param>
+            public BuildProgress(int unitNum,
+                                 int maxNumOfUnits,
+                                 ReadoutUnit.BuildProgress unitBuildProgress,
+                                 int groupNum,
+                                 int maxNumOfGroups,
+                                 OneTakesAllGroup.BuildProgress groupBuildProgress
+                                 )
+            {
+                UnitsTracker = new ProgressTracker((uint)maxNumOfUnits, (uint)unitNum);
+                UnitBuildProgress = unitBuildProgress;
+                GroupsTracker = new ProgressTracker((uint)maxNumOfGroups, (uint)groupNum);
+                GroupBuildProgress = groupBuildProgress;
+                return;
+            }
+
+            //Properties
+            /// <summary>
+            /// Indicates the readout units build progress is present.
+            /// </summary>
+            public bool ContainsReadoutUnitsProgressInfo { get { return UnitBuildProgress != null; } }
+
+            /// <summary>
+            /// Indicates the One Takes All groups build progress is present.
+            /// </summary>
+            public bool ContainsOneTakesAllGroupsProgressInfo { get { return GroupBuildProgress != null; } }
+
+            /// <inheritdoc/>
+            public bool NewEndNetwork
+            {
+                get
+                {
+                    return GetActiveBuildProgress().NewEndNetwork;
+                }
+            }
+
+            /// <inheritdoc/>
+            public bool ShouldBeReported
+            {
+                get
+                {
+                    return GetActiveBuildProgress().ShouldBeReported;
+                }
+            }
+
+            /// <inheritdoc/>
+            public int EndNetworkEpochNum
+            {
+                get
+                {
+                    return GetActiveBuildProgress().EndNetworkEpochNum;
+                }
+            }
+
+            //Methods
+            private IBuildProgress GetActiveBuildProgress()
+            {
+                return (IBuildProgress)UnitBuildProgress ?? GroupBuildProgress;
+            }
+
+            /// <inheritdoc/>
+            public string GetInfoText(int margin = 0, bool includeName = true)
+            {
+                return GetActiveBuildProgress().GetInfoText(margin, includeName);
+            }
+
+        }//BuildProgress
+
+
+
+
 
     }//ReadoutLayer
 

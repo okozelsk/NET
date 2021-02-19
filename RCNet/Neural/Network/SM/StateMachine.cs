@@ -281,7 +281,7 @@ namespace RCNet.Neural.Network.SM
                 }
                 double[] outputVector = RL.Compute(predictors, out ReadoutLayer.ReadoutData readoutData);
                 verificationResults.Update(predictors, readoutData, verificationData.OutputVectorCollection[sampleIdx]);
-                VerificationProgressChanged(verificationData.InputVectorCollection.Count, sampleIdx + 1);
+                VerificationProgressChanged?.Invoke(verificationData.InputVectorCollection.Count, sampleIdx + 1);
             }
             return verificationResults;
         }

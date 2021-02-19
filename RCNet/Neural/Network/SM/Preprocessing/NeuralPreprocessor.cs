@@ -467,7 +467,7 @@ namespace RCNet.Neural.Network.SM.Preprocessing
                     outputBundle.OutputVectorCollection.Add(inputBundle.OutputVectorCollection[dataSetIdx]);
                 }
                 //Raise informative event
-                PreprocessingProgressChanged(inputBundle.InputVectorCollection.Count, dataSetIdx + 1, null);
+                PreprocessingProgressChanged?.Invoke(inputBundle.InputVectorCollection.Count, dataSetIdx + 1, null);
             }
             //Initialize output features switches
             InitOutputFeaturesGeneralSwitches(outputBundle.InputVectorCollection);

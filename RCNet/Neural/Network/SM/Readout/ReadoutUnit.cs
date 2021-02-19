@@ -3,6 +3,7 @@ using RCNet.Neural.Data.Filter;
 using RCNet.Neural.Network.NonRecurrent;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace RCNet.Neural.Network.SM.Readout
 {
@@ -29,10 +30,16 @@ namespace RCNet.Neural.Network.SM.Readout
         }
 
         /// <summary>
-        /// This informative event occurs every time the regression epoch is done.
+        /// This informative event occurs each time the progress of the build process takes a step forward.
         /// </summary>
         [field: NonSerialized]
-        public event TNRNetBuilder.EpochDoneHandler EpochDone;
+        public event ReadoutUnitBuildProgressChangedHandler ReadoutUnitBuildProgressChanged;
+
+        /// <summary>
+        /// The delegate of the ReadoutUnitBuildProgressChanged event handler.
+        /// </summary>
+        /// <param name="buildProgress">The current state of the build process.</param>
+        public delegate void ReadoutUnitBuildProgressChangedHandler(BuildProgress buildProgress);
 
         //Attribute properties
         /// <summary>
@@ -96,10 +103,12 @@ namespace RCNet.Neural.Network.SM.Readout
         public bool Ready { get { return _clusterChain != null; } }
 
         //Methods
-        private void OnRegressionEpochDone(TNRNetBuilder.BuildProgress buildProgress, bool foundBetter)
+        private void OnChainBuildProgressChanged(TNRNetClusterChainBuilder.BuildProgress chainBuildProgress)
         {
-            //Only raise up
-            EpochDone(buildProgress, foundBetter);
+            //Prepare readout unit version
+            BuildProgress buildProgress = new BuildProgress(Name, chainBuildProgress);
+            //Raise event
+            ReadoutUnitBuildProgressChanged?.Invoke(buildProgress);
             return;
         }
 
@@ -117,13 +126,12 @@ namespace RCNet.Neural.Network.SM.Readout
                           )
         {
             rand = rand ?? new Random(0);
-            TNRNetClusterChainBuilder builder = new TNRNetClusterChainBuilder("RU",
-                                                                              Name,
+            TNRNetClusterChainBuilder builder = new TNRNetClusterChainBuilder(Name,
                                                                               _clusterChainCfg,
                                                                               rand,
                                                                               controller
                                                                               );
-            builder.EpochDone += OnRegressionEpochDone;
+            builder.ChainBuildProgressChanged += OnChainBuildProgressChanged;
             _clusterChain = builder.Build(dataBundle, new FeatureFilterBase[] { filter });
             return;
         }
@@ -150,6 +158,87 @@ namespace RCNet.Neural.Network.SM.Readout
         {
             return _clusterChain.MainCluster.ErrorStats.DeepClone();
         }
+
+
+        //Inner classes
+        /// <summary>
+        /// Implements the holder of the readout unit build progress information.
+        /// </summary>
+        public class BuildProgress : IBuildProgress
+        {
+            //Attribute properties
+            /// <summary>
+            /// Name of the readout unit.
+            /// </summary>
+            public string UnitName { get; }
+
+            /// <summary>
+            /// Information about the cluster chain build progress.
+            /// </summary>
+            public TNRNetClusterChainBuilder.BuildProgress ChainBuildProgress { get; }
+
+            /// <summary>
+            /// Creates an initialized instance.
+            /// </summary>
+            /// <param name="unitName">Name of the readout unit.</param>
+            /// <param name="chainBuildProgress">The holder of the cluster chain build progress information.</param>
+            public BuildProgress(string unitName,
+                                 TNRNetClusterChainBuilder.BuildProgress chainBuildProgress
+                                 )
+            {
+                UnitName = unitName;
+                ChainBuildProgress = chainBuildProgress;
+                return;
+            }
+
+            //Properties
+            /// <inheritdoc/>
+            public bool NewEndNetwork
+            {
+                get
+                {
+                    return ChainBuildProgress.NewEndNetwork;
+                }
+            }
+
+            /// <inheritdoc/>
+            public bool ShouldBeReported
+            {
+                get
+                {
+                    return ChainBuildProgress.ShouldBeReported;
+                }
+            }
+
+            /// <inheritdoc/>
+            public int EndNetworkEpochNum
+            {
+                get
+                {
+                    return ChainBuildProgress.EndNetworkEpochNum;
+                }
+            }
+
+            //Methods
+            /// <inheritdoc/>
+            public string GetInfoText(int margin = 0, bool includeName = true)
+            {
+                //Build the progress text message
+                StringBuilder progressText = new StringBuilder();
+                progressText.Append(new string(' ', margin));
+                if (includeName)
+                {
+                    progressText.Append("[");
+                    progressText.Append(UnitName);
+                    progressText.Append("] ");
+                }
+                progressText.Append(ChainBuildProgress.GetInfoText(0, false));
+                return progressText.ToString();
+            }
+
+        }//BuildProgress
+
+
 
     }//ReadoutUnit
 

@@ -5,6 +5,7 @@ using RCNet.Neural.Data.Filter;
 using RCNet.Neural.Network.NonRecurrent;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace RCNet.Neural.Network.SM.Readout
 {
@@ -34,10 +35,19 @@ namespace RCNet.Neural.Network.SM.Readout
         }
 
         /// <summary>
-        /// This informative event occurs every time the regression epoch is done.
+        /// This informative event occurs each time the progress of the build process takes a step forward.
         /// </summary>
         [field: NonSerialized]
-        public event TNRNetBuilder.EpochDoneHandler RegressionEpochDone;
+        public event OTAGBuildProgressChangedHandler OTAGBuildProgressChanged;
+
+        /// <summary>
+        /// The delegate of the OTAGBuildProgressChanged event handler.
+        /// </summary>
+        /// <param name="buildProgress">The current state of the build process.</param>
+        public delegate void OTAGBuildProgressChangedHandler(BuildProgress buildProgress);
+
+
+
 
         //Attribute properties
         /// <summary>
@@ -94,10 +104,12 @@ namespace RCNet.Neural.Network.SM.Readout
         public int NumOfMemberClasses { get { return MemberReadoutUnitIndexCollection.Count; } }
 
         //Methods
-        private void OnRegressionEpochDone(TNRNetBuilder.BuildProgress buildProgress, bool foundBetter)
+        private void OnChainBuildProgressChanged(TNRNetClusterChainBuilder.BuildProgress chainBuildProgress)
         {
-            //Only raise up
-            RegressionEpochDone(buildProgress, foundBetter);
+            //Prepare group version
+            BuildProgress buildProgress = new BuildProgress(Name, chainBuildProgress);
+            //Raise event
+            OTAGBuildProgressChanged?.Invoke(buildProgress);
             return;
         }
 
@@ -163,13 +175,12 @@ namespace RCNet.Neural.Network.SM.Readout
 
 
             //Cluster chain builder
-            TNRNetClusterChainBuilder builder = new TNRNetClusterChainBuilder("OTAG",
-                                                                              Name,
+            TNRNetClusterChainBuilder builder = new TNRNetClusterChainBuilder(Name,
                                                                               decisionCfg.ClusterChainCfg,
                                                                               rand,
                                                                               controller
                                                                               );
-            builder.EpochDone += OnRegressionEpochDone;
+            builder.ChainBuildProgressChanged += OnChainBuildProgressChanged;
             ProbabilisticClusterChain = builder.Build(trainingDataBundle, filters);
             return;
         }
@@ -225,6 +236,85 @@ namespace RCNet.Neural.Network.SM.Readout
 
             return winnerIdx;
         }
+
+        //Inner classes
+        /// <summary>
+        /// Implements the holder of the One Takes All group build progress information.
+        /// </summary>
+        public class BuildProgress : IBuildProgress
+        {
+            //Attribute properties
+            /// <summary>
+            /// Name of the One Takes All group.
+            /// </summary>
+            public string GroupName { get; }
+
+            /// <summary>
+            /// Information about the cluster chain build progress.
+            /// </summary>
+            public TNRNetClusterChainBuilder.BuildProgress ChainBuildProgress { get; }
+
+            /// <summary>
+            /// Creates an initialized instance.
+            /// </summary>
+            /// <param name="groupName">Name of the One Takes All group.</param>
+            /// <param name="chainBuildProgress">The holder of the cluster chain build progress information.</param>
+            public BuildProgress(string groupName,
+                                 TNRNetClusterChainBuilder.BuildProgress chainBuildProgress
+                                 )
+            {
+                GroupName = groupName;
+                ChainBuildProgress = chainBuildProgress;
+                return;
+            }
+
+            //Properties
+            /// <inheritdoc/>
+            public bool NewEndNetwork
+            {
+                get
+                {
+                    return ChainBuildProgress.NewEndNetwork;
+                }
+            }
+
+            /// <inheritdoc/>
+            public bool ShouldBeReported
+            {
+                get
+                {
+                    return ChainBuildProgress.ShouldBeReported;
+                }
+            }
+
+            /// <inheritdoc/>
+            public int EndNetworkEpochNum
+            {
+                get
+                {
+                    return ChainBuildProgress.EndNetworkEpochNum;
+                }
+            }
+
+            //Methods
+            /// <inheritdoc/>
+            public string GetInfoText(int margin = 0, bool includeName = true)
+            {
+                //Build the progress text message
+                StringBuilder progressText = new StringBuilder();
+                progressText.Append(new string(' ', margin));
+                if (includeName)
+                {
+                    progressText.Append("[");
+                    progressText.Append(GroupName);
+                    progressText.Append("] ");
+                }
+                progressText.Append(ChainBuildProgress.GetInfoText(0, false));
+                return progressText.ToString();
+            }
+
+        }//BuildProgress
+
 
     }//OneTakesAllGroup
 

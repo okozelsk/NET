@@ -2,66 +2,46 @@
 <demo dataFolder="./Data" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="SMDemoSettings.xsd">
 
 
-
-
-  <case name="Classification task CricketX: Pure ESN reservoir generating FiringTrace predictors, one Identity neuron as a classifier (Resilient trainer)">
-    <samples trainingData="CricketX_train.csv" verificationData="CricketX_verify.csv"/>
+  <case name="Forecast task High and Low share prices of TTOO (T2 Biosystems, Inc.): Pure ESN reservoir generating Activation and ActivationPower predictors, one Identity neuron as a forecaster (Elastic trainer)">
+    <samples trainingData="TTOO_train.csv" verificationData="TTOO_verify.csv"/>
     <stateMachine randomizerSeek="0">
-      <neuralPreprocessor predictorsReductionRatio="0" predictorValueMinSpan="1e-6">
+      <neuralPreprocessor>
         <inputEncoder>
-          <feedingPatterned slices="1" bidir="Continuous" variablesSchema="Sequential">
-            <unification detrend="false" unifyAmplitude="false">
-              <resampling signalBeginThreshold="0" signalEndThreshold="0" uniformTimeScale="true" targetTimePoints="Auto"/>
-            </unification>
-            <steadyFields>
-              <field name="xxx" routeToReadout="true"/>
-              <field name="yyy" routeToReadout="true"/>
-            </steadyFields>
-          </feedingPatterned>
+          <feedingContinuous bootCycles="Auto"/>
           <varyingFields routeToReadout="false">
-            <spikesCoder regime="Horizontal">
-              <downDirArrowsCoder timePoints="8" receptors="8"/>
-              <upDirArrowsCoder timePoints="8" receptors="8"/>
-              <gaussianReceptorsCoder timePoints="8" receptors="8"/>
-              <signalStrengthCoder timePoints="8"/>
-            </spikesCoder>
+            <spikesCoder regime="Forbidden"/>
             <externalFields>
-              <field name="Accel" routeToReadout="true">
-                <realFeature standardize="true" keepReserve="true"/>
+              <field name="High" routeToReadout="true">
+                <realFeature standardize="true" keepReserve="false"/>
+              </field>
+              <field name="Low" routeToReadout="true">
+                <realFeature standardize="true" keepReserve="false"/>
+              </field>
+              <field name="Adj Close" routeToReadout="true">
+                <realFeature standardize="true" keepReserve="false"/>
               </field>
             </externalFields>
-            <generatedFields>
-              <field name="rrrr" routeToReadout="true">
-                <random min="0.2" max="0.5" randomSign="true">
-                  <gammaDistr beta="0.4" alpha="0.5"/>
-                  <exponentialDistr mean="2.4"/>
-                  <gaussianDistr mean="0" stdDev="1"/>
-                </random>
-                <sinusoidal freq="1.5" ampl="0.5" phase="0.47"/>
-                <pulse mode="Uniform" avgPeriod="3.5" signal="1"/>
-                <mackeyGlass b="0.45" c="1.25" tau="18"/>
-                
-                <realFeature/>
-              </field>
-            </generatedFields>
           </varyingFields>
         </inputEncoder>
         <reservoirStructures>
           <reservoirStructure name="MainCfg">
             <pools>
-              <pool name="PoolMain">
-                <proportions dimX="500" dimY="1" dimZ="1"/>
+              <pool name="Logistic pool">
+                <proportions dimX="6" dimY="6" dimZ="6"/>
                 <neuronGroups>
-                  <analogGroup name="TanH-grp" relShare="1" firingThreshold="0.00125" thresholdMaxRefDeepness="60">
+                  <analogGroup name="TanH-grp" relShare="1">
                     <activationTanH/>
+                    <retainment density="1">
+                      <strength min="0" max="0.75" />
+                    </retainment>
                     <predictors>
-                      <firingTrace fading="0.005"/>
+                      <activation/>
+                      <activationPower exponent="3" keepSign="false"/>
                     </predictors>
                   </analogGroup>
                 </neuronGroups>
                 <interconnection>
-                  <randomSchema density="0.05" avgDistance="NA" allowSelfConnection="true"/>
-                  <chainSchema/>
+                  <chainSchema ratio="1" circle="true" replaceExistingConnections="true" repetitions="3"/>
                 </interconnection>
               </pool>
             </pools>
@@ -70,16 +50,17 @@
         <reservoirInstances>
           <reservoirInstance name="Main" reservoirStructure="MainCfg">
             <inputConnections>
-              <connection inputFieldName="Accel" poolName="PoolMain" analogTargetDensity="0.25"/>
+              <connection inputFieldName="High" poolName="Logistic pool"/>
+              <connection inputFieldName="Low" poolName="Logistic pool"/>
+              <connection inputFieldName="Adj Close" poolName="Logistic pool"/>
             </inputConnections>
             <synapse>
               <analogTarget spectralRadius="0.9999">
-                <input maxDelay="50">
+                <input>
                   <analogSource>
-                    <weight min="0" max="1.5"/>
+                    <weight min="0" max="1"/>
                   </analogSource>
                 </input>
-                <indifferent maxDelay="0"/>
               </analogTarget>
             </synapse>
           </reservoirInstance>
@@ -87,7 +68,7 @@
       </neuralPreprocessor>
       <readoutLayer>
         <taskDefaults>
-          <classification>
+          <forecast>
             <clusterChain>
               <crossvalidation foldDataRatio="0.1" folds="Auto" repetitions="1"/>
               <clusters>
@@ -95,63 +76,29 @@
                   <networks>
                     <ff>
                       <activationIdentity/>
-                      <resPropTrainer attempts="10" attemptEpochs="500"/>
+                      <elasticRegrTrainer attemptEpochs="400" lambda="1e-6" alpha="0.5"/>
                     </ff>
                   </networks>
                   <weights/>
                 </cluster>
               </clusters>
             </clusterChain>
-          </classification>
+          </forecast>
         </taskDefaults>
         <readoutUnits>
-          <readoutUnit name="Cancel Call">
-            <classification oneTakesAllGroupName="Gesture"/>
+          <readoutUnit name="High">
+            <forecast/>
           </readoutUnit>
-          <readoutUnit name="Dead Ball">
-            <classification oneTakesAllGroupName="Gesture"/>
+          <readoutUnit name="Low">
+            <forecast/>
           </readoutUnit>
-          <readoutUnit name="Four">
-            <classification oneTakesAllGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="Last Hour">
-            <classification oneTakesAllGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="Leg Bye">
-            <classification oneTakesAllGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="No Ball">
-            <classification oneTakesAllGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="One Short">
-            <classification oneTakesAllGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="Out">
-            <classification oneTakesAllGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="Penalty Runs">
-            <classification oneTakesAllGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="Six">
-            <classification oneTakesAllGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="TV Replay">
-            <classification oneTakesAllGroupName="Gesture"/>
-          </readoutUnit>
-          <readoutUnit name="Wide">
-            <classification oneTakesAllGroupName="Gesture"/>
+          <readoutUnit name="Adj Close">
+            <forecast/>
           </readoutUnit>
         </readoutUnits>
-        <oneTakesAllGroups>
-          <group name="Gesture">
-            <basicDecision/>
-          </group>
-        </oneTakesAllGroups>
       </readoutLayer>
     </stateMachine>
   </case>
-
-
 
 
 
@@ -1251,8 +1198,8 @@
     This demo case demonstrates the simple form of classical ESN reservoir setup to predict next Low, High and Close share prices.
     Elastic net regression is used as forecasting readout.
     Time series contains real share prices of TTOO title from https://finance.yahoo.com/quote/TTOO/history?p=TTOO.
-    The last recorded prices are from 2018/03/02 so StateMachine is predicting next High, Low and Close prices for the following
-    business day 2018/03/05 (where real prices were High=6.58$, Low=5.99$ and Close=6.15$).
+    The last recorded prices are from 2021/02/09 so StateMachine is predicting next High, Low and Close prices for the following
+    business day 2021/02/10 (where real prices were High=3.61$, Low=3.10$ and Close=3.30$).
   -->
   <case name="Forecast task High and Low share prices of TTOO (T2 Biosystems, Inc.): Pure ESN reservoir generating Activation and ActivationPower predictors, one Identity neuron as a forecaster (Elastic trainer)">
     <samples trainingData="TTOO_train.csv" verificationData="TTOO_verify.csv"/>

@@ -1,7 +1,6 @@
 ﻿using Demo.DemoConsoleApp.Log;
 using RCNet.CsvTools;
 using RCNet.Neural.Data;
-using RCNet.Neural.Network.NonRecurrent;
 using RCNet.Neural.Network.SM;
 using RCNet.Neural.Network.SM.Preprocessing;
 using RCNet.Neural.Network.SM.Preprocessing.Input;
@@ -72,24 +71,19 @@ namespace Demo.DemoConsoleApp.Examples
         }
 
         /// <summary>
-        /// Displays information about the build process progress.
+        /// Displays information about the readout layer build process progress.
         /// </summary>
         /// <param name="buildProgress">The current state of the build process.</param>
-        /// <param name="foundBetter">Indicates that the best network so far was found during the last performed epoch.</param>
-        protected void OnEpochDone(TNRNetBuilder.BuildProgress buildProgress, bool foundBetter)
+        protected void OnRLBuildProgressChanged(ReadoutLayer.BuildProgress buildProgress)
         {
             int reportEpochsInterval = 5;
             //Progress info
-            if (foundBetter ||
-                (buildProgress.Epoch % reportEpochsInterval) == 0 ||
-                buildProgress.Epoch == buildProgress.MaxEpochs ||
-                (buildProgress.Epoch == 1 && buildProgress.AttemptNumber == 1)
-                )
+            if (buildProgress.ShouldBeReported || (buildProgress.EndNetworkEpochNum % reportEpochsInterval == 0))
             {
                 //Build progress report message
-                string progressText = buildProgress.GetInfo(4);
+                string progressText = buildProgress.GetInfoText(4);
                 //Report the progress
-                _log.Write(progressText, !(buildProgress.Epoch == 1 && buildProgress.AttemptNumber == 1));
+                _log.Write(progressText, !(buildProgress.NewEndNetwork));
             }
             return;
         }
@@ -103,7 +97,7 @@ namespace Demo.DemoConsoleApp.Examples
         protected void TrainStateMachine(StateMachine stateMachine, string trainingDataFileName, out double[] predictionInputVector)
         {
             //Register to EpochDone event
-            stateMachine.RL.EpochDone += OnEpochDone;
+            stateMachine.RL.RLBuildProgressChanged += OnRLBuildProgressChanged;
             //Load csv data
             CsvDataHolder trainingCsvData = new CsvDataHolder(trainingDataFileName);
             //Convert csv data to VectorBundle useable for StateMachine training
