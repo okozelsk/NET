@@ -20,7 +20,7 @@ Application input data is standardly located in the "Data" sub-folder relative t
 <br/>
 Application has no startup parameters and when started, it shows the root menu.
 <br/>
-*Note that application may write data into "Examples" sub-folder relative to the location of the executable DemoConsoleApp.exe.*
+_Note that application may write data into "Examples" sub-folder relative to the location of the executable DemoConsoleApp.exe._
 
 ### 1. menu choice: Demonstration of the State Machine performance and configuration options
 Application performs sequence of tasks defined in the [SMDemoSettings.xml](./Demo/DemoConsoleApp/SMDemoSettings.xml) xml file, where each task is defined in the xml element "case" so you can easily insert new task or tune existing one by simple modification of xml content.
