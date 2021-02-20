@@ -11,12 +11,19 @@ Firing a spike of the hidden neuron having analog activation is based on defined
 
 
 ## The demo application (.NET Core 3.1)
-A simple [demo application](https://github.com/okozelsk/NET/tree/master/Demo/DemoConsoleApp) demonstrates main functionalities and possibilities of the State Machine component.
-Application has no startup parameters and when started, it shows the menu.
+A simple [demo application](https://github.com/okozelsk/NET/tree/master/Demo/DemoConsoleApp) demonstrates the StateMachine performance and it also includes several code examples showing how to use key RCNet components.
+<br/>
+Application input data is standardly located in the "Data" sub-folder relative to the location of the executable DemoConsoleApp.exe. Data is expected in csv format and data delimiter can be a tab, semicolon or comma character.
+* **Continuous feeding regime** requires a standard csv format, where the first line contains the names of the data fields and each next line contains the data. [Here](./Demo/DemoConsoleApp/Data/TTOO.csv) is an example.
+* **Patterned feeding regime** requires specific logical csv format without colum names (header). Each data line contains values of steady (optional) and repetitive pattern features followed by expected output values at the end. Values of repetitive pattern features can be organized in two ways: groupped [v1(t1),v2(t1),v1(t2),v2(t2),v1(t3),v2(t3)] or sequential [v1(t1),v1(t2),v1(t3),v2(t1),v2(t2),v2(t3)]. [Here](./Demo/DemoConsoleApp/Data/LibrasMovement_train.csv) is an example.
+<br/>
 <br/>
 *Note that application may write data into "Examples" sub-folder relative to the location of the executable DemoConsoleApp.exe.**
+<br/>
+<br/>
+Application has no startup parameters and when started, it shows the root menu.
 
-### Demonstration of performance and configuration options (1. menu choice)
+### 1. menu choice: Demonstration of the State Machine performance and configuration options
 Application performs sequence of tasks defined in the [SMDemoSettings.xml](./Demo/DemoConsoleApp/SMDemoSettings.xml) xml file, where each task is defined in the xml element "case" so you can easily insert new task or tune existing one by simple modification of xml content.
 SMDemoSettings.xml has to be located in the same folder as the executable DemoConsoleApp.exe.
 
@@ -41,19 +48,15 @@ site and State Machine is able to achieve competetive results to the best classi
 |[Libras](https://timeseriesclassification.com/description.php?Dataset=Libras)|92.78%|89.4%|DTWi|
 
 
-### Code examples (2. menu choice)
-This very simple machine learning example shows how to learn Feed Forward Network component to solve boolean algebra. Feed Forward network is a part of the State Machine's readout layer, but here is shown that it can be also used as a stand alone component.
+### 2. menu choice: Code examples related to State Machine
+Switches to sub-menu with several code examples showing how to configure State Machine manually from scratch or using the StateMachineDesigner component to perform classification or forecasting, then how to train State Machine and verify its performance.
 
-### Code examples (3. menu choice)
-Example shows how to setup State Machine configuration from the scratch in the code, then how to train State Machine and how to verify its performance.
+### 3. menu choice: Code examples related to State Machine
+Switches to sub-menu with several code examples showing how to  independently use non-recurrent network components. State Machine's readout layer consists of hirarchical structure of non-recurrent network components, but here is shown how to use them as the standalone components with no relation to State Machine.
 
-### Code examples (4, ... menu choices)
-Several examples show usage of the State Machine Designer component to setup simple State Machine configurations, then how to train State Machine and how to verify its performance.
+### 4. menu choice: Playground
+This choice runs the [Playground](./Demo/DemoConsoleApp/Playground.cs) module where you can quickly discover and try to use RCNet components.
 
-### Data format for the demo application
-Input data is standardly located in the "Data" sub-folder relative to the location of the executable DemoConsoleApp.exe. Data is expected in csv format and data delimiter can be a tab, semicolon or comma character.
-* **Continuous feeding regime** requires a standard csv format, where the first line contains the names of the data fields and each next line contains the data. [Here](./Demo/DemoConsoleApp/Data/TTOO.csv) is an example
-* **Patterned feeding regime** requires specific logical csv format without colum names (header). Each data line contains values of steady (optional) and repetitive pattern features followed by expected output values at the end. Values of repetitive pattern features can be organized in two ways: groupped [v1(t1),v2(t1),v1(t2),v2(t2),v1(t3),v2(t3)] or sequential [v1(t1),v1(t2),v1(t3),v2(t1),v2(t2),v2(t3)]. [Here](./Demo/DemoConsoleApp/Data/LibrasMovement_train.csv) is an example
 
 ## RCNet library (.NET Standard 2.0)
 

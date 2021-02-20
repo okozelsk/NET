@@ -1,13 +1,17 @@
 ﻿using RCNet.Neural.Activation;
+using RCNet.Neural.Data.Filter;
 using RCNet.Neural.Network.NonRecurrent;
 using RCNet.Neural.Network.SM;
+using RCNet.Neural.Network.SM.Preprocessing;
+using RCNet.Neural.Network.SM.Preprocessing.Input;
+using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 using RCNet.Neural.Network.SM.Readout;
 using System;
 
-namespace Demo.DemoConsoleApp.Examples
+namespace Demo.DemoConsoleApp.Examples.SM
 {
     /// <summary>
-    /// Example code shows how to setup StateMachine having bypassed neural preprocessor.
+    /// Example code shows how to use StateMachineDesigner to setup StateMachine as a pure ESN for multivariate timeseries classification.
     /// Example uses LibrasMovement_train.csv and LibrasMovement_verify.csv from ./Data subfolder.
     /// The dataset is from "Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com"
     /// https://timeseriesclassification.com/description.php?Dataset=Libras
@@ -23,18 +27,33 @@ namespace Demo.DemoConsoleApp.Examples
     /// Each instance represents 45 points on a bi-dimensional space, which can be plotted in an ordered way (from 1 through
     /// 45 as the X co-ordinate) in order to draw the path of the movement.
     /// </summary>
-    public class LibrasClassificationNPBypassedDesigner : ExampleBase
+    public class Classification_LibrasMovement_ESN_SMD : StateMachineExampleBase
     {
+        //Constructor
+        public Classification_LibrasMovement_ESN_SMD()
+            :base()
+        {
+            return;
+        }
+
+        //Methods
         /// <summary>
         /// Runs the example code.
         /// </summary>
         public void Run()
         {
             //Create StateMachine configuration
-            //Simplified readout layer configuration using FF-network having 2 hidden layers as the classifier
-            ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateClassificationReadoutCfg(new CrossvalidationSettings(0.0825d, 0, 1),
-                                                                                                  StateMachineDesigner.CreateMultiLayerFFNetCfg(10, new AFAnalogLeakyReLUSettings(), 2, 5, 400),
-                                                                                                  2,
+            //Simplified input configuration
+            InputEncoderSettings inputCfg = StateMachineDesigner.CreateInputCfg(new FeedingPatternedSettings(1, NeuralPreprocessor.BidirProcessing.WithReset, RCNet.Neural.Data.InputPattern.VariablesSchema.Groupped),
+                                                                                new InputSpikesCoderSettings(),
+                                                                                false,
+                                                                                new ExternalFieldSettings("coord_abcissa", new RealFeatureFilterSettings()),
+                                                                                new ExternalFieldSettings("coord_ordinate", new RealFeatureFilterSettings())
+                                                                                );
+            //Simplified readout layer configuration
+            ReadoutLayerSettings readoutCfg = StateMachineDesigner.CreateClassificationReadoutCfg(new CrossvalidationSettings(0.0825d, CrossvalidationSettings.AutoFolds, 1),
+                                                                                                  StateMachineDesigner.CreateSingleLayerFFNetCfg(new AFAnalogIdentitySettings(), 5, 400),
+                                                                                                  1,
                                                                                                   "Hand movement",
                                                                                                   "curved swing",
                                                                                                   "horizontal swing",
@@ -53,10 +72,18 @@ namespace Demo.DemoConsoleApp.Examples
                                                                                                   "tremble"
                                                                                                   );
             //Create designer instance
-            StateMachineDesigner smd = new StateMachineDesigner(readoutCfg);
-            //Create StateMachine configuration without preprocessing
-            StateMachineSettings stateMachineCfg = smd.CreateBypassedPreprocessingCfg();
-
+            StateMachineDesigner smd = new StateMachineDesigner(inputCfg, readoutCfg);
+            //Create pure ESN fashioned StateMachine configuration
+            StateMachineSettings stateMachineCfg = smd.CreatePureESNCfg(150, //Size
+                                                                        StateMachineDesigner.DefaultAnalogMaxInputStrength, //Max input strength
+                                                                        0.25d, //Input connection density
+                                                                        5, //Max input delay
+                                                                        0.1d, //Interconnection density
+                                                                        0, //Max internal delay
+                                                                        0, //Max absolute value of bias
+                                                                        0, //Max retainment strength
+                                                                        new PredictorsProviderSettings(new PredictorFiringTraceSettings(0.05, 45))
+                                                                        );
             //Display StateMachine xml configuration
             string xmlConfig = stateMachineCfg.GetXml(true).ToString();
             _log.Write("StateMachine configuration xml:");
@@ -86,6 +113,6 @@ namespace Demo.DemoConsoleApp.Examples
             return;
         }
 
-    }//LibrasClassificationNPBypassedDesigner
+    }//Classification_LibrasMovement_ESN_SMD
 
 }//Namespace

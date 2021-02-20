@@ -10,7 +10,7 @@ using RCNet.Neural.Network.SM.Preprocessing.Reservoir.Pool.NeuronGroup;
 using RCNet.Neural.Network.SM.Readout;
 using System;
 
-namespace Demo.DemoConsoleApp.Examples
+namespace Demo.DemoConsoleApp.Examples.SM
 {
     /// <summary>
     /// Example code shows how to use StateMachineDesigner to setup StateMachine as a pure LSM for classification.
@@ -30,8 +30,16 @@ namespace Demo.DemoConsoleApp.Examples
     /// Each instance represents 45 points on a bi-dimensional space, which can be plotted in an ordered way (from 1 through
     /// 45 as the X co-ordinate) in order to draw the path of the movement.
     /// </summary>
-    public class LibrasClassificationLSMDesigner : ExampleBase
+    public class Classification_LibrasMovement_LSM_SMD : StateMachineExampleBase
     {
+        //Constructor
+        public Classification_LibrasMovement_LSM_SMD()
+            : base()
+        {
+            return;
+        }
+
+        //Methods
         /// <summary>
         /// Runs the example code.
         /// </summary>
@@ -156,6 +164,6 @@ namespace Demo.DemoConsoleApp.Examples
             return;
         }
 
-    }//LibrasClassificationLSMDesigner
+    }//Classification_LibrasMovement_LSM_SMD
 
 }//Namespace

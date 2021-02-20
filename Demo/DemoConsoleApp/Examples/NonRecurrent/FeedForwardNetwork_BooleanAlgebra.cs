@@ -4,7 +4,7 @@ using RCNet.Neural.Network.NonRecurrent.FF;
 using System;
 using System.Globalization;
 
-namespace Demo.DemoConsoleApp.Examples
+namespace Demo.DemoConsoleApp.Examples.NonRecurrent
 {
     /// <summary>
     /// Trains a multilayer Feed Forward network to solve AND, OR and XOR.
@@ -12,8 +12,16 @@ namespace Demo.DemoConsoleApp.Examples
     /// <remarks>
     /// This "Hello world" example shows how to use the feed forward network component independently.
     /// </remarks>
-    public class FFNetBoolAlg : ExampleBase
+    public class FeedForwardNetwork_BooleanAlgebra : ExampleBase
     {
+        //Constructor
+        public FeedForwardNetwork_BooleanAlgebra()
+            :base()
+        {
+            return;
+        }
+
+        //Methods
         /// <summary>
         /// Creates the training data.
         /// Input vector contains 0/1 combination and output vector contains appropriate results of the AND, OR and XOR operation.
@@ -79,6 +87,6 @@ namespace Demo.DemoConsoleApp.Examples
             return;
         }//Run
 
-    }//FFNetBoolAlg
+    }//FeedForwardNetwork_BooleanAlgebra
 
 }//Namespace

@@ -16,18 +16,25 @@ using RCNet.RandomValue;
 using System;
 using System.IO;
 
-namespace Demo.DemoConsoleApp.Examples
+namespace Demo.DemoConsoleApp.Examples.SM
 {
     /// <summary>
-    /// Example code shows how to: setup StateMachine from scratch, store configuration xml (writes in Examples sub-folder),
-    /// train and serialize StateMachine (writes in Examples sub-folder), load serialized StateMachine and forecast next values.
+    /// Example code shows how to: setup StateMachine from scratch, store configuration xml (writes it in Examples sub-folder),
+    /// train and serialize StateMachine (writes it in Examples sub-folder), load serialized StateMachine and forecast next values.
     /// Example uses TTOO.csv from ./Data subfolder.
     /// Time series contains real share prices of TTOO title from https://finance.yahoo.com/quote/TTOO/history?p=TTOO.
     /// The last recorded prices are from 2021/02/09 so StateMachine is predicting next High and Low prices for the following
     /// business day 2021/02/10 (where real prices were High = 3.61$ and Low=3.10$).
     /// </summary>
-    public class TTOOForecastFromScratch : ExampleBase
+    public class Forecast_TTOO_ESN_FromScratch : StateMachineExampleBase
     {
+        //Constructor
+        public Forecast_TTOO_ESN_FromScratch()
+            : base()
+        {
+            return;
+        }
+
         //Methods
         /// <summary>
         /// Creates the InputEncoder configuration.
@@ -347,5 +354,6 @@ namespace Demo.DemoConsoleApp.Examples
             return;
         }
 
-    }//TTOOForecastFromScratch
+    }//Forecast_TTOO_ESN_FromScratch
+
 }//Namespace

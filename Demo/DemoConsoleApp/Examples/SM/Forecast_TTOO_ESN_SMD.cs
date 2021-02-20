@@ -7,17 +7,25 @@ using RCNet.Neural.Network.SM.Preprocessing.Neuron.Predictor;
 using RCNet.Neural.Network.SM.Readout;
 using System;
 
-namespace Demo.DemoConsoleApp.Examples
+namespace Demo.DemoConsoleApp.Examples.SM
 {
     /// <summary>
-    /// Example code shows how to use StateMachineDesigner and setup StateMachine as a pure ESN for multivariate timeseries forecast.
+    /// Example code shows how to use StateMachineDesigner to setup StateMachine as a pure ESN for multivariate timeseries forecast.
     /// Example uses TTOO.csv from ./Data subfolder.
     /// Time series contains real share prices of TTOO title from https://finance.yahoo.com/quote/TTOO/history?p=TTOO.
     /// The last recorded prices are from 2021/02/09 so StateMachine is predicting next High and Low prices for the following
     /// business day 2021/02/10 (where real prices were High = 3.61$ and Low=3.10$).
     /// </summary>
-    public class TTOOForecastDesigner : ExampleBase
+    public class Forecast_TTOO_ESN_SMD : StateMachineExampleBase
     {
+        //Constructor
+        public Forecast_TTOO_ESN_SMD()
+            : base()
+        {
+            return;
+        }
+
+        //Methods
         /// <summary>
         /// Runs the example code.
         /// </summary>
@@ -83,6 +91,6 @@ namespace Demo.DemoConsoleApp.Examples
             return;
         }
 
-    }//TTOOForecastDesigner
+    }//Forecast_TTOO_ESN_SMD
 
 }//Namespace
