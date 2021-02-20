@@ -18,7 +18,7 @@ Application input data is standardly located in the "Data" sub-folder relative t
 * **Patterned feeding regime** requires specific logical csv format without colum names (header). Each data line contains values of steady (optional) and repetitive pattern features followed by expected output values at the end. Values of repetitive pattern features can be organized in two ways: groupped [v1(t1),v2(t1),v1(t2),v2(t2),v1(t3),v2(t3)] or sequential [v1(t1),v1(t2),v1(t3),v2(t1),v2(t2),v2(t3)]. [Here](./Demo/DemoConsoleApp/Data/LibrasMovement_train.csv) is an example.
 <br/>
 <br/>
-*Note that application may write data into "Examples" sub-folder relative to the location of the executable DemoConsoleApp.exe.**
+*Note that application may write data into "Examples" sub-folder relative to the location of the executable DemoConsoleApp.exe.*
 <br/>
 <br/>
 Application has no startup parameters and when started, it shows the root menu.
