@@ -228,6 +228,7 @@ namespace Demo.DemoConsoleApp
                 Console.WriteLine("Non-Recurrent networks code examples menu:");
                 Console.WriteLine("  1. Feed Forward network trained to solve boolean algebra.");
                 Console.WriteLine("  2. Classifications performed by Network Cluster component.");
+                Console.WriteLine("  3. Classifications performed by Network Cluster Chain component.");
                 Console.WriteLine("  X. Back to Root menu");
                 Console.WriteLine();
                 Console.WriteLine("  Press the digit or letter of your choice...");
@@ -250,6 +251,17 @@ namespace Demo.DemoConsoleApp
                         try
                         {
                             (new Classification_TNRNetCluster_FromScratch()).Run();
+                        }
+                        catch (Exception e)
+                        {
+                            ReportException(e);
+                        }
+                        break;
+
+                    case "3":
+                        try
+                        {
+                            (new Classification_TNRNetClusterChain_FromScratch()).Run();
                         }
                         catch (Exception e)
                         {

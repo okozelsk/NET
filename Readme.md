@@ -1,6 +1,6 @@
 # Reservoir Computing for .NET (RCNet)
 ![Reservoir Computing conceptual view](./RCNet/Docs/Imgs/ReservoirComputing_BasicSchema.png)
-<br/>
+<br />
 This repository offers a .NET machine learning library primarily focused on prediction and classification of time series.
 RCNet library implementation is based on the ["**Reservoir Computing**"](https://en.wikipedia.org/wiki/Reservoir_computing) concept where the two most well-known methods are Echo State Network (ESN) and Liquid State Machine (LSM).
 The main component of RCNet is called "**State Machine**". State Machine has quite wide configuration options of the reservoirs and except of both mentioned methods (ESN, LSM) it also supports "hybrid" recurrent reservoirs where hidden neurons having an analog and spiking activation can be synaptically connected.
@@ -12,13 +12,13 @@ Firing a spike of the hidden neuron having analog activation is based on defined
 
 ## The demo application (.NET Core 3.1)
 A simple [demo application](https://github.com/okozelsk/NET/tree/master/Demo/DemoConsoleApp) demonstrates the StateMachine performance and it also includes several code examples showing how to use key RCNet components.
-<br/>
+<br />
 Application input data is standardly located in the "Data" sub-folder relative to the location of the executable DemoConsoleApp.exe. Data is expected in csv format and data delimiter can be a tab, semicolon or comma character.
 * **Continuous feeding regime** requires a standard csv format, where the first line contains the names of the data fields and each next line contains the data. [Here](./Demo/DemoConsoleApp/Data/TTOO.csv) is an example.
 * **Patterned feeding regime** requires specific logical csv format without colum names (header). Each data line contains values of steady (optional) and repetitive pattern features followed by expected output values at the end. Values of repetitive pattern features can be organized in two ways: groupped [v1(t1),v2(t1),v1(t2),v2(t2),v1(t3),v2(t3)] or sequential [v1(t1),v1(t2),v1(t3),v2(t1),v2(t2),v2(t3)]. [Here](./Demo/DemoConsoleApp/Data/LibrasMovement_train.csv) is an example.
-<br/>
-<br/>
-Application has no startup parameters and when started, it shows the root menu (note that application may write data into "Examples" sub-folder relative to the location of the executable DemoConsoleApp.exe).
+<br />
+<br />
+Application has no startup parameters and when started, it shows the root menu.<br />_Note that in some cases application may write data into "Examples" sub-folder relative to the location of the executable DemoConsoleApp.exe._
 
 ### 1. menu choice: Demonstration of the State Machine performance and configuration options
 Application performs sequence of tasks defined in the [SMDemoSettings.xml](./Demo/DemoConsoleApp/SMDemoSettings.xml) xml file, where each task is defined in the xml element "case" so you can easily insert new task or tune existing one by simple modification of xml content.
@@ -32,7 +32,7 @@ Demo application has internally implemented the xml validation so connection of 
 SMDemoSettings.xml currently includes several classification problems from the:
 [Anthony Bagnall, Jason Lines, William Vickers and Eamonn Keogh, The UEA & UCR Time Series Classification Repository, www.timeseriesclassification.com](https://timeseriesclassification.com)
 site and State Machine is able to achieve competetive results to the best classification algorithms referenced on that website.
-<br/>
+<br />
 
 |Dataset|State Machine Accuracy|Best Ref. Accuracy|Best Ref. Algorithm|
 |--|--|--|--|
