@@ -135,7 +135,6 @@ namespace RCNet.Extensions
             return sum;
         }
 
-
         /// <summary>
         /// Scales the values within the array in the way their sum equals to the specified value.
         /// </summary>
@@ -168,30 +167,31 @@ namespace RCNet.Extensions
         {
             double max = array.Max();
             double min = array.Min();
-            if (min != max)
+            double mid = min + (max - min);
+            for (int i = 0; i < array.Length; i++)
             {
-                array.Rescale();
-                for (int i = 0; i < array.Length; i++)
-                {
-                    array[i] = min + (1d - array[i]) * (max - min);
-                }
+                array[i] = (-(array[i] - mid)) + mid;
             }
             return;
         }
 
+
         /// <summary>
         /// Applies the softmax.
         /// </summary>
-        public static void Softmax(this double[] array)
+        /// <param name="scaleFirst">Specifies whether to scale values to have sum = 1 before the softmax application.</param>
+        /// <param name="array">This array.</param>
+        public static void Softmax(this double[] array, bool scaleFirst = true)
         {
+            if (scaleFirst)
+            {
+                array.ScaleToNewSum(1d);
+            }
             double min = array.Min();
             double max = array.Max();
             if (min != max)
             {
-                //Transformation is possible
-                array.ScaleToNewSum(1d);
-                min = array.Min();
-                max = array.Max();
+                //Transformation makes sense
                 double[] expW = new double[array.Length];
                 double expWSum = 0d;
                 for (int i = 0; i < array.Length; i++)
@@ -204,9 +204,8 @@ namespace RCNet.Extensions
                     array[i] = expW[i] / expWSum;
                 }
             }
-            else
+            else if(!scaleFirst)
             {
-                //Softmax transformation is not possible, ensure the sum of weights is 1
                 array.ScaleToNewSum(1d);
             }
             return;

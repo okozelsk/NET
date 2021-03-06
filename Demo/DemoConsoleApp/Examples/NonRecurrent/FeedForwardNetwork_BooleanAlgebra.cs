@@ -8,10 +8,23 @@ using System.Globalization;
 namespace Demo.DemoConsoleApp.Examples.NonRecurrent
 {
     /// <summary>
-    /// This code example shows how to use the feed forward network component independently.
-    /// It trains a multilayer Feed Forward network to solve AND, OR and XOR, using
-    /// two possible ways. A hand made low level training and an use of TNRNetBuilder.
+    /// This code example shows how to use the FeedForwardNetwork component independently.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Multilayer Feed Forward network here solves AND, OR and XOR.
+    /// Three ways of a network training are shown:
+    /// </para>
+    /// <para>
+    /// 1. A hand made low level training.
+    /// </para>
+    /// <para>
+    /// 2. An use of TNRNetBuilder with custom build process controller.
+    /// </para>
+    /// <para>
+    /// 3. An use of TNRNetBuilder with default build process controller.
+    /// </para>
+    /// </remarks>
     public class FeedForwardNetwork_BooleanAlgebra : ExampleBase
     {
         //Constructor
@@ -23,17 +36,45 @@ namespace Demo.DemoConsoleApp.Examples.NonRecurrent
 
         //Methods
         /// <summary>
+        /// Evaluates whether the "candidate" network achieved a better result than the best network so far.
+        /// </summary>
+        /// <param name="candidate">The candidate network to be evaluated.</param>
+        /// <param name="currentBest">The best network so far.</param>
+        private static bool IsBetter(TNRNet candidate, TNRNet currentBest)
+        {
+            return candidate.CombinedPrecisionError < currentBest.CombinedPrecisionError;
+        }
+
+        /// <summary>
+        /// Implements a simple build process controller which stops the build process when
+        /// an average absolute error is less than 1e-4.
+        /// </summary>
+        private TNRNetBuilder.BuildInstr NetworkBuildController(TNRNetBuilder.BuildProgress buildProgress)
+        {
+            bool currentIsBetter = IsBetter(buildProgress.CurrNetwork,
+                                            buildProgress.BestNetwork
+                                            );
+            TNRNetBuilder.BuildInstr instructions = new TNRNetBuilder.BuildInstr
+            {
+                CurrentIsBetter = currentIsBetter,
+                StopProcess = (currentIsBetter && buildProgress.CurrNetwork.CombinedPrecisionError < 1e-4)
+            };
+            return instructions;
+        }
+
+        /// <summary>
         /// Displays information about the network build process progress.
         /// </summary>
         /// <param name="buildProgress">The current state of the build process.</param>
         private void OnNetworkBuildProgressChanged(TNRNetBuilder.BuildProgress buildProgress)
         {
-            int reportEpochsInterval = 5;
+            const int leftMargin = 4;
+            const int reportEpochsInterval = 5;
             //Progress info
             if (buildProgress.ShouldBeReported || (buildProgress.EndNetworkEpochNum % reportEpochsInterval == 0))
             {
                 //Build progress report message
-                string progressText = buildProgress.GetInfoText(4);
+                string progressText = buildProgress.GetInfoText(leftMargin);
                 //Report the progress
                 _log.Write(progressText, !(buildProgress.NewEndNetwork));
             }
@@ -61,8 +102,7 @@ namespace Demo.DemoConsoleApp.Examples.NonRecurrent
         private void DisplayNetworkComputations(INonRecurrentNetwork network)
         {
             VectorBundle verificationData = CreateTrainingData();
-            _log.Write("Trained network computations:");
-            _log.Write("-----------------------------");
+            _log.Write("  Trained network computations:");
             int sampleIdx = 0;
             foreach (double[] input in verificationData.InputVectorCollection)
             {
@@ -73,7 +113,7 @@ namespace Demo.DemoConsoleApp.Examples.NonRecurrent
                 {
                     absError[i] = Math.Abs(results[i] - verificationData.OutputVectorCollection[sampleIdx][i]);
                 }
-                _log.Write($"  Input {input[0]} {input[1]} Results: AND={Math.Abs(Math.Round(results[0])).ToString(CultureInfo.InvariantCulture)} OR={Math.Abs(Math.Round(results[1])).ToString(CultureInfo.InvariantCulture)} XOR={Math.Abs(Math.Round(results[2])).ToString(CultureInfo.InvariantCulture)}, Absolute Errors: {absError[0].ToString("E3", CultureInfo.InvariantCulture)} {absError[1].ToString("E3", CultureInfo.InvariantCulture)} {absError[2].ToString("E3", CultureInfo.InvariantCulture)}");
+                _log.Write($"    Input {input[0]} {input[1]} Results: AND={Math.Abs(Math.Round(results[0])).ToString(CultureInfo.InvariantCulture)} OR={Math.Abs(Math.Round(results[1])).ToString(CultureInfo.InvariantCulture)} XOR={Math.Abs(Math.Round(results[2])).ToString(CultureInfo.InvariantCulture)}, Absolute Errors: {absError[0].ToString("E3", CultureInfo.InvariantCulture)} {absError[1].ToString("E3", CultureInfo.InvariantCulture)} {absError[2].ToString("E3", CultureInfo.InvariantCulture)}");
                 ++sampleIdx;
             }
             _log.Write(string.Empty);
@@ -81,18 +121,21 @@ namespace Demo.DemoConsoleApp.Examples.NonRecurrent
         }
 
         /// <summary>
-        /// Creates a configuration of the feed forward network having Identity output layer and two LeakyReLU hidden layers
-        /// with associated resilient back propagation trainer.
+        /// Creates a configuration of the feed forward network having Identity output layer, two LeakyReLU hidden layers and associated resilient back propagation trainer.
         /// </summary>
         private FeedForwardNetworkSettings CreateFFNetConfig()
         {
             const int HiddenLayerSize = 5;
-            HiddenLayerSettings hiddenLayerCfg = new HiddenLayerSettings(HiddenLayerSize, new AFAnalogLeakyReLUSettings());
-            FeedForwardNetworkSettings ffNetCfg = new FeedForwardNetworkSettings(new AFAnalogIdentitySettings(),
-                                                                                 new HiddenLayersSettings(hiddenLayerCfg, hiddenLayerCfg),
-                                                                                 new RPropTrainerSettings(2, 100)
-                                                                                 );
-            return ffNetCfg;
+            const int numOfTrainingAttempts = 2;
+            const int numOfTrainingAttemptEpochs = 150;
+            return new FeedForwardNetworkSettings(new AFAnalogIdentitySettings(), //Output layer activation
+                                                  new HiddenLayersSettings(new HiddenLayerSettings(HiddenLayerSize, new AFAnalogLeakyReLUSettings()), //First hidden layer
+                                                                           new HiddenLayerSettings(HiddenLayerSize, new AFAnalogLeakyReLUSettings()) //Second hidden layer
+                                                                           ),
+                                                  new RPropTrainerSettings(numOfTrainingAttempts, //The number of training attempts
+                                                                           numOfTrainingAttemptEpochs //The number of epochs within a training attempt
+                                                                           )
+                                                  );
         }
 
         /// <summary>
@@ -101,18 +144,24 @@ namespace Demo.DemoConsoleApp.Examples.NonRecurrent
         /// </summary>
         private void FullyManualLearning()
         {
-            _log.Write("Example of FF network low level training.");
+            _log.Write("Example of a FF network low level training:");
             //Create FF network configuration.
             FeedForwardNetworkSettings ffNetCfg = CreateFFNetConfig();
+            _log.Write($"Network configuration xml:");
+            _log.Write(ffNetCfg.GetXml(true).ToString());
             //Collect training data
             VectorBundle trainingData = CreateTrainingData();
             //Create network instance
             //We specify 2 input values, 3 output values and previously prepared network structure configuration
-            FeedForwardNetwork ffNet = new FeedForwardNetwork(2, 3, ffNetCfg);
+            FeedForwardNetwork ffNet = new FeedForwardNetwork(2, //The number of input values
+                                                              3, //The number of output values
+                                                              ffNetCfg //Network structure and a trainer
+                                                              );
 
             //Training
-            _log.Write("Training");
-            _log.Write("--------");
+            _log.Write(string.Empty);
+            _log.Write("  Training");
+            _log.Write(string.Empty);
             //Create the trainer instance
             RPropTrainer trainer = new RPropTrainer(ffNet,
                                                     trainingData.InputVectorCollection,
@@ -121,9 +170,14 @@ namespace Demo.DemoConsoleApp.Examples.NonRecurrent
                                                     new Random(0)
                                                     );
             //Training loop
-            while (trainer.Iteration() && trainer.MSE > 1e-6)
+            while (trainer.Iteration())
             {
-                _log.Write($"  Attempt {trainer.Attempt} / Epoch {trainer.AttemptEpoch,3} Mean Squared Error = {Math.Round(trainer.MSE, 8).ToString(CultureInfo.InvariantCulture)}", true);
+                _log.Write($"    Attempt {trainer.Attempt} / Epoch {trainer.AttemptEpoch,3} Mean Squared Error = {Math.Round(trainer.MSE, 8).ToString(CultureInfo.InvariantCulture)}", true);
+                //Check training exit condition
+                if(trainer.MSE < 1e-7)
+                {
+                    break;
+                }
             }
             _log.Write(string.Empty);
 
@@ -135,25 +189,77 @@ namespace Demo.DemoConsoleApp.Examples.NonRecurrent
         }
 
         /// <summary>
-        /// Trains FF network to solve boolean algebra. It shows how to use the TNRNetBuilder.
+        /// Trains FF network to solve boolean algebra.
+        /// It shows how to use the TNRNetBuilder (TNRNetBuilder is using here defined build controller).
         /// </summary>
-        private void TNRNetBuilderLearning()
+        private void TNRNetBuilderLearning_CustomController()
         {
-            _log.Write("Example of FF network build using TNRNetBuilder component.");
+            _log.Write("Example of a FF network build using the TNRNetBuilder component with custom build controller:");
             //Create FF network configuration.
             FeedForwardNetworkSettings ffNetCfg = CreateFFNetConfig();
+            _log.Write($"Network configuration xml:");
+            _log.Write(ffNetCfg.GetXml(true).ToString());
             //Collect training data
             VectorBundle trainingData = CreateTrainingData();
             //In our case, testing data is the same as training data
             VectorBundle testingData = trainingData;
             //Training
             //Create builder instance
-            TNRNetBuilder builder = new TNRNetBuilder("Boolean Algebra", ffNetCfg, TNRNet.OutputType.Real, trainingData, testingData);
+            TNRNetBuilder builder = new TNRNetBuilder("Boolean Algebra", //Network name
+                                                      ffNetCfg, //Network configuration
+                                                      TNRNet.OutputType.Real, //Network output is one or more real numbers
+                                                      trainingData, //Training data
+                                                      testingData, //Testing data
+                                                      null, //No specific random generator object to be used
+                                                      NetworkBuildController //Our custom build controller
+                                                      );
             //Register notification event handler
             builder.NetworkBuildProgressChanged += OnNetworkBuildProgressChanged;
-            //Build network
+            //Build the network
+            _log.Write(string.Empty);
+            _log.Write("  Training");
             TNRNet ffNet = builder.Build();
             //Training is done
+            _log.Write(string.Empty);
+            //Display the network computation results
+            DisplayNetworkComputations(ffNet.Network);
+            //Finished
+            return;
+        }
+
+        /// <summary>
+        /// Trains FF network to solve boolean algebra.
+        /// It shows how to use the TNRNetBuilder (TNRNetBuilder is using its default build controller).
+        /// </summary>
+        private void TNRNetBuilderLearning_DefaultController()
+        {
+            _log.Write("Example of a FF network build using the TNRNetBuilder component with default build controller:");
+            //Create FF network configuration.
+            FeedForwardNetworkSettings ffNetCfg = CreateFFNetConfig();
+            _log.Write($"Network configuration xml:");
+            _log.Write(ffNetCfg.GetXml(true).ToString());
+            //Collect training data
+            VectorBundle trainingData = CreateTrainingData();
+            //In our case, testing data is the same as training data
+            VectorBundle testingData = trainingData;
+            //Training
+            //Create builder instance
+            TNRNetBuilder builder = new TNRNetBuilder("Boolean Algebra", //Network name
+                                                      ffNetCfg, //Network configuration
+                                                      TNRNet.OutputType.Real, //Network output is one or more real numbers
+                                                      trainingData, //Training data
+                                                      testingData, //Testing data
+                                                      null, //No specific random generator object to be used
+                                                      null //No specific build controller -> use default
+                                                      );
+            //Register notification event handler
+            builder.NetworkBuildProgressChanged += OnNetworkBuildProgressChanged;
+            //Build the network
+            _log.Write(string.Empty);
+            _log.Write("  Training");
+            TNRNet ffNet = builder.Build();
+            //Training is done
+            _log.Write(string.Empty);
             //Display the network computation results
             DisplayNetworkComputations(ffNet.Network);
             //Finished
@@ -168,10 +274,17 @@ namespace Demo.DemoConsoleApp.Examples.NonRecurrent
             Console.Clear();
             FullyManualLearning();
             _log.Write(string.Empty);
-            _log.Write("Press Enter to continue with the TNRNetBuilder learning...");
+            _log.Write("Press Enter to continue with the TNRNetBuilder using the custom controller...");
             Console.ReadLine();
+            _log.Write(string.Empty, true);
             _log.Write(string.Empty);
-            TNRNetBuilderLearning();
+            TNRNetBuilderLearning_CustomController();
+            _log.Write(string.Empty);
+            _log.Write("Press Enter to continue with the TNRNetBuilder using the default controller...");
+            Console.ReadLine();
+            _log.Write(string.Empty, true);
+            _log.Write(string.Empty);
+            TNRNetBuilderLearning_DefaultController();
             return;
         }//Run
 

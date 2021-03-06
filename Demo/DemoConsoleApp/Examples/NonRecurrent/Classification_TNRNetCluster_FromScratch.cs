@@ -90,7 +90,7 @@ namespace Demo.DemoConsoleApp.Examples.NonRecurrent
                                                new HiddenLayersSettings(new HiddenLayerSettings(30, new AFAnalogTanHSettings()),
                                                                         new HiddenLayerSettings(30, new AFAnalogTanHSettings())
                                                                         ),
-                                               new RPropTrainerSettings(3, 1000)
+                                               new RPropTrainerSettings(3, 200)
                                                ),
                 //The second FF network will have two hidden layers of 30 LeakyReLU activated neurons.
                 //Output layer will have the SoftMax activation (it must be SoftMax because we will use the Probabilistic cluster).
@@ -98,13 +98,15 @@ namespace Demo.DemoConsoleApp.Examples.NonRecurrent
                                                new HiddenLayersSettings(new HiddenLayerSettings(30, new AFAnalogLeakyReLUSettings()),
                                                                         new HiddenLayerSettings(30, new AFAnalogLeakyReLUSettings())
                                                                         ),
-                                               new RPropTrainerSettings(3, 1000)
+                                               new RPropTrainerSettings(3, 200)
                                                )
             };
             //Probabilistic network cluster configuration instance
             ITNRNetClusterSettings clusterCfg = new TNRNetClusterProbabilisticSettings(new TNRNetClusterProbabilisticNetworksSettings(netCfgs),
                                                                                        new TNRNetClusterProbabilisticWeightsSettings()
                                                                                        );
+            _log.Write($"Cluster configuration xml:");
+            _log.Write(clusterCfg.GetXml(true).ToString());
             //Training
             _log.Write($"Cluster training on {trainDataFile}...");
             //An instance of network cluster builder.

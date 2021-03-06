@@ -308,6 +308,7 @@ namespace Demo.DemoConsoleApp
                 e = e.InnerException;
                 Console.WriteLine("--------------------------------------------------------------");
             }
+            Console.ReadLine();
             return;
         }
 

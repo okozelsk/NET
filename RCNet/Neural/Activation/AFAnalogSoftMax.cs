@@ -34,18 +34,11 @@ namespace RCNet.Neural.Activation
         /// <inheritdoc/>
         public override void Compute(double[] xVector, double[] cVector)
         {
-            if (xVector.Length < 2)
-            {
-                throw new ArgumentException("The length of the xVector must be GE to 2.", "xVector");
-            }
-            if (cVector.Length < xVector.Length)
-            {
-                throw new ArgumentException("The length of the cVector must be GE to xVector length.", "cVector");
-            }
+            double maxX = xVector.Max();
             double sum = 0;
             for (int i = 0; i < xVector.Length; i++)
             {
-                cVector[i] = Math.Exp(xVector[i].Bound(-40d, 40d));
+                cVector[i] = Math.Exp(xVector[i] - maxX);
                 sum += cVector[i];
             }
             for (int i = 0; i < xVector.Length; i++)
