@@ -1,4 +1,13 @@
 # Reservoir Computing for .NET (RCNet)
+
+
+
+
+**This project is frozen and no further updates will be available. I leave it here only for inspiration and as a possible source of some implemented functionality. The successor project is [**EasyML**](https://github.com/okozelsk/EasyML), where you can find the good stuff from here + much more, in a simpler form and higher maturity.**
+
+
+
+
 ![Reservoir Computing conceptual view](./RCNet/Docs/Imgs/ReservoirComputing_BasicSchema.png)
 <br />
 This repository offers a .NET machine learning library primarily focused on prediction and classification of time series.
